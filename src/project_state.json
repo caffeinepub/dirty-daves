@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-update-the-landing-page-hero-description-copy-to-remove-the-word-the-from-the-phrase-the-banter-so-it-reads-banter-e-g-change-and-the-banter-you-won-t-bloody-forget-to-and-banter-you-won-t-bloody-forget",
+      "title": "Update the landing page hero description copy to remove the word “the” from the phrase “the banter”, so it reads “banter” (e.g., change “and the banter you won't bloody forget!” to “and banter you won't bloody forget!”).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Update copy: change \"the banter\" to \"banter\"",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Update hero copy: change “the banter” to “banter”",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

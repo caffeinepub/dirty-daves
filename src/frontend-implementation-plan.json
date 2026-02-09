@@ -1,0 +1,22 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Landing page hero copy tweak (remove “the” from “the banter”)",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Update the landing page hero description to remove “the” from “the banter” so it reads “banter” while leaving the rest unchanged.",
+      "acceptanceCriteria": [
+        "In the Hero section description text, the phrase “the banter” no longer appears.",
+        "The hero description sentence reads with “banter” (without “the”) and is otherwise unchanged."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/landing/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Edit the hero description paragraph text to change the phrase “the banter” to “banter” (remove only the word “the” immediately preceding “banter”), leaving all other copy and formatting unchanged."
+        }
+      ]
+    }
+  ]
+}

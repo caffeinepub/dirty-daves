@@ -1,0 +1,37 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T09:23:26.466Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 1,
+    "implemented": 1,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Update the landing page hero description copy to remove the word “the” from the phrase “the banter”, so it reads “banter” (e.g., change “and the banter you won't bloody forget!” to “and banter you won't bloody forget!”).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/landing/HeroSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/landing/HeroSection.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/landing/HeroSection.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
