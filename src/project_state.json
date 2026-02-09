@@ -4,13 +4,21 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-landing-page-hero-description-copy-to-remove-the-word-the-from-the-phrase-the-banter-so-it-reads-banter-e-g-change-and-the-banter-you-won-t-bloody-forget-to-and-banter-you-won-t-bloody-forget",
-      "title": "Update the landing page hero description copy to remove the word “the” from the phrase “the banter”, so it reads “banter” (e.g., change “and the banter you won't bloody forget!” to “and banter you won't bloody forget!”).",
+      "id": "feature-in-frontend-src-components-landing-contactsection-tsx-remove-the-location-card-heading-text-start-your-adventure-and-remove-any-location-text-if-present-but-keep-the-scotland-flag-emoji-visible-in-that-heading-area",
+      "title": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
       "reqIds": [
-        "REQ-1"
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-landing-footer-tsx-remove-the-existing-bottom-attribution-that-links-to-caffeine-ai-built-with-using-caffeine-ai-and-replace-it-with-exactly-built-by-dave-and-thats-why-the-website-is-so-shit",
+      "title": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
+      "reqIds": [
+        "REQ-7"
       ],
       "version": 1
     }
@@ -18,12 +26,24 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Update copy: change \"the banter\" to \"banter\"",
+      "summary": "Remove the heading \"start your adventure\" and the \"Location?\" text while keeping the Scotland flag emoji",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add a CAPTCHA to the contact form to reduce spam submissions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Replace the site footer text \"built by caffeine AI\" with the user-provided custom attribution text",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Update hero copy: change “the banter” to “banter”",
+  "projectName": "Update location card heading text and replace footer attribution",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

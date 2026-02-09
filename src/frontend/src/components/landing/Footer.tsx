@@ -1,5 +1,5 @@
-import { SiFacebook, SiInstagram, SiX, SiWhatsapp } from 'react-icons/si';
-import { Heart } from 'lucide-react';
+import { SiX, SiWhatsapp } from 'react-icons/si';
+import { Mail } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -19,18 +19,11 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="flex gap-4">
               <a
-                href="#"
+                href="mailto:dirtydave69@protonmail.com"
                 className="w-12 h-12 bg-navy rounded-2xl flex items-center justify-center hover:bg-navy/90 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
-                aria-label="Facebook"
+                aria-label="Email"
               >
-                <SiFacebook className="w-6 h-6 text-white" />
-              </a>
-              <a
-                href="#"
-                className="w-12 h-12 bg-navy rounded-2xl flex items-center justify-center hover:bg-navy/90 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
-                aria-label="Instagram"
-              >
-                <SiInstagram className="w-6 h-6 text-white" />
+                <Mail className="w-6 h-6 text-white" />
               </a>
               <a
                 href="https://twitter.com/realdavidwatson"
@@ -59,16 +52,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/20 text-center">
-          <p className="text-sm text-white flex items-center justify-center gap-2 flex-wrap font-medium text-shadow-subtle">
-            © 2026. Built with <Heart className="w-4 h-4 text-teal fill-teal animate-pulse" /> using{' '}
-            <a
-              href="https://caffeine.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-teal hover:text-teal/90 font-black transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-teal/50 rounded"
-            >
-              caffeine.ai
-            </a>
+          <p className="text-sm text-white font-medium text-shadow-subtle">
+            built by Dave and thats why the website is so shit
           </p>
         </div>
       </div>

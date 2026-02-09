@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-landing-page-hero-description-copy-to-remove-the-word-the-from-the-phrase-the-banter-so-it-reads-banter-e-g-change-and-the-banter-you-won-t-bloody-forget-to-and-banter-you-won-t-bloody-forget",
-      "featureTitle": "Update the landing page hero description copy to remove the word “the” from the phrase “the banter”, so it reads “banter” (e.g., change “and the banter you won't bloody forget!” to “and banter you won't bloody forget!”).",
+      "featureId": "feature-in-frontend-src-components-landing-contactsection-tsx-remove-the-location-card-heading-text-start-your-adventure-and-remove-any-location-text-if-present-but-keep-the-scotland-flag-emoji-visible-in-that-heading-area",
+      "featureTitle": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
       "files": [
-        "frontend/src/components/landing/HeroSection.tsx"
+        "frontend/src/components/landing/ContactSection.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,7 +16,26 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-frontend-src-components-landing-footer-tsx-remove-the-existing-bottom-attribution-that-links-to-caffeine-ai-built-with-using-caffeine-ai-and-replace-it-with-exactly-built-by-dave-and-thats-why-the-website-is-so-shit",
+      "featureTitle": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
+      "files": [
+        "frontend/src/components/landing/Footer.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
       ],
       "confidence": "high"
     }

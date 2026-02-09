@@ -1,24 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:23:26.466Z",
+  "generatedAt": "2026-02-09T10:24:51.602Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Update the landing page hero description copy to remove the word “the” from the phrase “the banter”, so it reads “banter” (e.g., change “and the banter you won't bloody forget!” to “and banter you won't bloody forget!”).",
+        "id": "REQ-6",
+        "summary": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/landing/HeroSection.tsx"
+          "frontend/src/components/landing/ContactSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/landing/HeroSection.tsx"
+          "frontend/src/components/landing/ContactSection.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/landing/Footer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/landing/Footer.tsx"
         ]
       }
     ]
@@ -28,7 +39,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/landing/HeroSection.tsx",
+    "frontend/src/components/landing/ContactSection.tsx",
+    "frontend/src/components/landing/Footer.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

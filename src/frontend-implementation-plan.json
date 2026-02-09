@@ -1,20 +1,36 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Landing page hero copy tweak (remove “the” from “the banter”)",
+  "title": "Update location card heading and footer attribution text",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Update the landing page hero description to remove “the” from “the banter” so it reads “banter” while leaving the rest unchanged.",
+      "id": "REQ-6",
+      "summary": "Remove the location card heading text while keeping the Scotland flag emoji visible, and remove any \"Location?\" text if present.",
       "acceptanceCriteria": [
-        "In the Hero section description text, the phrase “the banter” no longer appears.",
-        "The hero description sentence reads with “banter” (without “the”) and is otherwise unchanged."
+        "The location card heading no longer contains the words \"Start Your Adventure\".",
+        "If the text \"Location?\" appears anywhere in the location card, it is removed.",
+        "The Scotland flag emoji (🏴) remains visible in the location card heading area."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/landing/HeroSection.tsx",
+          "path": "frontend/src/components/landing/ContactSection.tsx",
           "operation": "modify",
-          "description": "Edit the hero description paragraph text to change the phrase “the banter” to “banter” (remove only the word “the” immediately preceding “banter”), leaving all other copy and formatting unchanged."
+          "description": "Update the location card heading to remove the \"Start Your Adventure\" and any \"Location?\" text while keeping the Scotland flag emoji (🏴) visible in the heading area; ensure no remaining instances of \"Location?\" exist in that card (including supporting copy if needed)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Replace the footer bottom attribution with the exact requested sentence and remove caffeine.ai references.",
+      "acceptanceCriteria": [
+        "The footer no longer displays any \"Built with\" / \"caffeine.ai\" attribution text or link.",
+        "The footer displays exactly the text: \"built by Dave and thats why the website is so shit\" (matching spelling and casing)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/landing/Footer.tsx",
+          "operation": "modify",
+          "description": "Remove the existing \"Built with ... using caffeine.ai\" attribution (including the caffeine.ai link and any associated iconography if present) and replace it with exactly: \"built by Dave and thats why the website is so shit\"."
         }
       ]
     }

@@ -1,36 +1,30 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:23:26.464Z",
-  "summary": "REQ-1 appears implemented in the hero description (\"the banter\" removed to read \"banter\"). However, there are additional unrequested changes to metadata/state files, and the updated frontend-file-summaries.txt text claims other site-wide copy/content changes that are not part of the request and violate the stated non-goals (even if those underlying code changes are not shown in the diff).",
+  "generatedAt": "2026-02-09T10:24:51.600Z",
+  "summary": "REQ-6 and REQ-7 appear implemented: the ContactSection location card heading shows only the Scotland flag emoji and no \"Location?\" text is present; the Footer attribution was replaced with the exact requested sentence and no caffeine.ai attribution/link is shown. However, additional non-requested meta/state files were modified.",
   "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Unrequested site-wide copy/content changes are asserted (e.g., \"craic\" replaced with \"banter\", \"Stories & Craic\" updated to \"Stories & Banter\", curated reviews copy updated, styling changes). These go beyond the single requested hero-copy change and violate the non-goal of no other copy changes.",
-      "reason": "BuildRequest explicitly limits changes to removing \"the\" from \"the banter\" in the Hero description only; the diff includes a modified summary file describing multiple additional copy updates.",
+      "description": "Modified repository meta/summary file not requested by the BuildRequest (frontend-file-summaries.txt).",
+      "reason": "BuildRequest only asked for changes in ContactSection.tsx and Footer.tsx; no requirement mentions updating this summary file.",
       "evidence": [
         "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Unrequested modification of project tracking/state metadata (new_feature_requests/status entries)",
-      "reason": "BuildRequest did not request updating project_state.json; also non-goal mentions no backend changes, and state/metadata updates are not part of the specified frontend copy change.",
+      "description": "Modified project state tracking file not requested by the BuildRequest (project_state.json).",
+      "reason": "BuildRequest requirements are limited to UI text changes in two specific React components; it does not request changing internal tracking/state JSON.",
       "evidence": [
         "project_state.json"
       ]
-    },
-    {
-      "description": "Unrequested modification of repository documentation/summary file",
-      "reason": "BuildRequest did not request updating frontend-file-summaries.txt; requirement is a single copy change in the hero text.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/landing/HeroSection.tsx",
+    "frontend/src/components/landing/ContactSection.tsx",
+    "frontend/src/components/landing/Footer.tsx",
     "project_state.json"
   ]
 }

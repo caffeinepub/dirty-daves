@@ -26,9 +26,9 @@ export default function ContactSection() {
                     <MapPin className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black mb-2 text-black text-shadow-subtle">Based in Edinburgh 🏴󠁧󠁢󠁳󠁣󠁴󠁿</h3>
+                    <h3 className="text-xl font-black mb-2 text-black text-shadow-subtle">🏴󠁧󠁢󠁳󠁣󠁴󠁿</h3>
                     <p className="text-black font-medium text-shadow-subtle">
-                      Tours across Scotland — from the Highlands to the Islands, and everywhere in between!
+                      Start your adventure in Edinburgh, Glasgow, Inverness or where ever you want Tours across Scotland — from the Highlands to the Islands, and everywhere in between!
                     </p>
                   </div>
                 </div>
@@ -41,9 +41,15 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black mb-2 text-black text-shadow-subtle">Get in Touch 💬</h3>
-                    <p className="text-black font-medium text-shadow-subtle">
+                    <p className="text-black font-medium text-shadow-subtle mb-2">
                       Fill out the form and we'll get back to you faster than you can say "Och aye the noo!" ⚡
                     </p>
+                    <a 
+                      href="mailto:dirtydave69@protonmail.com"
+                      className="text-navy hover:text-teal font-black text-shadow-subtle transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-teal/50 rounded"
+                    >
+                      dirtydave69@protonmail.com
+                    </a>
                   </div>
                 </div>
               </div>

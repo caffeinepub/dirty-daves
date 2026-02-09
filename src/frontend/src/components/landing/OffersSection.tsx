@@ -1,4 +1,4 @@
-import { MapPin, Users, Clock, Star } from 'lucide-react';
+import { MapPin, Users, Clock, Star, Bed, Compass } from 'lucide-react';
 
 export default function OffersSection() {
   const features = [
@@ -18,13 +18,25 @@ export default function OffersSection() {
       icon: Clock,
       emoji: '⏰',
       title: 'Flexible as Hell',
-      description: 'Want to spend an extra hour at that castle? Or skip it for a proper pub session? You\'re the boss, mate!'
+      description: 'Want to spend an extra hour at that castle? Or skip it for a proper pub session? You\'re the boss!'
     },
     {
       icon: Star,
       emoji: '✨',
       title: 'Stories & Banter',
       description: 'History, legends, and the kind of stories that make you laugh until your face hurts. Pure entertainment!'
+    },
+    {
+      icon: Bed,
+      emoji: '🛏️',
+      title: 'Stay Your Way',
+      description: 'park bench, shitty hostel, tent, 5 star hotel or your own castle - I dont care where you stay, but will book what ever the fuck you want'
+    },
+    {
+      icon: Compass,
+      emoji: '🧭',
+      title: 'Choose Your Own Adventure',
+      description: 'History buffs? Castle lovers? Distillery piss-ups? Every strip club in Scotland? Or just a bit of everything? You decide!'
     }
   ];
 
@@ -35,11 +47,11 @@ export default function OffersSection() {
       
       <div className="relative container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 text-black animate-float text-shadow-strong">
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 text-white animate-float text-shadow-strong text-glow-light">
             Why Choose Dirty Daves? 🤔
           </h2>
-          <p className="text-2xl md:text-3xl text-black max-w-3xl mx-auto font-bold text-shadow-subtle">
-            Because cookie-cutter tours are boring as shite! 💤
+          <p className="text-2xl md:text-3xl text-white max-w-3xl mx-auto font-bold text-shadow-strong">
+            Because cookie-cutter tours are boring as shit! 💤
           </p>
         </div>
 

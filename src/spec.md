@@ -1,9 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Update the landing page hero description copy to remove “the” from the phrase “the banter”.
+**Goal:** Update landing page copy by removing specific location-card heading text while preserving the Scotland flag emoji, and replace the footer attribution text.
 
 **Planned changes:**
-- Modify the Hero section description text so “the banter” becomes “banter”, leaving the rest of the sentence unchanged.
+- In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text “Start Your Adventure” and remove any “Location?” text if present, while keeping the Scotland flag emoji (🏴) visible in the heading area.
+- In `frontend/src/components/landing/Footer.tsx`, remove the existing “Built with … using caffeine.ai” attribution/link and replace it with exactly: “built by Dave and thats why the website is so shit”.
 
-**User-visible outcome:** The landing page hero description no longer contains the phrase “the banter” and instead reads “banter” in the same sentence.
+**User-visible outcome:** The location card no longer shows “Start Your Adventure” or “Location?” (but still shows the Scotland flag emoji), and the footer shows the new attribution sentence instead of the caffeine.ai credit.
