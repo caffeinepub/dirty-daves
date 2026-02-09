@@ -3,6 +3,17 @@
         <meta charset='UTF-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <title>Dirty Daves</title>
+        
+        <!-- Preload critical hero image -->
+        <link
+          rel="preload"
+          as="image"
+          href="/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png"
+        />
+        
+        <!-- DNS prefetch for reCAPTCHA (deferred loading, no script injection) -->
+        <link rel="dns-prefetch" href="https://www.google.com" />
+        <link rel="dns-prefetch" href="https://www.gstatic.com" />
     </head>
     <body>
         <div id='root'></div>

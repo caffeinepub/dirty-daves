@@ -4,10 +4,10 @@ import { useActor } from './useActor';
 interface ContactFormData {
   name: string;
   email: string;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  subject: string;
   message: string;
+  honeypot: string;
+  elapsedTime: number;
+  recaptchaToken: string;
 }
 
 export function useSubmitContactForm() {
@@ -23,10 +23,10 @@ export function useSubmitContactForm() {
       const submissionId = await actor.submitContactForm(
         data.name,
         data.email,
-        data.phoneCountryCode,
-        data.phoneNumber,
-        data.subject,
-        data.message
+        data.message,
+        data.honeypot,
+        data.elapsedTime,
+        data.recaptchaToken
       );
 
       return submissionId;

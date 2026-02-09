@@ -1,75 +1,69 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T11:23:59.685Z",
+  "generatedAt": "2026-02-09T13:16:00.064Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
+        "summary": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/content/countryCallingCodes.ts",
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
+          "frontend/index.html",
+          "frontend/src/App.tsx",
+          "frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png",
+          "frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png"
         ],
         "matchedFiles": [
-          "frontend/src/content/countryCallingCodes.ts",
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/PRODUCTION_DEPLOYMENT_NOTES.md"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+        "summary": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/SMOKE_TEST_PRODUCTION.md",
+          "frontend/src/components/landing/ContactForm.tsx",
+          "frontend/src/hooks/useRecaptchaV3.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/SMOKE_TEST_PRODUCTION.md"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+        "summary": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useSubmitContactForm.ts",
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/PRODUCTION_CONFIGURATION.md",
+          "frontend/.env.production.example",
+          "frontend/src/components/landing/ContactSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useSubmitContactForm.ts",
-          "frontend/src/components/landing/ContactForm.tsx"
+          "frontend/PRODUCTION_CONFIGURATION.md",
+          "frontend/.env.production.example"
         ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/landing/ContactForm.tsx",
-    "frontend/src/content/countryCallingCodes.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useSubmitContactForm.ts",
+    "frontend/.env.production.example",
+    "frontend/PRODUCTION_CONFIGURATION.md",
+    "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
+    "frontend/SMOKE_TEST_PRODUCTION.md",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

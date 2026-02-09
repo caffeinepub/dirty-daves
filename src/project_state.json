@@ -1,30 +1,30 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build/update a contact form with a required phone number field and a country code dropdown.",
+  "summary": "Project is being prepared for a live deployment of the current app draft (Version 33).",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-landing-page-contact-form-ui-to-collect-a-required-phone-number-composed-of-1-a-required-country-calling-code-selected-from-a-dropdown-and-2-a-required-local-phone-number-text-input",
-      "title": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
+      "id": "feature-deploy-the-current-codebase-version-33-to-production-on-the-internet-computer-upgrading-both-the-backend-canister-and-the-frontend-asset-canister-using-the-existing-single-actor-backend-architecture",
+      "title": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-extend-client-side-validation-in-the-contact-form-so-that-missing-country-code-or-missing-phone-number-produces-field-level-error-messages-and-blocks-submission",
-      "title": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+      "id": "feature-run-a-production-smoke-test-after-deployment-covering-landing-page-render-offer-page-navigation-contact-form-submission-path-including-recaptcha-readiness-handling-and-admin-only-backend-queries-remaining-protected-by-access-control",
+      "title": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-contact-form-submission-flow-to-send-the-selected-country-calling-code-and-phone-number-to-the-backend-in-addition-to-the-existing-fields",
-      "title": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "id": "feature-verify-production-configuration-needed-for-the-deployed-version-is-in-place-e-g-recaptcha-settings-expected-by-the-frontend-and-backend-and-document-any-required-post-deploy-admin-steps-such-as-setting-the-recaptcha-secret-via-the-existing-admin-method-to-make-the-live-contact-form-fully-operational",
+      "title": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
       "reqIds": [
         "REQ-3"
       ],
@@ -34,20 +34,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add required phone number field to contact form with country code dropdown selector",
+      "summary": "Deploy the current app draft (Version 33) live / to production",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
-  "projectName": "Add required phone number (with country code dropdown) to contact form",
+  "projectName": "Deploy current app draft (Version 33) live",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

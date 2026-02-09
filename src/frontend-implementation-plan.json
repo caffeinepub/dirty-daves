@@ -1,66 +1,92 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add required phone number (country code dropdown + local number) to landing page contact form",
+  "title": "Version 33 production readiness (frontend-only)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add required phone number UI to the landing page contact form with a country calling code dropdown and a local phone number input, matching existing Tailwind styling and disabled during submission.",
+      "summary": "Prepare frontend asset canister build/config notes for deploying Version 33 and ensure required routes/assets load in production.",
       "acceptanceCriteria": [
-        "The contact form renders a country code dropdown (e.g., options like \"United States (+1)\", \"United Kingdom (+44)\") and a separate phone number input.",
-        "Both country code and phone number are required to submit the form.",
-        "All new labels, placeholders, and validation messages are in English.",
-        "The new fields visually match the existing styling of the form (Tailwind classes consistent with other inputs).",
-        "When the form is submitting (isPending), the new fields are disabled just like existing fields."
+        "A production deployment is completed using the current Version 33 sources.",
+        "Frontend loads successfully in production and routes render (/, and all /offers/* pages)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/content/countryCallingCodes.ts",
+          "path": "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
           "operation": "create",
-          "description": "Create an exported, curated list of country calling code dropdown options (label + value) to populate the contact form country code selector."
+          "description": "Add concise production deployment notes for the frontend asset canister: build command, environment-variable expectations (VITE_RECAPTCHA_SITE_KEY), and a route verification checklist for / and all /offers/* pages."
         },
         {
-          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Add state and UI controls for (1) a required country calling code dropdown and (2) a required local phone number input; ensure labels/placeholders are English, styling matches existing Tailwind input patterns, and both new fields respect isPending disabled behavior."
+          "description": "Verify production-safe asset references and preloads remain correct for the hero background image, and that reCAPTCHA DNS-prefetch remains present (no functional changes beyond what is necessary for Version 33 production deployment)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify the router continues to include / and all /offers/* routes required for production, and that lazy-loaded offer pages remain wrapped in Suspense with the existing loading fallback."
+        },
+        {
+          "path": "frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png",
+          "operation": "create",
+          "description": "Add the generated asset at the exact path frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png so production builds can serve the preloaded hero image correctly."
+        },
+        {
+          "path": "frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated asset at the exact path frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png so production builds can reference the logo as needed."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Extend client-side contact form validation to require country calling code and phone number with field-level errors that block submission while preserving existing validation.",
+      "summary": "Add a production smoke-test checklist for frontend routing, lazy-load fallback, and contact form submission behavior (including reCAPTCHA readiness/error states) plus an access-control verification step.",
       "acceptanceCriteria": [
-        "If the user submits with no country code selected, an error message is shown for the country code field and the mutation is not triggered.",
-        "If the user submits with an empty phone number, an error message is shown for the phone field and the mutation is not triggered.",
-        "If the user corrects the errors and resubmits, the form submits successfully.",
-        "Existing validation for name/email/subject/message continues to work."
+        "Landing page renders without console errors.",
+        "Each offer route loads and the lazy-loading fallback shows appropriately during load.",
+        "Contact form can be submitted end-to-end (or shows the existing configured error state if reCAPTCHA is not configured), and the UI reaches the success state on a valid submission.",
+        "Unauthenticated callers cannot access admin-only query methods (e.g., getAllContactSubmissions, getAllContactSubmissionsJunk)."
       ],
       "file_operations": [
         {
+          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
+          "operation": "create",
+          "description": "Create a production smoke-test checklist covering: (1) landing page render + console errors check, (2) navigation to each /offers/* route and confirming the Suspense fallback appears during load, (3) contact form submission including the expected UI behavior when reCAPTCHA is configured vs not configured, and (4) verifying admin-only backend queries remain protected by access control (use the authorization component’s role-based access control behavior as the expected baseline; Verify the component's usage instructions before implementing)."
+        },
+        {
           "path": "frontend/src/components/landing/ContactForm.tsx",
           "operation": "modify",
-          "description": "Extend validateForm to include required checks for phoneCountryCode and phoneNumber, add field-level error messages for each, and ensure submission is blocked (mutation not triggered) when either is missing while keeping existing field validations intact."
+          "description": "Harden the contact form’s production UX for smoke testing: ensure the existing reCAPTCHA readiness/configuration error states are clearly surfaced and do not cause console errors; keep behavior aligned with Version 33 (no feature additions)."
+        },
+        {
+          "path": "frontend/src/hooks/useRecaptchaV3.ts",
+          "operation": "modify",
+          "description": "Ensure reCAPTCHA initialization/execute paths remain robust in production (script load, ready callback, and error propagation) so the smoke test can reliably validate readiness handling and configured/unconfigured states."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Include phone country calling code and phone number in the contact form submission payload sent via the existing mutation hook.",
+      "summary": "Document production configuration requirements for reCAPTCHA and any post-deploy admin steps needed to fully enable the live contact form without introducing broken placeholder states.",
       "acceptanceCriteria": [
-        "The frontend mutation payload includes the country calling code value and phone number value.",
-        "The backend canister method signature for contact form submission accepts the additional phone fields and compiles successfully.",
-        "Submitting the contact form from the UI results in a stored submission that includes the phone information."
+        "A short deployment note exists stating whether reCAPTCHA is configured in production and, if not, the exact admin action required to configure it using the existing backend method.",
+        "No user-facing placeholders or broken configuration states are introduced by the deployment."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useSubmitContactForm.ts",
-          "operation": "modify",
-          "description": "Update the ContactFormData shape to include phoneCountryCode and phoneNumber, and update the mutation function to call submitContactForm with name, email, phoneCountryCode, phoneNumber, subject, and message in the correct order."
+          "path": "frontend/PRODUCTION_CONFIGURATION.md",
+          "operation": "create",
+          "description": "Document the frontend production configuration expectations for Version 33, including VITE_RECAPTCHA_SITE_KEY and how the UI behaves when it is missing; include a short 'post-deploy admin step' note instructing how to complete reCAPTCHA setup using the existing backend admin method (described at a high level; do not include sensitive secrets)."
         },
         {
-          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "path": "frontend/.env.production.example",
+          "operation": "create",
+          "description": "Add an example production env file documenting VITE_RECAPTCHA_SITE_KEY for the frontend build (example values only; no real secrets)."
+        },
+        {
+          "path": "frontend/src/components/landing/ContactSection.tsx",
           "operation": "modify",
-          "description": "Update handleSubmit to pass phoneCountryCode and phoneNumber into useSubmitContactForm mutate payload, and clear the new fields on success alongside existing fields."
+          "description": "Verify the contact section’s deferred reCAPTCHA loading trigger remains compatible with production configuration: when configured, it should initialize when visible; when not configured, it should not cause broken states."
         }
       ]
     }

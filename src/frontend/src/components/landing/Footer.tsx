@@ -1,4 +1,4 @@
-import { SiX, SiWhatsapp } from 'react-icons/si';
+import { SiX, SiWhatsapp, SiYoutube } from 'react-icons/si';
 import { Mail } from 'lucide-react';
 
 export default function Footer() {
@@ -30,11 +30,19 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="@realdavidwatson"
-                className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 active:scale-95 focus:outline-none focus:ring-4 focus:ring-navy/50"
-                style={{ backgroundColor: '#00BFFF' }}
+                className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center hover:bg-black/90 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 active:scale-95 focus:outline-none focus:ring-4 focus:ring-navy/50"
                 aria-label="X (Twitter)"
               >
                 <SiX className="w-6 h-6 text-white" />
+              </a>
+              <a
+                href="https://www.youtube.com/@YOUR_CHANNEL_HERE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 bg-[#FF0000] rounded-2xl flex items-center justify-center hover:bg-[#CC0000] transition-all shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
+                aria-label="YouTube"
+              >
+                <SiYoutube className="w-6 h-6 text-white" />
               </a>
             </div>
 

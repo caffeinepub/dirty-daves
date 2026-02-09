@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-landing-page-contact-form-ui-to-collect-a-required-phone-number-composed-of-1-a-required-country-calling-code-selected-from-a-dropdown-and-2-a-required-local-phone-number-text-input",
-      "featureTitle": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
+      "featureId": "feature-deploy-the-current-codebase-version-33-to-production-on-the-internet-computer-upgrading-both-the-backend-canister-and-the-frontend-asset-canister-using-the-existing-single-actor-backend-architecture",
+      "featureTitle": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
       "files": [
-        "frontend/src/components/landing/ContactForm.tsx",
-        "frontend/src/content/countryCallingCodes.ts"
+        "frontend/PRODUCTION_DEPLOYMENT_NOTES.md"
       ],
       "components": [
         "authorization@4.0.0",
@@ -14,7 +13,8 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-1"
@@ -22,10 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-extend-client-side-validation-in-the-contact-form-so-that-missing-country-code-or-missing-phone-number-produces-field-level-error-messages-and-blocks-submission",
-      "featureTitle": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+      "featureId": "feature-run-a-production-smoke-test-after-deployment-covering-landing-page-render-offer-page-navigation-contact-form-submission-path-including-recaptcha-readiness-handling-and-admin-only-backend-queries-remaining-protected-by-access-control",
+      "featureTitle": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
       "files": [
-        "frontend/src/components/landing/ContactForm.tsx"
+        "frontend/SMOKE_TEST_PRODUCTION.md"
       ],
       "components": [
         "authorization@4.0.0",
@@ -33,7 +33,8 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-2"
@@ -41,11 +42,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-contact-form-submission-flow-to-send-the-selected-country-calling-code-and-phone-number-to-the-backend-in-addition-to-the-existing-fields",
-      "featureTitle": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "featureId": "feature-verify-production-configuration-needed-for-the-deployed-version-is-in-place-e-g-recaptcha-settings-expected-by-the-frontend-and-backend-and-document-any-required-post-deploy-admin-steps-such-as-setting-the-recaptcha-secret-via-the-existing-admin-method-to-make-the-live-contact-form-fully-operational",
+      "featureTitle": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
       "files": [
-        "frontend/src/components/landing/ContactForm.tsx",
-        "frontend/src/hooks/useSubmitContactForm.ts"
+        "frontend/.env.production.example",
+        "frontend/PRODUCTION_CONFIGURATION.md"
       ],
       "components": [
         "authorization@4.0.0",
@@ -53,7 +54,8 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-3"

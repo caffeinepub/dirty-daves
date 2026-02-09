@@ -3,8 +3,11 @@ import OffersSection from './OffersSection';
 import ReviewsSection from './ReviewsSection';
 import ContactSection from './ContactSection';
 import Footer from './Footer';
+import { useScrollToHashSection } from '../../hooks/useScrollToHashSection';
 
 export default function LandingPage() {
+  useScrollToHashSection();
+
   return (
     <div className="min-h-screen relative">
       {/* Full-page background image */}

@@ -1,4 +1,5 @@
 import { MapPin, Users, Clock, Star, Bed, Compass } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
 export default function OffersSection() {
   const features = [
@@ -6,37 +7,43 @@ export default function OffersSection() {
       icon: MapPin,
       emoji: '🗺️',
       title: 'Off the Beaten Path',
-      description: 'Hidden gems, secret spots, and places the tour buses can\'t reach. This is Scotland unfiltered and RAW!'
+      description: 'Hidden gems, secret spots, and places the tour buses can\'t reach. This is Scotland unfiltered and RAW!',
+      path: '/offers/off-the-beaten-path'
     },
     {
       icon: Users,
       emoji: '👥',
       title: 'Private & Personal',
-      description: 'Just you, your crew, and Dave. No strangers, no schedules, no bullshit. Your tour, your rules, your adventure!'
+      description: 'Just you, your crew, and Dave. No strangers, no schedules, no bullshit. Your tour, your rules, your adventure!',
+      path: '/offers/private-and-personal'
     },
     {
       icon: Clock,
       emoji: '⏰',
       title: 'Flexible as Hell',
-      description: 'Want to spend an extra hour at that castle? Or skip it for a proper pub session? You\'re the boss!'
+      description: 'Want to spend an extra hour at that castle? Or skip it for a proper pub session? You\'re the boss!',
+      path: '/offers/flexible-as-hell'
     },
     {
       icon: Star,
       emoji: '✨',
       title: 'Stories & Banter',
-      description: 'History, legends, and the kind of stories that make you laugh until your face hurts. Pure entertainment!'
+      description: 'History, legends, and the kind of stories that make you laugh until your face hurts. Pure entertainment!',
+      path: '/offers/stories-and-banter'
     },
     {
       icon: Bed,
       emoji: '🛏️',
       title: 'Stay Your Way',
-      description: 'park bench, shitty hostel, tent, 5 star hotel or your own castle - I dont care where you stay, but will book what ever the fuck you want'
+      description: 'park bench, shitty hostel, tent, 5 star hotel or your own castle - I dont care where you stay, but will book what ever the fuck you want',
+      path: '/offers/stay-your-way'
     },
     {
       icon: Compass,
       emoji: '🧭',
       title: 'Choose Your Own Adventure',
-      description: 'History buffs? Castle lovers? Distillery piss-ups? Every strip club in Scotland? Or just a bit of everything? You decide!'
+      description: 'History buffs? Castle lovers? Distillery piss-ups? Every strip club in Scotland? Or just a bit of everything? You decide!',
+      path: '/offers/choose-your-own-adventure'
     }
   ];
 
@@ -57,9 +64,10 @@ export default function OffersSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {features.map((feature, index) => (
-            <div
+            <Link
               key={index}
-              className="group bg-white/25 backdrop-blur-sm p-8 rounded-3xl border-2 border-navy/30 hover:border-teal transition-all shadow-lg hover:shadow-2xl hover:shadow-teal/30 transform hover:scale-105 hover:-rotate-1 active:scale-100 focus-within:ring-4 focus-within:ring-teal/50"
+              to={feature.path}
+              className="group bg-white/25 backdrop-blur-sm p-8 rounded-3xl border-2 border-navy/30 hover:border-teal transition-all shadow-lg hover:shadow-2xl hover:shadow-teal/30 transform hover:scale-105 hover:-rotate-1 active:scale-100 focus-visible:ring-4 focus-visible:ring-teal focus-visible:outline-none block"
             >
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-16 h-16 bg-navy rounded-2xl flex items-center justify-center group-hover:animate-wiggle shadow-lg">
@@ -74,7 +82,7 @@ export default function OffersSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

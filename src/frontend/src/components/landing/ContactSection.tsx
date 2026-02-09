@@ -1,9 +1,39 @@
+import { useState, useEffect, useRef } from 'react';
 import ContactForm from './ContactForm';
 import { Mail, MapPin } from 'lucide-react';
 
 export default function ContactSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        });
+      },
+      {
+        rootMargin: '100px',
+        threshold: 0.1,
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [isVisible]);
+
   return (
-    <section id="contact" className="relative py-20 md:py-32">
+    <section id="contact" ref={sectionRef} className="relative py-20 md:py-32">
       {/* Subtle overlay - 20% opacity */}
       <div className="absolute inset-0 bg-white/20" />
       
@@ -54,7 +84,7 @@ export default function ContactSection() {
               </div>
             </div>
 
-            <ContactForm />
+            <ContactForm shouldLoadRecaptcha={isVisible} />
           </div>
         </div>
       </div>

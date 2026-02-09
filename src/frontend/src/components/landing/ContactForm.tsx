@@ -1,34 +1,48 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSubmitContactForm } from '../../hooks/useSubmitContactForm';
+import { useRecaptchaV3 } from '../../hooks/useRecaptchaV3';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-import { countryCallingCodes } from '../../content/countryCallingCodes';
 
-export default function ContactForm() {
+interface ContactFormProps {
+  shouldLoadRecaptcha?: boolean;
+}
+
+export default function ContactForm({ shouldLoadRecaptcha = false }: ContactFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneCountryCode, setPhoneCountryCode] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [errors, setErrors] = useState<{ 
     name?: string; 
     email?: string; 
-    phoneCountryCode?: string;
-    phoneNumber?: string;
-    subject?: string; 
-    message?: string 
+    message?: string;
+    recaptcha?: string;
   }>({});
 
+  // Track form start time for bot detection
+  const formStartTimeRef = useRef<number>(Date.now());
+
+  // Reset start time when component mounts
+  useEffect(() => {
+    formStartTimeRef.current = Date.now();
+  }, []);
+
   const { mutate: submitForm, isPending, isSuccess, isError, error } = useSubmitContactForm();
+  const { isReady: recaptchaReady, executeRecaptcha, isConfigured: recaptchaConfigured, initializeRecaptcha } = useRecaptchaV3();
+
+  // Initialize reCAPTCHA when contact section becomes visible
+  useEffect(() => {
+    if (shouldLoadRecaptcha && recaptchaConfigured && !recaptchaReady) {
+      initializeRecaptcha();
+    }
+  }, [shouldLoadRecaptcha, recaptchaConfigured, recaptchaReady, initializeRecaptcha]);
 
   const validateForm = () => {
     const newErrors: { 
       name?: string; 
       email?: string; 
-      phoneCountryCode?: string;
-      phoneNumber?: string;
-      subject?: string; 
-      message?: string 
+      message?: string;
+      recaptcha?: string;
     } = {};
 
     if (!name.trim()) {
@@ -41,18 +55,6 @@ export default function ContactForm() {
       newErrors.email = 'Please enter a valid email';
     }
 
-    if (!phoneCountryCode) {
-      newErrors.phoneCountryCode = 'Country code is required';
-    }
-
-    if (!phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required';
-    }
-
-    if (!subject.trim()) {
-      newErrors.subject = 'Subject is required';
-    }
-
     if (!message.trim()) {
       newErrors.message = 'Message is required';
     }
@@ -61,31 +63,54 @@ export default function ContactForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
+    // Check reCAPTCHA configuration and readiness
+    if (!recaptchaConfigured) {
+      setErrors({ recaptcha: 'Security verification is not configured. Please contact support.' });
+      return;
+    }
+
+    if (!recaptchaReady) {
+      setErrors({ recaptcha: 'Security verification is not ready. Please wait a moment and try again.' });
+      return;
+    }
+
+    // Generate reCAPTCHA token
+    let recaptchaToken: string;
+    try {
+      recaptchaToken = await executeRecaptcha('contact_form');
+    } catch (err) {
+      setErrors({ recaptcha: 'Failed to verify security. Please refresh the page and try again.' });
+      return;
+    }
+
+    // Calculate elapsed time since form was presented
+    const elapsedTime = Date.now() - formStartTimeRef.current;
+
     submitForm(
       { 
         name: name.trim(), 
         email: email.trim(), 
-        phoneCountryCode,
-        phoneNumber: phoneNumber.trim(),
-        subject: subject.trim(), 
-        message: message.trim() 
+        message: message.trim(),
+        honeypot,
+        elapsedTime,
+        recaptchaToken,
       },
       {
         onSuccess: () => {
           setName('');
           setEmail('');
-          setPhoneCountryCode('');
-          setPhoneNumber('');
-          setSubject('');
           setMessage('');
+          setHoneypot('');
           setErrors({});
+          // Reset form start time for potential next submission
+          formStartTimeRef.current = Date.now();
         },
       }
     );
@@ -108,6 +133,22 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white/30 backdrop-blur-sm p-8 rounded-3xl border-2 border-navy/30 hover:border-teal/50 transition-all shadow-lg space-y-6">
+      {/* Honeypot field - visually hidden but accessible to bots */}
+      <div className="absolute left-[-9999px] w-1 h-1 overflow-hidden" aria-hidden="true">
+        <label htmlFor="website">
+          Website
+        </label>
+        <input
+          type="text"
+          id="website"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <div>
         <label htmlFor="name" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
           Your Name 👤
@@ -141,99 +182,59 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="phoneCountryCode" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
-          Country Code 🌍
-        </label>
-        <select
-          id="phoneCountryCode"
-          value={phoneCountryCode}
-          onChange={(e) => setPhoneCountryCode(e.target.value)}
-          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium disabled:opacity-50"
-          disabled={isPending}
-        >
-          <option value="">Select country code</option>
-          {countryCallingCodes.map((country) => (
-            <option key={country.value + country.label} value={country.value}>
-              {country.label}
-            </option>
-          ))}
-        </select>
-        {errors.phoneCountryCode && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.phoneCountryCode}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="phoneNumber" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
-          Phone Number 📱
-        </label>
-        <input
-          type="tel"
-          id="phoneNumber"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium placeholder:text-black/50"
-          placeholder="Your phone number"
-          disabled={isPending}
-        />
-        {errors.phoneNumber && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.phoneNumber}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="subject" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
-          Subject 📝
-        </label>
-        <input
-          type="text"
-          id="subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium placeholder:text-black/50"
-          placeholder="What's this about?"
-          disabled={isPending}
-        />
-        {errors.subject && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.subject}</p>}
-      </div>
-
-      <div>
         <label htmlFor="message" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
-          Your Message 💭
+          Your Message 💬
         </label>
         <textarea
           id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={5}
-          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all resize-none font-medium placeholder:text-black/50"
+          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium placeholder:text-black/50 resize-none"
           placeholder="Tell us about your dream Scottish adventure..."
           disabled={isPending}
         />
         {errors.message && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.message}</p>}
       </div>
 
+      {errors.recaptcha && (
+        <div className="bg-red-100/80 backdrop-blur-sm border-2 border-red-500 text-red-800 px-4 py-3 rounded-xl font-medium">
+          {errors.recaptcha}
+        </div>
+      )}
+
       {isError && (
-        <div className="p-4 bg-white/40 backdrop-blur-sm border-2 border-black rounded-xl animate-wiggle">
-          <p className="text-black font-black text-shadow-subtle">
-            {error?.message || 'Something went wrong. Please try again.'}
-          </p>
+        <div className="bg-red-100/80 backdrop-blur-sm border-2 border-red-500 text-red-800 px-4 py-3 rounded-xl font-medium">
+          {error?.message || 'Failed to send message. Please try again.'}
         </div>
       )}
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full px-6 py-4 bg-navy text-white rounded-2xl font-black text-lg hover:bg-navy/90 transition-all shadow-lg hover:shadow-2xl hover:shadow-navy/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
+        className="w-full px-8 py-4 bg-navy text-white rounded-2xl font-black hover:bg-navy/90 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-teal/50"
       >
         {isPending ? (
-          <>
+          <span className="flex items-center justify-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
             Sending...
-          </>
+          </span>
         ) : (
-          <>
-            <span>Send Message</span>
-            <span className="text-xl">🚀</span>
-          </>
+          'Send Message 🚀'
         )}
       </button>
+
+      <p className="text-xs text-black/70 text-center font-medium text-shadow-subtle">
+        This site is protected by reCAPTCHA and the Google{' '}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal">
+          Privacy Policy
+        </a>{' '}
+        and{' '}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal">
+          Terms of Service
+        </a>{' '}
+        apply.
+      </p>
     </form>
   );
 }

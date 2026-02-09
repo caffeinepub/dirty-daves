@@ -1,98 +1,85 @@
 {
   "kind": "build_request",
-  "title": "Add required phone number (with country code dropdown) to contact form",
-  "priority": "normal",
+  "title": "Deploy current app draft (Version 33) live",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "lets add a field to the contact form so that people have to enter their phone number and make it so they can choose their country code from a drop down menu"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The contact form renders a country code dropdown (e.g., options like \"United States (+1)\", \"United Kingdom (+44)\") and a separate phone number input.",
-        "Both country code and phone number are required to submit the form.",
-        "All new labels, placeholders, and validation messages are in English.",
-        "The new fields visually match the existing styling of the form (Tailwind classes consistent with other inputs).",
-        "When the form is submitting (isPending), the new fields are disabled just like existing fields."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "people have to enter their phone number",
-          "choose their country code from a drop down menu"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If the user submits with no country code selected, an error message is shown for the country code field and the mutation is not triggered.",
-        "If the user submits with an empty phone number, an error message is shown for the phone field and the mutation is not triggered.",
-        "If the user corrects the errors and resubmits, the form submits successfully.",
-        "Existing validation for name/email/subject/message continues to work."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "text": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
       "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "add a field to the contact form",
-          "choose their country code from a drop down menu"
+          "ok lets take this version live now"
         ]
       },
       "acceptanceCriteria": [
-        "The frontend mutation payload includes the country calling code value and phone number value.",
-        "The backend canister method signature for contact form submission accepts the additional phone fields and compiles successfully.",
-        "Submitting the contact form from the UI results in a stored submission that includes the phone information."
+        "A production deployment is completed using the current Version 33 sources.",
+        "Backend canister is upgraded successfully without breaking existing stable data.",
+        "Frontend loads successfully in production and routes render (/, and all /offers/* pages)."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
-      "target": "backend",
+      "id": "REQ-2",
+      "text": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "add a field to the contact form so that people have to enter their phone number"
+          "ok lets take this version live now"
         ]
       },
       "acceptanceCriteria": [
-        "New contact submissions stored in the backend include phone country code and phone number fields.",
-        "The admin query that returns all contact submissions returns these phone fields for each entry.",
-        "Existing contact submission functionality (name/email/subject/message/timestamp/id behavior) continues to work after the change."
+        "Landing page renders without console errors.",
+        "Each offer route loads and the lazy-loading fallback shows appropriately during load.",
+        "Contact form can be submitted end-to-end (or shows the existing configured error state if reCAPTCHA is not configured), and the UI reaches the success state on a valid submission.",
+        "Unauthenticated callers cannot access admin-only query methods (e.g., getAllContactSubmissions, getAllContactSubmissionsJunk)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "ok lets take this version live now"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A short deployment note exists stating whether reCAPTCHA is configured in production and, if not, the exact admin action required to configure it using the existing backend method.",
+        "No user-facing placeholders or broken configuration states are introduced by the deployment."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose UI using existing components instead).",
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT.",
     "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Adding SMS/WhatsApp messaging integrations.",
-    "Adding third-party authentication providers (only Internet Identity is supported).",
-    "Persisting contact submissions in an external database."
+    "Adding new product features or changing UI/UX beyond what is necessary to deploy Version 33.",
+    "Implementing third-party auth beyond Internet Identity.",
+    "Adding external databases, non-Motoko backend services, or real-time/WebSocket functionality."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

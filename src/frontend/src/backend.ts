@@ -89,17 +89,32 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
+export interface TransformationOutput {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
+}
 export interface ContactSubmission {
     id: string;
-    subject: string;
     name: string;
-    phoneCountryCode: string;
     email: string;
     message: string;
     timestamp: bigint;
-    phoneNumber: string;
+}
+export interface TransformationInput {
+    context: Uint8Array;
+    response: http_request_result;
 }
 export interface UserProfile {
+    name: string;
+}
+export interface http_header {
+    value: string;
     name: string;
 }
 export enum UserRole {
@@ -111,12 +126,16 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
+    getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, phoneCountryCode: string, phoneNumber: string, subject: string, message: string): Promise<string>;
+    submitContactForm(name: string, email: string, message: string, honeypot: string, elapsedTime: number, _recaptchaToken: string): Promise<string>;
+    transform(input: TransformationInput): Promise<TransformationOutput>;
+    updateRecaptchaMinScore(score: number): Promise<void>;
+    updateRecaptchaSecret(key: string): Promise<void>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -160,6 +179,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllContactSubmissions();
+            return result;
+        }
+    }
+    async getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllContactSubmissionsJunk();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllContactSubmissionsJunk();
             return result;
         }
     }
@@ -233,7 +266,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string): Promise<string> {
+    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: number, arg5: string): Promise<string> {
         if (this.processError) {
             try {
                 const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
@@ -244,6 +277,48 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
+            return result;
+        }
+    }
+    async transform(arg0: TransformationInput): Promise<TransformationOutput> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.transform(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.transform(arg0);
+            return result;
+        }
+    }
+    async updateRecaptchaMinScore(arg0: number): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateRecaptchaMinScore(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateRecaptchaMinScore(arg0);
+            return result;
+        }
+    }
+    async updateRecaptchaSecret(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateRecaptchaSecret(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateRecaptchaSecret(arg0);
             return result;
         }
     }

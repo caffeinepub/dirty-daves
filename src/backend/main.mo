@@ -5,14 +5,11 @@ import Array "mo:core/Array";
 import Time "mo:core/Time";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
+import OutCall "http-outcalls/outcall";
 import Principal "mo:core/Principal";
-import Migration "migration";
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-// Use migration for data persistence
-(with migration = Migration.run)
 actor {
   // Initialize the access control system
   let accessControlState = AccessControl.initState();
@@ -45,14 +42,11 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Contact Form System with Phone Support
+  // Contact Form system (no phone or subject)
   type ContactSubmission = {
     id : Text;
     name : Text;
     email : Text;
-    phoneCountryCode : Text;
-    phoneNumber : Text;
-    subject : Text;
     message : Text;
     timestamp : Int;
   };
@@ -71,16 +65,14 @@ actor {
   };
 
   let contactSubmissions = Map.empty<Text, ContactSubmission>();
+  let contactSubmissionsJunk = Map.empty<Text, ContactSubmission>();
 
-  func createContactSubmission(name : Text, email : Text, phoneCountryCode : Text, phoneNumber : Text, subject : Text, message : Text) : ContactSubmission {
-    let id = name.concat(email).concat(subject).concat(message).concat(Time.now().toText());
+  func createContactSubmission(name : Text, email : Text, message : Text) : ContactSubmission {
+    let id = name.concat(email).concat(message).concat(Time.now().toText());
     {
       id;
       name;
       email;
-      phoneCountryCode;
-      phoneNumber;
-      subject;
       message;
       timestamp = Time.now();
     };
@@ -98,9 +90,86 @@ actor {
     };
   };
 
-  // Accepts new phone fields in the contact form and persists in backend
-  public shared ({ caller }) func submitContactForm(name : Text, email : Text, phoneCountryCode : Text, phoneNumber : Text, subject : Text, message : Text) : async Text {
-    let newSubmission = createContactSubmission(name, email, phoneCountryCode, phoneNumber, subject, message);
+  func insertContactSubmissionJunk(submission : ContactSubmission) {
+    let id = submission.id;
+    switch (contactSubmissionsJunk.get(id)) {
+      case (?existing) {
+        if (existing == submission) { Runtime.trap("Identical junk submission already exists") };
+      };
+      case (null) {
+        contactSubmissionsJunk.add(id, submission);
+      };
+    };
+  };
+
+  // Admin-only: Retrieve all junk contact submissions
+  public query ({ caller }) func getAllContactSubmissionsJunk() : async [ContactSubmission] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can view all junk submissions");
+    };
+    let submissions = Array.fromIter(contactSubmissionsJunk.values());
+    submissions.sort(ContactSubmission.compareByTimestamp);
+  };
+
+  var recaptchaSecretKey : ?Text = null;
+  var recaptchaMinScore : Float = 0.6;
+
+  type RecaptchaResult = {
+    success : Bool;
+    score : Float;
+  };
+
+  func parseRecaptchaResponse(response : Text) : ?RecaptchaResult {
+    let score = (response.contains(#char 't') or response.contains(#char 'T'));
+    if (response.contains(#text "ratedgood")) {
+      ?{
+        success = score;
+        score = 0.9;
+      };
+    } else if (response.contains(#text "ratedfair")) {
+      ?{
+        success = score;
+        score = 0.5;
+      };
+    } else if (response.contains(#text "ratedbad")) {
+      if (score) {
+        ?{ success = true; score = 0.2 };
+      } else {
+        ?{ success = false; score = 0.0 };
+      };
+    } else {
+      ?{ success = score; score = 0.0 };
+    };
+  };
+
+  public shared query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
+    OutCall.transform(input);
+  };
+
+  func verifyRecaptcha(token : Text) : async Float {
+    switch (recaptchaSecretKey) {
+      case (?key) {
+        let url = "https://www.google.com/recaptcha/api/siteverify?secret=" # key # "&response=" # token;
+        let result = await OutCall.httpGetRequest(url, [], transform);
+        switch (parseRecaptchaResponse(result)) {
+          case (?{ success; score }) {
+            if (success) { score } else { 0 };
+          };
+          case (null) { 0 };
+        };
+      };
+      case (null) { 0 };
+    };
+  };
+
+  public shared ({ caller }) func submitContactForm(name : Text, email : Text, message : Text, honeypot : Text, elapsedTime : Float, _recaptchaToken : Text) : async Text {
+    let newSubmission = createContactSubmission(name, email, message);
+
+    if (honeypot != "" or elapsedTime < 1.0) {
+      insertContactSubmissionJunk(newSubmission);
+      return newSubmission.id;
+    };
+
     insertContactSubmission(newSubmission);
     newSubmission.id;
   };
@@ -111,5 +180,21 @@ actor {
     };
     let submissions = Array.fromIter(contactSubmissions.values());
     submissions.sort(ContactSubmission.compareByTimestamp);
+  };
+
+  // Admin-only: Update reCAPTCHA secret key
+  public shared ({ caller }) func updateRecaptchaSecret(key : Text) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update reCAPTCHA secret");
+    };
+    recaptchaSecretKey := ?key;
+  };
+
+  // Admin-only: Update reCAPTCHA minimum score threshold
+  public shared ({ caller }) func updateRecaptchaMinScore(score : Float) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update reCAPTCHA minimum score");
+    };
+    recaptchaMinScore := score;
   };
 };
