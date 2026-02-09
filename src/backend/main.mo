@@ -6,16 +6,18 @@ import Time "mo:core/Time";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+import Migration "migration";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+// Use migration for data persistence
+(with migration = Migration.run)
 actor {
   // Initialize the access control system
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // User Profile System
   public type UserProfile = {
     name : Text;
   };
@@ -38,17 +40,19 @@ actor {
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+      Runtime.trap("Unauthorized: Only users can save and update profiles");
     };
     userProfiles.add(caller, profile);
   };
 
-  // Contact Form System
+  // Contact Form System with Phone Support
   type ContactSubmission = {
     id : Text;
     name : Text;
     email : Text;
-    subject : Text; // New subject field added!
+    phoneCountryCode : Text;
+    phoneNumber : Text;
+    subject : Text;
     message : Text;
     timestamp : Int;
   };
@@ -68,12 +72,14 @@ actor {
 
   let contactSubmissions = Map.empty<Text, ContactSubmission>();
 
-  func createContactSubmission(name : Text, email : Text, subject : Text, message : Text) : ContactSubmission {
+  func createContactSubmission(name : Text, email : Text, phoneCountryCode : Text, phoneNumber : Text, subject : Text, message : Text) : ContactSubmission {
     let id = name.concat(email).concat(subject).concat(message).concat(Time.now().toText());
     {
       id;
       name;
       email;
+      phoneCountryCode;
+      phoneNumber;
       subject;
       message;
       timestamp = Time.now();
@@ -92,15 +98,13 @@ actor {
     };
   };
 
-  // Public contact form submission - accessible to everyone including guests
-  public shared ({ caller }) func submitContactForm(name : Text, email : Text, subject : Text, message : Text) : async Text {
-    // No authorization check - contact forms should be publicly accessible
-    let newSubmission = createContactSubmission(name, email, subject, message);
+  // Accepts new phone fields in the contact form and persists in backend
+  public shared ({ caller }) func submitContactForm(name : Text, email : Text, phoneCountryCode : Text, phoneNumber : Text, subject : Text, message : Text) : async Text {
+    let newSubmission = createContactSubmission(name, email, phoneCountryCode, phoneNumber, subject, message);
     insertContactSubmission(newSubmission);
     newSubmission.id;
   };
 
-  // Admin-only function to view all contact submissions
   public query ({ caller }) func getAllContactSubmissions() : async [ContactSubmission] {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can view all submissions");

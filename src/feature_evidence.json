@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-descriptive-text-inside-the-get-in-touch-bubble-in-the-contact-section-to-exactly-fill-out-the-form-and-we-ll-get-back-to-you-as-soon-as-im-back-from-the-pub",
-      "featureTitle": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+      "featureId": "feature-update-the-landing-page-contact-form-ui-to-collect-a-required-phone-number-composed-of-1-a-required-country-calling-code-selected-from-a-dropdown-and-2-a-required-local-phone-number-text-input",
+      "featureTitle": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
       "files": [
-        "frontend/src/components/landing/ContactSection.tsx"
+        "frontend/src/components/landing/ContactForm.tsx",
+        "frontend/src/content/countryCallingCodes.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,6 +18,45 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-extend-client-side-validation-in-the-contact-form-so-that-missing-country-code-or-missing-phone-number-produces-field-level-error-messages-and-blocks-submission",
+      "featureTitle": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+      "files": [
+        "frontend/src/components/landing/ContactForm.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-contact-form-submission-flow-to-send-the-selected-country-calling-code-and-phone-number-to-the-backend-in-addition-to-the-existing-fields",
+      "featureTitle": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "files": [
+        "frontend/src/components/landing/ContactForm.tsx",
+        "frontend/src/hooks/useSubmitContactForm.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

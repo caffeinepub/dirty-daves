@@ -1,20 +1,66 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Update 'Get in Touch' bubble copy in landing page Contact section",
+  "title": "Add required phone number (country code dropdown + local number) to landing page contact form",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Change the paragraph text inside the \"Get in Touch 💬\" contact card to the exact requested sentence, without altering any other Contact section text.",
+      "summary": "Add required phone number UI to the landing page contact form with a country calling code dropdown and a local phone number input, matching existing Tailwind styling and disabled during submission.",
       "acceptanceCriteria": [
-        "On the landing page Contact section (the card with heading \"Get in Touch 💬\"), the paragraph text is exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
-        "No other text in the Contact section is changed."
+        "The contact form renders a country code dropdown (e.g., options like \"United States (+1)\", \"United Kingdom (+44)\") and a separate phone number input.",
+        "Both country code and phone number are required to submit the form.",
+        "All new labels, placeholders, and validation messages are in English.",
+        "The new fields visually match the existing styling of the form (Tailwind classes consistent with other inputs).",
+        "When the form is submitting (isPending), the new fields are disabled just like existing fields."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/landing/ContactSection.tsx",
+          "path": "frontend/src/content/countryCallingCodes.ts",
+          "operation": "create",
+          "description": "Create an exported, curated list of country calling code dropdown options (label + value) to populate the contact form country code selector."
+        },
+        {
+          "path": "frontend/src/components/landing/ContactForm.tsx",
           "operation": "modify",
-          "description": "Update only the paragraph copy under the \"Get in Touch 💬\" heading to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\" Ensure no other strings in the Contact section are modified."
+          "description": "Add state and UI controls for (1) a required country calling code dropdown and (2) a required local phone number input; ensure labels/placeholders are English, styling matches existing Tailwind input patterns, and both new fields respect isPending disabled behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Extend client-side contact form validation to require country calling code and phone number with field-level errors that block submission while preserving existing validation.",
+      "acceptanceCriteria": [
+        "If the user submits with no country code selected, an error message is shown for the country code field and the mutation is not triggered.",
+        "If the user submits with an empty phone number, an error message is shown for the phone field and the mutation is not triggered.",
+        "If the user corrects the errors and resubmits, the form submits successfully.",
+        "Existing validation for name/email/subject/message continues to work."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "operation": "modify",
+          "description": "Extend validateForm to include required checks for phoneCountryCode and phoneNumber, add field-level error messages for each, and ensure submission is blocked (mutation not triggered) when either is missing while keeping existing field validations intact."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Include phone country calling code and phone number in the contact form submission payload sent via the existing mutation hook.",
+      "acceptanceCriteria": [
+        "The frontend mutation payload includes the country calling code value and phone number value.",
+        "The backend canister method signature for contact form submission accepts the additional phone fields and compiles successfully.",
+        "Submitting the contact form from the UI results in a stored submission that includes the phone information."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useSubmitContactForm.ts",
+          "operation": "modify",
+          "description": "Update the ContactFormData shape to include phoneCountryCode and phoneNumber, and update the mutation function to call submitContactForm with name, email, phoneCountryCode, phoneNumber, subject, and message in the correct order."
+        },
+        {
+          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "operation": "modify",
+          "description": "Update handleSubmit to pass phoneCountryCode and phoneNumber into useSubmitContactForm mutate payload, and clear the new fields on success alongside existing fields."
         }
       ]
     }

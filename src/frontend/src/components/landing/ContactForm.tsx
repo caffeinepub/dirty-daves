@@ -1,18 +1,35 @@
 import { useState } from 'react';
 import { useSubmitContactForm } from '../../hooks/useSubmitContactForm';
 import { Loader2, CheckCircle2 } from 'lucide-react';
+import { countryCallingCodes } from '../../content/countryCallingCodes';
 
 export default function ContactForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneCountryCode, setPhoneCountryCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; email?: string; subject?: string; message?: string }>({});
+  const [errors, setErrors] = useState<{ 
+    name?: string; 
+    email?: string; 
+    phoneCountryCode?: string;
+    phoneNumber?: string;
+    subject?: string; 
+    message?: string 
+  }>({});
 
   const { mutate: submitForm, isPending, isSuccess, isError, error } = useSubmitContactForm();
 
   const validateForm = () => {
-    const newErrors: { name?: string; email?: string; subject?: string; message?: string } = {};
+    const newErrors: { 
+      name?: string; 
+      email?: string; 
+      phoneCountryCode?: string;
+      phoneNumber?: string;
+      subject?: string; 
+      message?: string 
+    } = {};
 
     if (!name.trim()) {
       newErrors.name = 'Name is required';
@@ -22,6 +39,14 @@ export default function ContactForm() {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Please enter a valid email';
+    }
+
+    if (!phoneCountryCode) {
+      newErrors.phoneCountryCode = 'Country code is required';
+    }
+
+    if (!phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
     }
 
     if (!subject.trim()) {
@@ -44,11 +69,20 @@ export default function ContactForm() {
     }
 
     submitForm(
-      { name: name.trim(), email: email.trim(), subject: subject.trim(), message: message.trim() },
+      { 
+        name: name.trim(), 
+        email: email.trim(), 
+        phoneCountryCode,
+        phoneNumber: phoneNumber.trim(),
+        subject: subject.trim(), 
+        message: message.trim() 
+      },
       {
         onSuccess: () => {
           setName('');
           setEmail('');
+          setPhoneCountryCode('');
+          setPhoneNumber('');
           setSubject('');
           setMessage('');
           setErrors({});
@@ -104,6 +138,43 @@ export default function ContactForm() {
           disabled={isPending}
         />
         {errors.email && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.email}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="phoneCountryCode" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
+          Country Code 🌍
+        </label>
+        <select
+          id="phoneCountryCode"
+          value={phoneCountryCode}
+          onChange={(e) => setPhoneCountryCode(e.target.value)}
+          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium disabled:opacity-50"
+          disabled={isPending}
+        >
+          <option value="">Select country code</option>
+          {countryCallingCodes.map((country) => (
+            <option key={country.value + country.label} value={country.value}>
+              {country.label}
+            </option>
+          ))}
+        </select>
+        {errors.phoneCountryCode && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.phoneCountryCode}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="phoneNumber" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
+          Phone Number 📱
+        </label>
+        <input
+          type="tel"
+          id="phoneNumber"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium placeholder:text-black/50"
+          placeholder="Your phone number"
+          disabled={isPending}
+        />
+        {errors.phoneNumber && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.phoneNumber}</p>}
       </div>
 
       <div>

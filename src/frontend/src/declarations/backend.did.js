@@ -17,9 +17,11 @@ export const ContactSubmission = IDL.Record({
   'id' : IDL.Text,
   'subject' : IDL.Text,
   'name' : IDL.Text,
+  'phoneCountryCode' : IDL.Text,
   'email' : IDL.Text,
   'message' : IDL.Text,
   'timestamp' : IDL.Int,
+  'phoneNumber' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 
@@ -41,7 +43,7 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitContactForm' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Text],
       [],
     ),
@@ -59,9 +61,11 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'subject' : IDL.Text,
     'name' : IDL.Text,
+    'phoneCountryCode' : IDL.Text,
     'email' : IDL.Text,
     'message' : IDL.Text,
     'timestamp' : IDL.Int,
+    'phoneNumber' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
   
@@ -83,7 +87,7 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitContactForm' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Text],
         [],
       ),

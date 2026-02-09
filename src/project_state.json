@@ -1,16 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Build/update a contact form with a required phone number field and a country code dropdown.",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-descriptive-text-inside-the-get-in-touch-bubble-in-the-contact-section-to-exactly-fill-out-the-form-and-we-ll-get-back-to-you-as-soon-as-im-back-from-the-pub",
-      "title": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+      "id": "feature-update-the-landing-page-contact-form-ui-to-collect-a-required-phone-number-composed-of-1-a-required-country-calling-code-selected-from-a-dropdown-and-2-a-required-local-phone-number-text-input",
+      "title": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
       "reqIds": [
         "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-client-side-validation-in-the-contact-form-so-that-missing-country-code-or-missing-phone-number-produces-field-level-error-messages-and-blocks-submission",
+      "title": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-contact-form-submission-flow-to-send-the-selected-country-calling-code-and-phone-number-to-the-backend-in-addition-to-the-existing-fields",
+      "title": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
@@ -18,12 +34,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Update the 'Get in touch' bubble text to: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+      "summary": "Add required phone number field to contact form with country code dropdown selector",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
+      "reqIds": [
+        "REQ-4"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Update 'Get in Touch' bubble copy in Contact section",
+  "projectName": "Add required phone number (with country code dropdown) to contact form",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -7,11 +7,12 @@
   "frontend/src/components/landing/ReviewsSection.tsx": "Reviews section with 22% black overlay, white high-contrast text with shadows, and grid of review cards with improved visibility.",
   "frontend/src/components/landing/ReviewCard.tsx": "Individual review card with translucent white background, black text with shadows, and teal star ratings for high contrast against the background image.",
   "frontend/src/components/landing/ContactSection.tsx": "Contact section with location card showing Scotland tour description and email contact card with updated \"Get in Touch 💬\" bubble text reading \"Fill out the form and we'll get back to you as soon as Im back from the pub.\" and dirtydave69@protonmail.com as a clickable mailto link.",
-  "frontend/src/components/landing/ContactForm.tsx": "Contact form with translucent white inputs, black text, navy submit button, teal focus rings, and backdrop blur for readability over the background image.",
+  "frontend/src/components/landing/ContactForm.tsx": "Contact form with translucent white inputs including required country code dropdown and phone number fields, black text, navy submit button, teal focus rings, and backdrop blur for readability over the background image.",
   "frontend/src/components/landing/Footer.tsx": "Footer with email icon linking to dirtydave69@protonmail.com, X (Twitter) icon, WhatsApp CTA, and custom attribution text \"built by Dave and thats why the website is so shit\".",
   "frontend/src/content/curatedReviews.ts": "Curated reviews data with more energetic and enthusiastic copy emphasizing the fun, authentic experience.",
-  "frontend/src/hooks/useSubmitContactForm.ts": "React Query mutation hook that submits contact form data including name, email, subject, and message to the backend actor's submitContactForm method.",
+  "frontend/src/hooks/useSubmitContactForm.ts": "React Query mutation hook that submits contact form data including name, email, phoneCountryCode, phoneNumber, subject, and message to the backend actor's submitContactForm method.",
   "frontend/src/index.css": "Global styles with OKLCH color system including new high-contrast navy and teal accent colors, plus utility classes for subtle text shadows and glows to improve readability over background images.",
   "frontend/tailwind.config.js": "Tailwind configuration extended with navy and teal accent color utilities for high-contrast interactive elements and focus states.",
-  "frontend/src/backend.d.ts": "TypeScript interface for backend canister including the _initializeAccessControlWithSecret method required by the authorization mixin pattern, along with all user profile, role management, and contact form submission methods."
+  "frontend/src/backend.d.ts": "TypeScript interface for backend canister including the _initializeAccessControlWithSecret method required by the authorization mixin pattern, along with all user profile, role management, and contact form submission methods.",
+  "frontend/src/content/countryCallingCodes.ts": "Curated list of 20 country calling codes with labels and values for the contact form country code dropdown selector."
 }

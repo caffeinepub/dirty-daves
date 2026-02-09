@@ -93,9 +93,11 @@ export interface ContactSubmission {
     id: string;
     subject: string;
     name: string;
+    phoneCountryCode: string;
     email: string;
     message: string;
     timestamp: bigint;
+    phoneNumber: string;
 }
 export interface UserProfile {
     name: string;
@@ -114,7 +116,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, subject: string, message: string): Promise<string>;
+    submitContactForm(name: string, email: string, phoneCountryCode: string, phoneNumber: string, subject: string, message: string): Promise<string>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -231,17 +233,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string): Promise<string> {
+    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3);
+                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3);
+            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
             return result;
         }
     }

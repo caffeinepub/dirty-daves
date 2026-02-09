@@ -11,9 +11,11 @@ export interface ContactSubmission {
     id: string;
     subject: string;
     name: string;
+    phoneCountryCode: string;
     email: string;
     message: string;
     timestamp: bigint;
+    phoneNumber: string;
 }
 export interface UserProfile {
     name: string;
@@ -24,7 +26,6 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    _initializeAccessControlWithSecret(secret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -32,5 +33,5 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, subject: string, message: string): Promise<string>;
+    submitContactForm(name: string, email: string, phoneCountryCode: string, phoneNumber: string, subject: string, message: string): Promise<string>;
 }

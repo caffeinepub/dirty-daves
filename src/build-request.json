@@ -1,31 +1,95 @@
 {
   "kind": "build_request",
-  "title": "Update 'Get in Touch' bubble copy in Contact section",
+  "title": "Add required phone number (with country code dropdown) to contact form",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+      "text": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "change the get in touch bubble so that it reads \"Fill out the form and we'll get back to you as soon as Im back from the pub.\""
+          "lets add a field to the contact form so that people have to enter their phone number and make it so they can choose their country code from a drop down menu"
         ]
       },
       "acceptanceCriteria": [
-        "On the landing page Contact section (the card with heading \"Get in Touch 💬\"), the paragraph text is exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
-        "No other text in the Contact section is changed."
+        "The contact form renders a country code dropdown (e.g., options like \"United States (+1)\", \"United Kingdom (+44)\") and a separate phone number input.",
+        "Both country code and phone number are required to submit the form.",
+        "All new labels, placeholders, and validation messages are in English.",
+        "The new fields visually match the existing styling of the form (Tailwind classes consistent with other inputs).",
+        "When the form is submitting (isPending), the new fields are disabled just like existing fields."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "people have to enter their phone number",
+          "choose their country code from a drop down menu"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If the user submits with no country code selected, an error message is shown for the country code field and the mutation is not triggered.",
+        "If the user submits with an empty phone number, an error message is shown for the phone field and the mutation is not triggered.",
+        "If the user corrects the errors and resubmits, the form submits successfully.",
+        "Existing validation for name/email/subject/message continues to work."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "add a field to the contact form",
+          "choose their country code from a drop down menu"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The frontend mutation payload includes the country calling code value and phone number value.",
+        "The backend canister method signature for contact form submission accepts the additional phone fields and compiles successfully.",
+        "Submitting the contact form from the UI results in a stored submission that includes the phone information."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "add a field to the contact form so that people have to enter their phone number"
+        ]
+      },
+      "acceptanceCriteria": [
+        "New contact submissions stored in the backend include phone country code and phone number fields.",
+        "The admin query that returns all contact submissions returns these phone fields for each entry.",
+        "Existing contact submission functionality (name/email/subject/message/timestamp/id behavior) continues to work after the change."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or anything in frontend/src/components/ui (immutable paths)."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose UI using existing components instead).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not change the contact form fields, validation, submission behavior, or backend contact submission logic."
+    "Adding SMS/WhatsApp messaging integrations.",
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Persisting contact submissions in an external database."
   ],
   "imageRequirements": {
     "required": [],

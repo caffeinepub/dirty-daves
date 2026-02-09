@@ -1,34 +1,75 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T11:17:41.675Z",
+  "generatedAt": "2026-02-09T11:23:59.685Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+        "summary": "Update the landing page contact form UI to collect a required phone number composed of (1) a required country calling code selected from a dropdown and (2) a required local phone number text input.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/landing/ContactSection.tsx"
+          "frontend/src/content/countryCallingCodes.ts",
+          "frontend/src/components/landing/ContactForm.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/landing/ContactSection.tsx"
+          "frontend/src/content/countryCallingCodes.ts",
+          "frontend/src/components/landing/ContactForm.tsx"
         ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Extend client-side validation in the contact form so that missing country code or missing phone number produces field-level error messages and blocks submission.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/landing/ContactForm.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/landing/ContactForm.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Update the contact form submission flow to send the selected country calling code and phone number to the backend in addition to the existing fields.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useSubmitContactForm.ts",
+          "frontend/src/components/landing/ContactForm.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useSubmitContactForm.ts",
+          "frontend/src/components/landing/ContactForm.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update the backend contact submission data model to store phone information (country calling code and phone number) on each contact submission, and include these fields in admin retrieval of submissions.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/landing/ContactSection.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/landing/ContactForm.tsx",
+    "frontend/src/content/countryCallingCodes.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useSubmitContactForm.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
