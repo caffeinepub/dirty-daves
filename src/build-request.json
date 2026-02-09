@@ -1,85 +1,131 @@
 {
   "kind": "build_request",
-  "title": "Deploy current app draft (Version 33) live",
-  "priority": "high",
+  "title": "Restore phone number field to contact form with country code dropdown",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
-      "target": "both",
+      "text": "Update the landing page contact form UI to include a phone number input composed of (1) a country calling code dropdown and (2) a phone number text input. The dropdown options must display the calling code plus the country abbreviation (e.g., \"+1 US\"), not the full country name. After the user selects a country calling code, they must be able to enter their phone number.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "ok lets take this version live now"
+          "i need you to add the phone number field back into the contact form ... the user should be able to select their country code from a drop down menu and the country abbreviation should be beside the code like US instead of united states after selecting the country code the user should be able to enter their phone number"
         ]
       },
       "acceptanceCriteria": [
-        "A production deployment is completed using the current Version 33 sources.",
-        "Backend canister is upgraded successfully without breaking existing stable data.",
-        "Frontend loads successfully in production and routes render (/, and all /offers/* pages)."
+        "The contact form shows a new Phone field consisting of a country calling code dropdown and a phone number input in `frontend/src/components/landing/ContactForm.tsx`.",
+        "The country dropdown labels include the calling code and a short country abbreviation (example: \"+1 US\"), and do not display full country names (example: \"United States\").",
+        "The user can select a country calling code and then type a phone number into the phone input without the form preventing entry.",
+        "Any user-facing labels/placeholders/validation messages added for the phone field are in English.",
+        "The form submission payload includes the selected calling code and the entered phone number (see REQ-3/REQ-4)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
-      "target": "both",
+      "text": "Implement/populate the country calling code option list used by the contact form dropdown in `frontend/src/content/countryCallingCodes.ts` as an exported, typed list containing at minimum: callingCode (e.g., \"+1\"), countryAbbrev (e.g., \"US\"), and a stable option value usable by the dropdown.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "ok lets take this version live now"
+          "the user should be able to select their country code from a drop down menu and the country abbreviation should be beside the code like US instead of united states"
         ]
       },
       "acceptanceCriteria": [
-        "Landing page renders without console errors.",
-        "Each offer route loads and the lazy-loading fallback shows appropriately during load.",
-        "Contact form can be submitted end-to-end (or shows the existing configured error state if reCAPTCHA is not configured), and the UI reaches the success state on a valid submission.",
-        "Unauthenticated callers cannot access admin-only query methods (e.g., getAllContactSubmissions, getAllContactSubmissionsJunk)."
+        "`frontend/src/content/countryCallingCodes.ts` exports a non-empty list of calling-code options.",
+        "Each option contains a calling code and a country abbreviation suitable for rendering labels like \"+44 UK\" / \"+1 US\".",
+        "The contact form country code dropdown is driven by this exported list (not hardcoded inline)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
-      "target": "both",
+      "text": "Extend the frontend contact form submission hook to send phone data (selected country calling code and phone number) to the backend when submitting the contact form. Update `frontend/src/hooks/useSubmitContactForm.ts` accordingly.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "ok lets take this version live now"
+          "add the phone number field back into the contact form"
         ]
       },
       "acceptanceCriteria": [
-        "A short deployment note exists stating whether reCAPTCHA is configured in production and, if not, the exact admin action required to configure it using the existing backend method.",
-        "No user-facing placeholders or broken configuration states are introduced by the deployment."
+        "`useSubmitContactForm` accepts phone-related fields in its `ContactFormData` type.",
+        "The mutation calls the backend `submitContactForm` with the phone-related fields included (matching the updated backend method signature from REQ-4).",
+        "TypeScript compilation succeeds without using `any` for the new phone fields."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update the backend contact submission model and submission method to store phone details from the contact form: selected country calling code and phone number. This must include updating the `ContactSubmission` type and the `submitContactForm` method in `backend/main.mo` to accept and persist these phone fields for both normal and junk submissions.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "add the phone number field back into the contact form"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`backend/main.mo` stores phone-related fields on each `ContactSubmission` record (for both `contactSubmissions` and `contactSubmissionsJunk`).",
+        "`submitContactForm` accepts phone-related parameters and persists them in the created submission record.",
+        "Admin query methods that return submissions (`getAllContactSubmissions` and `getAllContactSubmissionsJunk`) return objects that include the phone-related fields.",
+        "Existing anti-bot checks (honeypot + elapsedTime) remain in place and still route bot-like submissions to the junk store."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add a conditional Motoko state migration to handle the `ContactSubmission` schema change (adding phone fields) when upgrading an already-deployed canister. Create/update `backend/migration.mo` so that existing stored submissions can be upgraded with default empty values for the new phone fields without trapping on upgrade.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "add the phone number field back into the contact form"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A `backend/migration.mo` exists and follows the project’s conditional migration policy to safely upgrade stored state.",
+        "After upgrade, previously stored submissions remain accessible via admin queries and include default values for the new phone fields (e.g., empty strings).",
+        "No upgrade-time traps occur due to the added phone fields in `ContactSubmission`."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Update production smoke-test documentation to include verifying the new phone number field behavior (country code dropdown label format + phone entry + successful submission).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "the user should be able to select their country code from a drop down menu ... after selecting the country code the user should be able to enter their phone number"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/SMOKE_TEST_PRODUCTION.md` includes steps and expected results for the phone field, including that dropdown labels appear like \"+1 US\" and that the form can be submitted with phone data included."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
-    "Do not edit files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT.",
-    "Use English for any user-facing text."
+    "Frontend files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and `frontend/src/components/ui` are immutable and must not be edited.",
+    "All backend logic must remain in a single Motoko actor in `backend/main.mo` (single-actor architecture).",
+    "Do not introduce external databases or third-party auth providers; persist data only in canister state.",
+    "Use English for any user-facing text related to the new phone field (labels/placeholders/validation)."
   ],
   "nonGoals": [
-    "Adding new product features or changing UI/UX beyond what is necessary to deploy Version 33.",
-    "Implementing third-party auth beyond Internet Identity.",
-    "Adding external databases, non-Motoko backend services, or real-time/WebSocket functionality."
+    "Adding SMS/WhatsApp messaging, calling features, or phone verification workflows.",
+    "Integrating third-party phone-number validation services.",
+    "Changing reCAPTCHA behavior beyond what is required to pass the new phone fields through submission."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

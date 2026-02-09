@@ -1,32 +1,40 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project is being prepared for a live deployment of the current app draft (Version 33).",
+  "summary": "Add phone number back to contact form with country code dropdown showing abbreviations (e.g., US) and a phone input field.",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-deploy-the-current-codebase-version-33-to-production-on-the-internet-computer-upgrading-both-the-backend-canister-and-the-frontend-asset-canister-using-the-existing-single-actor-backend-architecture",
-      "title": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
+      "id": "feature-update-the-landing-page-contact-form-ui-to-include-a-phone-number-input-composed-of-1-a-country-calling-code-dropdown-and-2-a-phone-number-text-input-the-dropdown-options-must-display-the-calling-code-plus-the-country-abbreviation-e-g-1-us-not-the-full-country-name-after-the-user-selects-a-country-calling-code-they-must-be-able-to-enter-their-phone-number",
+      "title": "Update the landing page contact form UI to include a phone number input composed of (1) a country calling code dropdown and (2) a phone number text input. The dropdown options must display the calling code plus the country abbreviation (e.g., \"+1 US\"), not the full country name. After the user selects a country calling code, they must be able to enter their phone number.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-run-a-production-smoke-test-after-deployment-covering-landing-page-render-offer-page-navigation-contact-form-submission-path-including-recaptcha-readiness-handling-and-admin-only-backend-queries-remaining-protected-by-access-control",
-      "title": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
+      "id": "feature-implement-populate-the-country-calling-code-option-list-used-by-the-contact-form-dropdown-in-frontend-src-content-countrycallingcodes-ts-as-an-exported-typed-list-containing-at-minimum-callingcode-e-g-1-countryabbrev-e-g-us-and-a-stable-option-value-usable-by-the-dropdown",
+      "title": "Implement/populate the country calling code option list used by the contact form dropdown in `frontend/src/content/countryCallingCodes.ts` as an exported, typed list containing at minimum: callingCode (e.g., \"+1\"), countryAbbrev (e.g., \"US\"), and a stable option value usable by the dropdown.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-verify-production-configuration-needed-for-the-deployed-version-is-in-place-e-g-recaptcha-settings-expected-by-the-frontend-and-backend-and-document-any-required-post-deploy-admin-steps-such-as-setting-the-recaptcha-secret-via-the-existing-admin-method-to-make-the-live-contact-form-fully-operational",
-      "title": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
+      "id": "feature-extend-the-frontend-contact-form-submission-hook-to-send-phone-data-selected-country-calling-code-and-phone-number-to-the-backend-when-submitting-the-contact-form-update-frontend-src-hooks-usesubmitcontactform-ts-accordingly",
+      "title": "Extend the frontend contact form submission hook to send phone data (selected country calling code and phone number) to the backend when submitting the contact form. Update `frontend/src/hooks/useSubmitContactForm.ts` accordingly.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-production-smoke-test-documentation-to-include-verifying-the-new-phone-number-field-behavior-country-code-dropdown-label-format-phone-entry-successful-submission",
+      "title": "Update production smoke-test documentation to include verifying the new phone number field behavior (country code dropdown label format + phone entry + successful submission).",
+      "reqIds": [
+        "REQ-6"
       ],
       "version": 1
     }
@@ -34,12 +42,28 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Deploy the current app draft (Version 33) live / to production",
+      "summary": "Restore phone number field in contact form with country code dropdown (show country abbreviation like US) and phone number input after selection",
       "reqIds": [],
-      "status": "in_progress"
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Update the backend contact submission model and submission method to store phone details from the contact form: selected country calling code and phone number. This must include updating the `ContactSubmission` type and the `submitContactForm` method in `backend/main.mo` to accept and persist these phone fields for both normal and junk submissions.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add a conditional Motoko state migration to handle the `ContactSubmission` schema change (adding phone fields) when upgrading an already-deployed canister. Create/update `backend/migration.mo` so that existing stored submissions can be upgraded with default empty values for the new phone fields without trapping on upgrade.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
     }
   ],
-  "projectName": "Deploy current app draft (Version 33) live",
+  "projectName": "Restore phone number field to contact form with country code dropdown",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

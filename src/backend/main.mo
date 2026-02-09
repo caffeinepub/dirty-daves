@@ -9,7 +9,9 @@ import OutCall "http-outcalls/outcall";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // Initialize the access control system
   let accessControlState = AccessControl.initState();
@@ -30,7 +32,7 @@ actor {
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
+      Runtime.trap("Unauthorized: Only the owner or admins can view this profile");
     };
     userProfiles.get(user);
   };
@@ -42,11 +44,13 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Contact Form system (no phone or subject)
-  type ContactSubmission = {
+  // Contact Form system with phone fields (add subject later)
+  public type ContactSubmission = {
     id : Text;
     name : Text;
     email : Text;
+    phoneCountryCallingCode : Text;
+    phoneNumber : Text;
     message : Text;
     timestamp : Int;
   };
@@ -67,12 +71,20 @@ actor {
   let contactSubmissions = Map.empty<Text, ContactSubmission>();
   let contactSubmissionsJunk = Map.empty<Text, ContactSubmission>();
 
-  func createContactSubmission(name : Text, email : Text, message : Text) : ContactSubmission {
+  func createContactSubmission(
+    name : Text,
+    email : Text,
+    phoneCountryCode : Text,
+    phoneNumber : Text,
+    message : Text,
+  ) : ContactSubmission {
     let id = name.concat(email).concat(message).concat(Time.now().toText());
     {
       id;
       name;
       email;
+      phoneCountryCallingCode = phoneCountryCode;
+      phoneNumber;
       message;
       timestamp = Time.now();
     };
@@ -162,8 +174,17 @@ actor {
     };
   };
 
-  public shared ({ caller }) func submitContactForm(name : Text, email : Text, message : Text, honeypot : Text, elapsedTime : Float, _recaptchaToken : Text) : async Text {
-    let newSubmission = createContactSubmission(name, email, message);
+  public shared ({ caller }) func submitContactForm(
+    name : Text,
+    email : Text,
+    phoneCountry : Text,
+    phoneNumber : Text,
+    message : Text,
+    honeypot : Text,
+    elapsedTime : Float,
+    _recaptchaToken : Text,
+  ) : async Text {
+    let newSubmission = createContactSubmission(name, email, phoneCountry, phoneNumber, message);
 
     if (honeypot != "" or elapsedTime < 1.0) {
       insertContactSubmissionJunk(newSubmission);

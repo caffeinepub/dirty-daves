@@ -14,8 +14,10 @@ export interface ContactSubmission {
   'id' : string,
   'name' : string,
   'email' : string,
+  'phoneCountryCallingCode' : string,
   'message' : string,
   'timestamp' : bigint,
+  'phoneNumber' : string,
 }
 export interface TransformationInput {
   'context' : Uint8Array,
@@ -47,7 +49,7 @@ export interface _SERVICE {
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitContactForm' : ActorMethod<
-    [string, string, string, string, number, string],
+    [string, string, string, string, string, string, number, string],
     string
   >,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,

@@ -1,92 +1,69 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Version 33 production readiness (frontend-only)",
+  "title": "Restore contact form phone field with country calling code dropdown",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Prepare frontend asset canister build/config notes for deploying Version 33 and ensure required routes/assets load in production.",
+      "summary": "Add a Phone field to the landing page contact form composed of a country calling code dropdown (label format like \"+1 US\") and a phone number text input, and ensure both values are submitted.",
       "acceptanceCriteria": [
-        "A production deployment is completed using the current Version 33 sources.",
-        "Frontend loads successfully in production and routes render (/, and all /offers/* pages)."
+        "The contact form shows a new Phone field consisting of a country calling code dropdown and a phone number input in `frontend/src/components/landing/ContactForm.tsx`.",
+        "The country dropdown labels include the calling code and a short country abbreviation (example: \"+1 US\"), and do not display full country names (example: \"United States\").",
+        "The user can select a country calling code and then type a phone number into the phone input without the form preventing entry.",
+        "Any user-facing labels/placeholders/validation messages added for the phone field are in English.",
+        "The form submission payload includes the selected calling code and the entered phone number (see REQ-3/REQ-4)."
       ],
       "file_operations": [
         {
-          "path": "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
-          "operation": "create",
-          "description": "Add concise production deployment notes for the frontend asset canister: build command, environment-variable expectations (VITE_RECAPTCHA_SITE_KEY), and a route verification checklist for / and all /offers/* pages."
-        },
-        {
-          "path": "frontend/index.html",
+          "path": "frontend/src/components/landing/ContactForm.tsx",
           "operation": "modify",
-          "description": "Verify production-safe asset references and preloads remain correct for the hero background image, and that reCAPTCHA DNS-prefetch remains present (no functional changes beyond what is necessary for Version 33 production deployment)."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Verify the router continues to include / and all /offers/* routes required for production, and that lazy-loaded offer pages remain wrapped in Suspense with the existing loading fallback."
-        },
-        {
-          "path": "frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png",
-          "operation": "create",
-          "description": "Add the generated asset at the exact path frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png so production builds can serve the preloaded hero image correctly."
-        },
-        {
-          "path": "frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the generated asset at the exact path frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png so production builds can reference the logo as needed."
+          "description": "Extend the contact form UI and local state to include (1) a country calling code <select> driven by the exported list from `frontend/src/content/countryCallingCodes.ts` and (2) a phone number <input type=\"tel\">. Render dropdown option labels strictly as \"<callingCode> <countryAbbrev>\" (e.g., \"+1 US\"), and ensure the selected calling code + entered phone number are passed into `useSubmitContactForm` during submit. Keep any added labels/placeholders/validation messages in English."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a production smoke-test checklist for frontend routing, lazy-load fallback, and contact form submission behavior (including reCAPTCHA readiness/error states) plus an access-control verification step.",
+      "summary": "Implement a typed, exported list of country calling code options for the contact form dropdown.",
       "acceptanceCriteria": [
-        "Landing page renders without console errors.",
-        "Each offer route loads and the lazy-loading fallback shows appropriately during load.",
-        "Contact form can be submitted end-to-end (or shows the existing configured error state if reCAPTCHA is not configured), and the UI reaches the success state on a valid submission.",
-        "Unauthenticated callers cannot access admin-only query methods (e.g., getAllContactSubmissions, getAllContactSubmissionsJunk)."
+        "`frontend/src/content/countryCallingCodes.ts` exports a non-empty list of calling-code options.",
+        "Each option contains a calling code and a country abbreviation suitable for rendering labels like \"+44 UK\" / \"+1 US\".",
+        "The contact form country code dropdown is driven by this exported list (not hardcoded inline)."
       ],
       "file_operations": [
         {
-          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
-          "operation": "create",
-          "description": "Create a production smoke-test checklist covering: (1) landing page render + console errors check, (2) navigation to each /offers/* route and confirming the Suspense fallback appears during load, (3) contact form submission including the expected UI behavior when reCAPTCHA is configured vs not configured, and (4) verifying admin-only backend queries remain protected by access control (use the authorization component’s role-based access control behavior as the expected baseline; Verify the component's usage instructions before implementing)."
-        },
-        {
-          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "path": "frontend/src/content/countryCallingCodes.ts",
           "operation": "modify",
-          "description": "Harden the contact form’s production UX for smoke testing: ensure the existing reCAPTCHA readiness/configuration error states are clearly surfaced and do not cause console errors; keep behavior aligned with Version 33 (no feature additions)."
-        },
-        {
-          "path": "frontend/src/hooks/useRecaptchaV3.ts",
-          "operation": "modify",
-          "description": "Ensure reCAPTCHA initialization/execute paths remain robust in production (script load, ready callback, and error propagation) so the smoke test can reliably validate readiness handling and configured/unconfigured states."
+          "description": "Add a typed export for the country calling code dropdown (e.g., an exported `CountryCallingCodeOption` type plus an exported non-empty `countryCallingCodes` array). Each option must include at minimum: `callingCode` (e.g., \"+1\"), `countryAbbrev` (e.g., \"US\"), and a stable `value` suitable for dropdown selection."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Document production configuration requirements for reCAPTCHA and any post-deploy admin steps needed to fully enable the live contact form without introducing broken placeholder states.",
+      "summary": "Extend the contact form submission hook to accept and submit phone calling code and phone number fields.",
       "acceptanceCriteria": [
-        "A short deployment note exists stating whether reCAPTCHA is configured in production and, if not, the exact admin action required to configure it using the existing backend method.",
-        "No user-facing placeholders or broken configuration states are introduced by the deployment."
+        "`useSubmitContactForm` accepts phone-related fields in its `ContactFormData` type.",
+        "The mutation calls the backend `submitContactForm` with the phone-related fields included (matching the updated backend method signature from REQ-4).",
+        "TypeScript compilation succeeds without using `any` for the new phone fields."
       ],
       "file_operations": [
         {
-          "path": "frontend/PRODUCTION_CONFIGURATION.md",
-          "operation": "create",
-          "description": "Document the frontend production configuration expectations for Version 33, including VITE_RECAPTCHA_SITE_KEY and how the UI behaves when it is missing; include a short 'post-deploy admin step' note instructing how to complete reCAPTCHA setup using the existing backend admin method (described at a high level; do not include sensitive secrets)."
-        },
-        {
-          "path": "frontend/.env.production.example",
-          "operation": "create",
-          "description": "Add an example production env file documenting VITE_RECAPTCHA_SITE_KEY for the frontend build (example values only; no real secrets)."
-        },
-        {
-          "path": "frontend/src/components/landing/ContactSection.tsx",
+          "path": "frontend/src/hooks/useSubmitContactForm.ts",
           "operation": "modify",
-          "description": "Verify the contact section’s deferred reCAPTCHA loading trigger remains compatible with production configuration: when configured, it should initialize when visible; when not configured, it should not cause broken states."
+          "description": "Update the `ContactFormData` type to include `phoneCountryCallingCode` and `phoneNumber`, and update the mutation to call `actor.submitContactForm` using the correct argument order per `frontend/src/backend.d.ts` (name, email, phoneCountry, phoneNumber, message, honeypot, elapsedTime, recaptcha token). Ensure TypeScript types remain strict without `any` for the new fields."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Update production smoke-test documentation to include verification of the new phone field behavior and successful submission.",
+      "acceptanceCriteria": [
+        "`frontend/SMOKE_TEST_PRODUCTION.md` includes steps and expected results for the phone field, including that dropdown labels appear like \"+1 US\" and that the form can be submitted with phone data included."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
+          "operation": "modify",
+          "description": "Add smoke-test steps and expected results under the contact form section to verify: (1) the Phone field exists, (2) country dropdown labels use the \"+<code> <abbrev>\" format (e.g., \"+1 US\"), (3) selecting a code allows typing a phone number, and (4) the form can be submitted successfully with phone data included."
         }
       ]
     }

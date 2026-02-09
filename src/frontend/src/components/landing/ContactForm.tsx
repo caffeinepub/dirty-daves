@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSubmitContactForm } from '../../hooks/useSubmitContactForm';
 import { useRecaptchaV3 } from '../../hooks/useRecaptchaV3';
+import { countryCallingCodes } from '../../content/countryCallingCodes';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
 interface ContactFormProps {
@@ -10,11 +11,14 @@ interface ContactFormProps {
 export default function ContactForm({ shouldLoadRecaptcha = false }: ContactFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneCountryCallingCode, setPhoneCountryCallingCode] = useState('+44');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [errors, setErrors] = useState<{ 
     name?: string; 
     email?: string; 
+    phoneNumber?: string;
     message?: string;
     recaptcha?: string;
   }>({});
@@ -41,6 +45,7 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
     const newErrors: { 
       name?: string; 
       email?: string; 
+      phoneNumber?: string;
       message?: string;
       recaptcha?: string;
     } = {};
@@ -97,6 +102,8 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
       { 
         name: name.trim(), 
         email: email.trim(), 
+        phoneCountryCallingCode,
+        phoneNumber: phoneNumber.trim(),
         message: message.trim(),
         honeypot,
         elapsedTime,
@@ -106,6 +113,8 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
         onSuccess: () => {
           setName('');
           setEmail('');
+          setPhoneCountryCallingCode('+44');
+          setPhoneNumber('');
           setMessage('');
           setHoneypot('');
           setErrors({});
@@ -179,6 +188,37 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
           disabled={isPending}
         />
         {errors.email && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.email}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="phone" className="block text-sm font-black mb-2 text-black text-shadow-subtle">
+          Phone Number 📱
+        </label>
+        <div className="flex gap-2">
+          <select
+            id="phoneCountryCode"
+            value={phoneCountryCallingCode}
+            onChange={(e) => setPhoneCountryCallingCode(e.target.value)}
+            className="px-3 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium"
+            disabled={isPending}
+          >
+            {countryCallingCodes.map((country) => (
+              <option key={country.value} value={country.callingCode}>
+                {country.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="tel"
+            id="phone"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="flex-1 px-4 py-3 bg-white/50 backdrop-blur-sm border-2 border-navy/30 rounded-xl text-black focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 transition-all font-medium placeholder:text-black/50"
+            placeholder="Your phone number"
+            disabled={isPending}
+          />
+        </div>
+        {errors.phoneNumber && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.phoneNumber}</p>}
       </div>
 
       <div>

@@ -1,4 +1,4 @@
-# Production Smoke Test Checklist - Version 33
+# Production Smoke Test Checklist - Version 34
 
 Run these tests immediately after deploying to production to verify core functionality.
 
@@ -65,7 +65,7 @@ For each offer route, perform the following:
 
 #### 3A. reCAPTCHA Not Configured (Expected if VITE_RECAPTCHA_SITE_KEY is not set)
 1. Scroll to contact form section
-2. Fill in all fields (name, email, message)
+2. Fill in all fields (name, email, phone, message)
 3. Click "Send Message 🚀"
 
 **Expected Results:**
@@ -76,7 +76,7 @@ For each offer route, perform the following:
 #### 3B. reCAPTCHA Configured (Expected if VITE_RECAPTCHA_SITE_KEY is set)
 1. Scroll to contact form section (reCAPTCHA should initialize when visible)
 2. Wait 2-3 seconds for reCAPTCHA to become ready
-3. Fill in all fields (name, email, message)
+3. Fill in all fields (name, email, phone, message)
 4. Click "Send Message 🚀"
 
 **Expected Results:**
@@ -86,7 +86,21 @@ For each offer route, perform the following:
 - [ ] "Send Another Message" button is visible
 - [ ] No console errors
 
-#### 3C. Form Validation
+#### 3C. Phone Field Behavior
+1. Locate the Phone Number field in the contact form
+2. Click on the country code dropdown
+3. Select different country codes (e.g., "+1 US", "+44 GB", "+61 AU")
+4. Type a phone number in the phone input field
+
+**Expected Results:**
+- [ ] Phone field exists with label "Phone Number 📱"
+- [ ] Country code dropdown displays labels in format "+<code> <abbrev>" (e.g., "+1 US", "+44 GB")
+- [ ] Dropdown does NOT show full country names (e.g., "United States")
+- [ ] After selecting a country code, user can type phone number without form preventing entry
+- [ ] Phone number input accepts numeric input
+- [ ] Form can be submitted with phone data included
+
+#### 3D. Form Validation
 1. Try submitting empty form
 2. Try submitting with invalid email
 
@@ -94,12 +108,14 @@ For each offer route, perform the following:
 - [ ] Name field shows error: "Name is required"
 - [ ] Email field shows error: "Email is required" or "Please enter a valid email"
 - [ ] Message field shows error: "Message is required"
-- [ ] Form does NOT submit until all fields are valid
+- [ ] Form does NOT submit until all required fields are valid
+- [ ] Phone field is optional (form can submit without phone number)
 
 ### Common Issues
 - reCAPTCHA not loading: Check VITE_RECAPTCHA_SITE_KEY is set correctly
 - reCAPTCHA "not ready" error: Wait longer for initialization, or check network tab for script load failures
 - Form submits but no success message: Check backend canister is deployed and accessible
+- Phone dropdown not showing correct format: Verify countryCallingCodes.ts exports correct label format
 
 ---
 
@@ -139,6 +155,7 @@ For each offer route, perform the following:
 - [ ] Admin can successfully call `getAllContactSubmissions()`
 - [ ] Admin can successfully call `getAllContactSubmissionsJunk()`
 - [ ] Admin can update reCAPTCHA configuration
+- [ ] Retrieved submissions include phone-related fields (phoneCountryCallingCode, phoneNumber)
 
 ### Common Issues
 - Access control not working: Verify backend authorization mixin is properly initialized
@@ -167,6 +184,9 @@ For each offer route, perform the following:
 - [ ] Landing page renders without errors
 - [ ] All 6 offer routes load with proper lazy-loading fallback
 - [ ] Contact form behaves correctly based on reCAPTCHA configuration
+- [ ] Phone field displays with country code dropdown in "+<code> <abbrev>" format
+- [ ] Phone field allows user to select country code and enter phone number
+- [ ] Form submission includes phone data
 - [ ] Access control prevents unauthorized access to admin methods
 - [ ] Navigation and routing work as expected
 - [ ] No critical console errors

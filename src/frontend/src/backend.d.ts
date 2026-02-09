@@ -21,8 +21,10 @@ export interface ContactSubmission {
     id: string;
     name: string;
     email: string;
+    phoneCountryCallingCode: string;
     message: string;
     timestamp: bigint;
+    phoneNumber: string;
 }
 export interface TransformationInput {
     context: Uint8Array;
@@ -49,7 +51,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, message: string, honeypot: string, elapsedTime: number, _recaptchaToken: string): Promise<string>;
+    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number, _recaptchaToken: string): Promise<string>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateRecaptchaMinScore(score: number): Promise<void>;
     updateRecaptchaSecret(key: string): Promise<void>;

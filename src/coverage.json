@@ -1,69 +1,90 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T13:16:00.064Z",
+  "generatedAt": "2026-02-09T13:24:53.540Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Deploy the current codebase (Version 33) to production on the Internet Computer, upgrading both the backend canister and the frontend asset canister using the existing single-actor backend architecture.",
+        "summary": "Update the landing page contact form UI to include a phone number input composed of (1) a country calling code dropdown and (2) a phone number text input. The dropdown options must display the calling code plus the country abbreviation (e.g., \"+1 US\"), not the full country name. After the user selects a country calling code, they must be able to enter their phone number.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
-          "frontend/index.html",
-          "frontend/src/App.tsx",
-          "frontend/public/assets/generated/dirty-daves-hero-bg.dim_1920x1080.png",
-          "frontend/public/assets/generated/dirty-daves-logo.dim_512x512.png"
+          "frontend/src/components/landing/ContactForm.tsx"
         ],
         "matchedFiles": [
-          "frontend/PRODUCTION_DEPLOYMENT_NOTES.md"
+          "frontend/src/components/landing/ContactForm.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Run a production smoke test after deployment covering: landing page render, offer-page navigation, contact form submission path (including reCAPTCHA readiness handling), and admin-only backend queries remaining protected by access control.",
+        "summary": "Implement/populate the country calling code option list used by the contact form dropdown in `frontend/src/content/countryCallingCodes.ts` as an exported, typed list containing at minimum: callingCode (e.g., \"+1\"), countryAbbrev (e.g., \"US\"), and a stable option value usable by the dropdown.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/SMOKE_TEST_PRODUCTION.md",
-          "frontend/src/components/landing/ContactForm.tsx",
-          "frontend/src/hooks/useRecaptchaV3.ts"
+          "frontend/src/content/countryCallingCodes.ts"
         ],
         "matchedFiles": [
-          "frontend/SMOKE_TEST_PRODUCTION.md"
+          "frontend/src/content/countryCallingCodes.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Verify production configuration needed for the deployed version is in place (e.g., reCAPTCHA settings expected by the frontend and backend), and document any required post-deploy admin steps (such as setting the reCAPTCHA secret via the existing admin method) to make the live contact form fully operational.",
+        "summary": "Extend the frontend contact form submission hook to send phone data (selected country calling code and phone number) to the backend when submitting the contact form. Update `frontend/src/hooks/useSubmitContactForm.ts` accordingly.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/PRODUCTION_CONFIGURATION.md",
-          "frontend/.env.production.example",
-          "frontend/src/components/landing/ContactSection.tsx"
+          "frontend/src/hooks/useSubmitContactForm.ts"
         ],
         "matchedFiles": [
-          "frontend/PRODUCTION_CONFIGURATION.md",
-          "frontend/.env.production.example"
+          "frontend/src/hooks/useSubmitContactForm.ts"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update the backend contact submission model and submission method to store phone details from the contact form: selected country calling code and phone number. This must include updating the `ContactSubmission` type and the `submitContactForm` method in `backend/main.mo` to accept and persist these phone fields for both normal and junk submissions.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add a conditional Motoko state migration to handle the `ContactSubmission` schema change (adding phone fields) when upgrading an already-deployed canister. Create/update `backend/migration.mo` so that existing stored submissions can be upgraded with default empty values for the new phone fields without trapping on upgrade.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Update production smoke-test documentation to include verifying the new phone number field behavior (country code dropdown label format + phone entry + successful submission).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/SMOKE_TEST_PRODUCTION.md"
+        ],
+        "matchedFiles": [
+          "frontend/SMOKE_TEST_PRODUCTION.md"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/.env.production.example",
-    "frontend/PRODUCTION_CONFIGURATION.md",
-    "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
     "frontend/SMOKE_TEST_PRODUCTION.md",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/landing/ContactForm.tsx",
+    "frontend/src/content/countryCallingCodes.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useSubmitContactForm.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -103,8 +103,10 @@ export interface ContactSubmission {
     id: string;
     name: string;
     email: string;
+    phoneCountryCallingCode: string;
     message: string;
     timestamp: bigint;
+    phoneNumber: string;
 }
 export interface TransformationInput {
     context: Uint8Array;
@@ -132,7 +134,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, message: string, honeypot: string, elapsedTime: number, _recaptchaToken: string): Promise<string>;
+    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number, _recaptchaToken: string): Promise<string>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateRecaptchaMinScore(score: number): Promise<void>;
     updateRecaptchaSecret(key: string): Promise<void>;
@@ -266,17 +268,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: number, arg5: string): Promise<string> {
+    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: number, arg7: string): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
+                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5);
+            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             return result;
         }
     }

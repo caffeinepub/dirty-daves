@@ -1,12 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Deploy the current app draft (Version 33) to production on the Internet Computer and confirm it works via a focused production smoke test.
+**Goal:** Restore a Phone field in the landing page contact form, allowing users to choose a country calling code (shown with a country abbreviation) and enter a phone number, and ensure this data is saved with contact submissions.
 
 **Planned changes:**
-- Deploy/upgrade the backend canister (single-actor Motoko canister) using the current Version 33 code, preserving existing stable data.
-- Deploy/upgrade the frontend asset canister for Version 33 and verify production routing renders for `/` and all `/offers/*` pages.
-- Run a post-deploy production smoke test covering landing page render (no console errors), offer-page navigation with lazy-loading fallback, contact form submission path (including reCAPTCHA readiness/error handling), and access control for admin-only backend query methods.
-- Verify production configuration needed for this version (including reCAPTCHA settings) and add a short deployment note documenting whether it’s configured and any required post-deploy admin step (e.g., setting the reCAPTCHA secret via the existing admin method).
+- Update `frontend/src/components/landing/ContactForm.tsx` to add a Phone field composed of a country calling code dropdown (labels like “+1 US”) and a phone number text input.
+- Add a typed, exported calling-code option list in `frontend/src/content/countryCallingCodes.ts` containing `callingCode`, `countryAbbrev`, and a stable dropdown value; drive the dropdown from this list.
+- Extend `frontend/src/hooks/useSubmitContactForm.ts` to include the selected calling code and phone number in the contact form submission payload and types.
+- Update `backend/main.mo` to accept, persist, and return phone-related fields on `ContactSubmission` records for both normal and junk submissions, keeping existing anti-bot routing intact.
+- Add/update `backend/migration.mo` to migrate existing stored submissions by adding default empty values for the new phone fields on upgrade.
+- Update `frontend/SMOKE_TEST_PRODUCTION.md` to include production smoke-test steps verifying the phone field UI (dropdown label format), phone entry, and successful submission including phone data.
 
-**User-visible outcome:** The Version 33 app is live in production; users can load the landing page and offer pages, submit the contact form (or see the existing configured reCAPTCHA error state), and admin-only backend queries remain inaccessible to unauthenticated callers.
+**User-visible outcome:** The contact form includes a phone number field with a country calling code dropdown (e.g., “+1 US”); users can select a code, enter a phone number, submit the form successfully, and admins can see saved phone details on submissions.
