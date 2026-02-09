@@ -7,18 +7,10 @@
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-in-frontend-src-components-landing-contactsection-tsx-remove-the-location-card-heading-text-start-your-adventure-and-remove-any-location-text-if-present-but-keep-the-scotland-flag-emoji-visible-in-that-heading-area",
-      "title": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
+      "id": "feature-update-the-descriptive-text-inside-the-get-in-touch-bubble-in-the-contact-section-to-exactly-fill-out-the-form-and-we-ll-get-back-to-you-as-soon-as-im-back-from-the-pub",
+      "title": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
       "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-components-landing-footer-tsx-remove-the-existing-bottom-attribution-that-links-to-caffeine-ai-built-with-using-caffeine-ai-and-replace-it-with-exactly-built-by-dave-and-thats-why-the-website-is-so-shit",
-      "title": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
-      "reqIds": [
-        "REQ-7"
+        "REQ-1"
       ],
       "version": 1
     }
@@ -26,24 +18,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Remove the heading \"start your adventure\" and the \"Location?\" text while keeping the Scotland flag emoji",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add a CAPTCHA to the contact form to reduce spam submissions",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Replace the site footer text \"built by caffeine AI\" with the user-provided custom attribution text",
+      "summary": "Update the 'Get in touch' bubble text to: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Update location card heading text and replace footer attribution",
+  "projectName": "Update 'Get in Touch' bubble copy in Contact section",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

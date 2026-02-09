@@ -1,51 +1,31 @@
 {
   "kind": "build_request",
-  "title": "Update location card heading text and replace footer attribution",
+  "title": "Update 'Get in Touch' bubble copy in Contact section",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-6",
-      "text": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
+      "id": "REQ-1",
+      "text": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "remove the heading \"start your adventure\" with Location? but keep the scotland flag emoji"
+          "change the get in touch bubble so that it reads \"Fill out the form and we'll get back to you as soon as Im back from the pub.\""
         ]
       },
       "acceptanceCriteria": [
-        "The location card heading no longer contains the words \"Start Your Adventure\".",
-        "If the text \"Location?\" appears anywhere in the location card, it is removed.",
-        "The Scotland flag emoji (🏴) remains visible in the location card heading area."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "remove the built by caffeine AI from the bottom of the website and replace it with \"built by Dave and thats why the website is so shit\""
-        ]
-      },
-      "acceptanceCriteria": [
-        "The footer no longer displays any \"Built with\" / \"caffeine.ai\" attribution text or link.",
-        "The footer displays exactly the text: \"built by Dave and thats why the website is so shit\" (matching spelling and casing)."
+        "On the landing page Contact section (the card with heading \"Get in Touch 💬\"), the paragraph text is exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+        "No other text in the Contact section is changed."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under `frontend/src/components/ui` (compose them instead).",
-    "Do not modify any files listed as immutable by the system context (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`)."
+    "Do not edit any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or anything in frontend/src/components/ui (immutable paths)."
   ],
   "nonGoals": [
-    "Do not add CAPTCHA or other spam-prevention changes to the contact form in this build request.",
-    "Do not change backend canister logic or data schema."
+    "Do not change the contact form fields, validation, submission behavior, or backend contact submission logic."
   ],
   "imageRequirements": {
     "required": [],

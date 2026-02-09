@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-frontend-src-components-landing-contactsection-tsx-remove-the-location-card-heading-text-start-your-adventure-and-remove-any-location-text-if-present-but-keep-the-scotland-flag-emoji-visible-in-that-heading-area",
-      "featureTitle": "In `frontend/src/components/landing/ContactSection.tsx`, remove the location card heading text \"Start Your Adventure\" and remove any \"Location?\" text if present, but keep the Scotland flag emoji visible in that heading area.",
+      "featureId": "feature-update-the-descriptive-text-inside-the-get-in-touch-bubble-in-the-contact-section-to-exactly-fill-out-the-form-and-we-ll-get-back-to-you-as-soon-as-im-back-from-the-pub",
+      "featureTitle": "Update the descriptive text inside the \"Get in Touch 💬\" bubble in the Contact section to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
       "files": [
         "frontend/src/components/landing/ContactSection.tsx"
       ],
@@ -16,26 +16,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-in-frontend-src-components-landing-footer-tsx-remove-the-existing-bottom-attribution-that-links-to-caffeine-ai-built-with-using-caffeine-ai-and-replace-it-with-exactly-built-by-dave-and-thats-why-the-website-is-so-shit",
-      "featureTitle": "In `frontend/src/components/landing/Footer.tsx`, remove the existing bottom attribution that links to caffeine.ai (\"Built with ... using caffeine.ai\") and replace it with exactly: \"built by Dave and thats why the website is so shit\".",
-      "files": [
-        "frontend/src/components/landing/Footer.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
+        "REQ-1"
       ],
       "confidence": "high"
     }

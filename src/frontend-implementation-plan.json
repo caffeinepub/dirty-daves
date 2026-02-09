@@ -1,36 +1,20 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Update location card heading and footer attribution text",
+  "title": "Update 'Get in Touch' bubble copy in landing page Contact section",
   "requirements": [
     {
-      "id": "REQ-6",
-      "summary": "Remove the location card heading text while keeping the Scotland flag emoji visible, and remove any \"Location?\" text if present.",
+      "id": "REQ-1",
+      "summary": "Change the paragraph text inside the \"Get in Touch 💬\" contact card to the exact requested sentence, without altering any other Contact section text.",
       "acceptanceCriteria": [
-        "The location card heading no longer contains the words \"Start Your Adventure\".",
-        "If the text \"Location?\" appears anywhere in the location card, it is removed.",
-        "The Scotland flag emoji (🏴) remains visible in the location card heading area."
+        "On the landing page Contact section (the card with heading \"Get in Touch 💬\"), the paragraph text is exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\"",
+        "No other text in the Contact section is changed."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/landing/ContactSection.tsx",
           "operation": "modify",
-          "description": "Update the location card heading to remove the \"Start Your Adventure\" and any \"Location?\" text while keeping the Scotland flag emoji (🏴) visible in the heading area; ensure no remaining instances of \"Location?\" exist in that card (including supporting copy if needed)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Replace the footer bottom attribution with the exact requested sentence and remove caffeine.ai references.",
-      "acceptanceCriteria": [
-        "The footer no longer displays any \"Built with\" / \"caffeine.ai\" attribution text or link.",
-        "The footer displays exactly the text: \"built by Dave and thats why the website is so shit\" (matching spelling and casing)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/landing/Footer.tsx",
-          "operation": "modify",
-          "description": "Remove the existing \"Built with ... using caffeine.ai\" attribution (including the caffeine.ai link and any associated iconography if present) and replace it with exactly: \"built by Dave and thats why the website is so shit\"."
+          "description": "Update only the paragraph copy under the \"Get in Touch 💬\" heading to exactly: \"Fill out the form and we'll get back to you as soon as Im back from the pub.\" Ensure no other strings in the Contact section are modified."
         }
       ]
     }

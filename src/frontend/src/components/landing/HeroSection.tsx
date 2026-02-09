@@ -8,17 +8,16 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20 text-center">
-        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 text-white tracking-tight animate-float text-shadow-strong">
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-white tracking-tight animate-float text-shadow-strong">
           DIRTY DAVES
         </h1>
         
-        <p className="text-2xl md:text-4xl lg:text-5xl font-black mb-6 text-white text-shadow-strong">
+        <p className="text-2xl md:text-3xl lg:text-4xl mb-6 text-white max-w-4xl mx-auto font-bold leading-relaxed text-shadow-subtle">
           Private Tours of Scotland by the S.H.I.T Tour company
         </p>
-        
-        <p className="text-xl md:text-2xl lg:text-3xl mb-14 text-white max-w-4xl mx-auto font-bold leading-relaxed text-shadow-subtle">
-          Forget the tourist traps. Get the <span className="text-teal font-black">REAL Scotland</span> — 
-          the stories they don't tell, the places they don't show, and banter you won't bloody forget! 🍻
+
+        <p className="text-xl md:text-2xl lg:text-3xl mb-14 text-white max-w-4xl mx-auto font-medium leading-relaxed text-shadow-subtle">
+          Forget the tourist traps. Get the REAL Scotland — the stories they don't tell, the places they don't show, and <span className="whitespace-nowrap">banter you won't forget!&nbsp;🍻</span>
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

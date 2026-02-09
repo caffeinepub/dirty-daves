@@ -24,6 +24,7 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    _initializeAccessControlWithSecret(secret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;

@@ -10,8 +10,6 @@ import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-// Apply data migration via with-clause to transform old state to new state on upgrades
-
 actor {
   // Initialize the access control system
   let accessControlState = AccessControl.initState();
