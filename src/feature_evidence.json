@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-landing-page-contact-form-ui-to-include-a-phone-number-input-composed-of-1-a-country-calling-code-dropdown-and-2-a-phone-number-text-input-the-dropdown-options-must-display-the-calling-code-plus-the-country-abbreviation-e-g-1-us-not-the-full-country-name-after-the-user-selects-a-country-calling-code-they-must-be-able-to-enter-their-phone-number",
-      "featureTitle": "Update the landing page contact form UI to include a phone number input composed of (1) a country calling code dropdown and (2) a phone number text input. The dropdown options must display the calling code plus the country abbreviation (e.g., \"+1 US\"), not the full country name. After the user selects a country calling code, they must be able to enter their phone number.",
+      "featureId": "feature-make-the-existing-website-contact-form-save-each-submission-in-the-backend-and-return-a-successful-response-to-the-frontend-so-the-user-sees-the-success-state-after-submitting",
+      "featureTitle": "Make the existing website contact form save each submission in the backend and return a successful response to the frontend so the user sees the success state after submitting.",
       "files": [
-        "frontend/src/components/landing/ContactForm.tsx"
+        "frontend/src/hooks/useSubmitContactForm.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -22,30 +22,14 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-populate-the-country-calling-code-option-list-used-by-the-contact-form-dropdown-in-frontend-src-content-countrycallingcodes-ts-as-an-exported-typed-list-containing-at-minimum-callingcode-e-g-1-countryabbrev-e-g-us-and-a-stable-option-value-usable-by-the-dropdown",
-      "featureTitle": "Implement/populate the country calling code option list used by the contact form dropdown in `frontend/src/content/countryCallingCodes.ts` as an exported, typed list containing at minimum: callingCode (e.g., \"+1\"), countryAbbrev (e.g., \"US\"), and a stable option value usable by the dropdown.",
+      "featureId": "feature-add-an-in-app-admin-page-admin-panel-that-allows-an-admin-user-to-view-contact-form-submissions-stored-in-the-backend",
+      "featureTitle": "Add an in-app admin page (admin panel) that allows an admin user to view contact form submissions stored in the backend.",
       "files": [
-        "frontend/src/content/countryCallingCodes.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-extend-the-frontend-contact-form-submission-hook-to-send-phone-data-selected-country-calling-code-and-phone-number-to-the-backend-when-submitting-the-contact-form-update-frontend-src-hooks-usesubmitcontactform-ts-accordingly",
-      "featureTitle": "Extend the frontend contact form submission hook to send phone data (selected country calling code and phone number) to the backend when submitting the contact form. Update `frontend/src/hooks/useSubmitContactForm.ts` accordingly.",
-      "files": [
-        "frontend/src/hooks/useSubmitContactForm.ts"
+        "frontend/src/App.tsx",
+        "frontend/src/components/admin/AccessDeniedScreen.tsx",
+        "frontend/src/hooks/useAdminContactSubmissions.ts",
+        "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+        "frontend/src/utils/formatTimestamp.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -58,26 +42,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-production-smoke-test-documentation-to-include-verifying-the-new-phone-number-field-behavior-country-code-dropdown-label-format-phone-entry-successful-submission",
-      "featureTitle": "Update production smoke-test documentation to include verifying the new phone number field behavior (country code dropdown label format + phone entry + successful submission).",
-      "files": [
-        "frontend/SMOKE_TEST_PRODUCTION.md"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
       ],
       "confidence": "high"
     }

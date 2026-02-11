@@ -1,37 +1,55 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T13:24:53.538Z",
-  "summary": "Most requested phone-field functionality appears implemented across frontend UI, calling code list, submission hook, backend data model, migration, and smoke-test docs. However, the diff evidence indicates the generated/declared frontend canister types may not have been updated to include the new phone fields, which can break TypeScript compilation for REQ-3. Additionally, the backend submitContactForm implementation details are not visible due to truncation, so full REQ-4 compliance cannot be conclusively verified from the provided excerpt.",
+  "generatedAt": "2026-02-11T12:32:49.518Z",
+  "summary": "Diff adds backend storage types/collections for contact submissions (including phone fields) and a new React admin page at /admin/submissions with React Query fetching normal/junk submissions and an access-denied screen. However, reCAPTCHA/junk-routing behavior in submitContactForm() is not evidenced in the provided backend diff (truncated), and there is a clear type mismatch indicated by frontend backend.d.ts lacking phone fields required by the admin UI/REQs. Several unrelated UI/content changes and a backend migration were also introduced but not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "TypeScript compilation succeeds without using `any` for the new phone fields (including updated actor/canister typings matching the new `submitContactForm` signature).",
-      "reason": "The diff shows `useSubmitContactForm` calling `actor.submitContactForm` with two additional phone parameters, but the repository summary indicates `frontend/src/backend.d.ts` still defines `ContactSubmission` without phone fields, implying typings may not match the updated backend signature and could cause TS compilation errors.",
+      "id": "REQ-2",
+      "requirement": "submitContactForm() must verify the provided reCAPTCHA token server-side (when secret configured), apply min score, and route spam/low-score submissions into the junk submissions collection deterministically without trapping (store as junk and return an id).",
+      "reason": "The backend diff shown defines ContactSubmission types and junk/normal maps and adds getAllContactSubmissionsJunk(), but the submitContactForm() implementation and any reCAPTCHA verification logic are not present in the visible (truncated) backend/main.mo excerpt, so this requirement is not verifiable from the diff summary.",
       "evidence": [
-        "frontend/src/hooks/useSubmitContactForm.ts",
-        "frontend-file-summaries.txt (mentions `frontend/src/backend.d.ts` ContactSubmission has no phone fields)"
+        "backend/main.mo (truncated; submitContactForm not shown)"
       ]
     },
     {
-      "id": "REQ-4",
-      "requirement": "`submitContactForm` accepts phone-related parameters and persists them for both normal and junk submissions while keeping existing anti-bot routing (honeypot + elapsedTime).",
-      "reason": "The diff excerpt for `backend/main.mo` is truncated before the `submitContactForm` function implementation, so it cannot be confirmed from the provided evidence that the method signature was updated and that both normal and junk submission paths persist the new fields while preserving the existing anti-bot checks.",
+      "id": "REQ-1",
+      "requirement": "Persist successful contact form submissions as ContactSubmission records with name, email, phone (calling code + number), message, and timestamp, and ensure the frontend can submit and handle errors via existing UI.",
+      "reason": "Backend ContactSubmission includes phone fields, but the frontend type definition for ContactSubmission is explicitly summarized as missing phone fields, which would prevent the admin page and/or other frontend code from reliably accessing required fields (phone calling code/number) without type errors or unsafe casts.",
       "evidence": [
-        "backend/main.mo (truncated; `submitContactForm` not shown)"
+        "frontend/src/backend.d.ts (summary indicates ContactSubmission has no phone fields)",
+        "backend/main.mo (ContactSubmission includes phoneCountryCallingCode and phoneNumber)"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.66,
+  "hallucinated_features": [
+    {
+      "description": "Added backend migration changing recaptchaSecretKey from optional (?Text) to non-optional Text with empty-string default.",
+      "reason": "BuildRequest does not request any schema migration or changing the recaptchaSecretKey storage type; it only specifies using the configured secret when verifying reCAPTCHA.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo (with migration = Migration.run)"
+      ]
+    },
+    {
+      "description": "Multiple landing-page/UI/content changes unrelated to storing contact submissions or the admin submissions panel (e.g., hero copy/CTA changes, TripAdvisor CTA styling, reviews visibility changes, footer text/links changes, offers cards converted to links, global CSS and Tailwind theme adjustments).",
+      "reason": "BuildRequest scope is contact form persistence, backend spam handling, and an admin panel page; it explicitly constrains editing certain UI paths and does not request broader site redesign/content changes.",
+      "evidence": [
+        "frontend-file-summaries.txt (summaries referencing changes in frontend/src/components/landing/*, frontend/src/index.css, frontend/tailwind.config.js, frontend/src/content/* files)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/SMOKE_TEST_PRODUCTION.md",
-    "frontend/src/components/landing/ContactForm.tsx",
-    "frontend/src/content/countryCallingCodes.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/components/admin/AccessDeniedScreen.tsx",
+    "frontend/src/hooks/useAdminContactSubmissions.ts",
     "frontend/src/hooks/useSubmitContactForm.ts",
+    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+    "frontend/src/utils/formatTimestamp.ts",
     "project_state.json"
   ]
 }

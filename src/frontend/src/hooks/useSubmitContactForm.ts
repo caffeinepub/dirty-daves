@@ -36,8 +36,14 @@ export function useSubmitContactForm() {
       return submissionId;
     },
     onSuccess: () => {
-      // Invalidate any queries that might display contact submissions
+      // Invalidate admin submission queries so they refresh
       queryClient.invalidateQueries({ queryKey: ['contactSubmissions'] });
+    },
+    onError: (error: any) => {
+      // Ensure error messages are readable for the UI
+      if (!error.message || error.message === 'Call failed') {
+        error.message = 'Failed to send message. Please try again.';
+      }
     },
   });
 }

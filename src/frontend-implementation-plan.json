@@ -1,69 +1,64 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore contact form phone field with country calling code dropdown",
+  "title": "Admin panel for viewing stored contact form submissions",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add a Phone field to the landing page contact form composed of a country calling code dropdown (label format like \"+1 US\") and a phone number text input, and ensure both values are submitted.",
+      "summary": "Ensure the landing-page contact form submits to the backend successfully and surfaces success/error states reliably.",
       "acceptanceCriteria": [
-        "The contact form shows a new Phone field consisting of a country calling code dropdown and a phone number input in `frontend/src/components/landing/ContactForm.tsx`.",
-        "The country dropdown labels include the calling code and a short country abbreviation (example: \"+1 US\"), and do not display full country names (example: \"United States\").",
-        "The user can select a country calling code and then type a phone number into the phone input without the form preventing entry.",
-        "Any user-facing labels/placeholders/validation messages added for the phone field are in English.",
-        "The form submission payload includes the selected calling code and the entered phone number (see REQ-3/REQ-4)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/landing/ContactForm.tsx",
-          "operation": "modify",
-          "description": "Extend the contact form UI and local state to include (1) a country calling code <select> driven by the exported list from `frontend/src/content/countryCallingCodes.ts` and (2) a phone number <input type=\"tel\">. Render dropdown option labels strictly as \"<callingCode> <countryAbbrev>\" (e.g., \"+1 US\"), and ensure the selected calling code + entered phone number are passed into `useSubmitContactForm` during submit. Keep any added labels/placeholders/validation messages in English."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Implement a typed, exported list of country calling code options for the contact form dropdown.",
-      "acceptanceCriteria": [
-        "`frontend/src/content/countryCallingCodes.ts` exports a non-empty list of calling-code options.",
-        "Each option contains a calling code and a country abbreviation suitable for rendering labels like \"+44 UK\" / \"+1 US\".",
-        "The contact form country code dropdown is driven by this exported list (not hardcoded inline)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/content/countryCallingCodes.ts",
-          "operation": "modify",
-          "description": "Add a typed export for the country calling code dropdown (e.g., an exported `CountryCallingCodeOption` type plus an exported non-empty `countryCallingCodes` array). Each option must include at minimum: `callingCode` (e.g., \"+1\"), `countryAbbrev` (e.g., \"US\"), and a stable `value` suitable for dropdown selection."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Extend the contact form submission hook to accept and submit phone calling code and phone number fields.",
-      "acceptanceCriteria": [
-        "`useSubmitContactForm` accepts phone-related fields in its `ContactFormData` type.",
-        "The mutation calls the backend `submitContactForm` with the phone-related fields included (matching the updated backend method signature from REQ-4).",
-        "TypeScript compilation succeeds without using `any` for the new phone fields."
+        "Submitting the contact form from the landing page completes without client-side errors and shows the existing success UI state.",
+        "A successful submission is persisted in the backend as a ContactSubmission record with name, email, phone fields (calling code + number), message, and timestamp.",
+        "If the backend is unavailable or rejects the submission, the form shows a clear error message (using the existing error UI)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useSubmitContactForm.ts",
           "operation": "modify",
-          "description": "Update the `ContactFormData` type to include `phoneCountryCallingCode` and `phoneNumber`, and update the mutation to call `actor.submitContactForm` using the correct argument order per `frontend/src/backend.d.ts` (name, email, phoneCountry, phoneNumber, message, honeypot, elapsedTime, recaptcha token). Ensure TypeScript types remain strict without `any` for the new fields."
+          "description": "Align React Query invalidation keys with the new admin submissions queries (so admin lists can be refreshed after a successful form submission), and ensure backend failures propagate a clear Error message for the existing error UI to display."
+        },
+        {
+          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "operation": "modify",
+          "description": "Confirm the existing error UI renders readable messages for backend unavailability/authorization traps, and ensure the submit flow keeps using the existing success state UI after mutation success."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Update production smoke-test documentation to include verification of the new phone field behavior and successful submission.",
+      "id": "REQ-3",
+      "summary": "Add an admin-only React route to view normal and junk contact submissions with drill-in and manual refresh.",
       "acceptanceCriteria": [
-        "`frontend/SMOKE_TEST_PRODUCTION.md` includes steps and expected results for the phone field, including that dropdown labels appear like \"+1 US\" and that the form can be submitted with phone data included."
+        "A new route exists in the React app for an admin submissions page (reachable by URL) that lists stored contact submissions.",
+        "The page fetches data from the backend admin-only queries (getAllContactSubmissions and getAllContactSubmissionsJunk) and renders submission rows with at least timestamp, name, email, phone, and a message preview.",
+        "An admin can open a submission to view the full message content.",
+        "If a non-admin visits the admin page or the query traps as unauthorized, the UI shows an English access-denied message and does not crash.",
+        "The page supports manual refresh (button) that refetches the submissions list via React Query."
       ],
       "file_operations": [
         {
-          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
+          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+          "operation": "create",
+          "description": "Create the admin submissions page UI that renders tabs/sections for normal vs junk submissions, shows a list with message previews, supports selecting a submission to view full message content, and includes a manual refresh button wired to React Query refetch. Use the authorization component’s role-based access control guidance to handle unauthorized/trap errors gracefully (show an English access-denied message). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useAdminContactSubmissions.ts",
+          "operation": "create",
+          "description": "Add React Query hooks to fetch normal and junk submissions via the backend actor (getAllContactSubmissions, getAllContactSubmissionsJunk), including stable query keys and error mapping for unauthorized/trap cases. Use the authorization component guidance for handling authorization failures in UI without crashes. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/admin/AccessDeniedScreen.tsx",
+          "operation": "create",
+          "description": "Add a small reusable AccessDeniedScreen component used by the admin submissions page when the user is not logged in or backend calls fail as unauthorized. Use the authorization component’s UI guidance for access-denied states. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/formatTimestamp.ts",
+          "operation": "create",
+          "description": "Create a utility to format ContactSubmission.timestamp (bigint) into a readable date/time string for the admin submissions list."
+        },
+        {
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add smoke-test steps and expected results under the contact form section to verify: (1) the Phone field exists, (2) country dropdown labels use the \"+<code> <abbrev>\" format (e.g., \"+1 US\"), (3) selecting a code allows typing a phone number, and (4) the form can be submitted successfully with phone data included."
+          "description": "Register a new admin route (e.g., /admin/submissions) in the TanStack router that renders the ContactSubmissionsAdminPage so it is reachable by URL (no orphan page)."
         }
       ]
     }

@@ -9,6 +9,7 @@ const FlexibleAsHellPage = lazy(() => import('./pages/offers/FlexibleAsHellPage'
 const StoriesAndBanterPage = lazy(() => import('./pages/offers/StoriesAndBanterPage'));
 const StayYourWayPage = lazy(() => import('./pages/offers/StayYourWayPage'));
 const ChooseYourOwnAdventurePage = lazy(() => import('./pages/offers/ChooseYourOwnAdventurePage'));
+const ContactSubmissionsAdminPage = lazy(() => import('./pages/admin/ContactSubmissionsAdminPage'));
 
 // Loading fallback component
 function PageLoader() {
@@ -96,6 +97,16 @@ const chooseYourOwnAdventureRoute = createRoute({
   ),
 });
 
+const adminSubmissionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/submissions',
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <ContactSubmissionsAdminPage />
+    </Suspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   offTheBeatenPathRoute,
@@ -104,6 +115,7 @@ const routeTree = rootRoute.addChildren([
   storiesAndBanterRoute,
   stayYourWayRoute,
   chooseYourOwnAdventureRoute,
+  adminSubmissionsRoute,
 ]);
 
 const router = createRouter({ routeTree });

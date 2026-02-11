@@ -11,7 +11,7 @@ interface ContactFormProps {
 export default function ContactForm({ shouldLoadRecaptcha = false }: ContactFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneCountryCallingCode, setPhoneCountryCallingCode] = useState('+44');
+  const [phoneCountryCallingCode, setPhoneCountryCallingCode] = useState('+1');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
   const [honeypot, setHoneypot] = useState('');
@@ -113,7 +113,7 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
         onSuccess: () => {
           setName('');
           setEmail('');
-          setPhoneCountryCallingCode('+44');
+          setPhoneCountryCallingCode('+1');
           setPhoneNumber('');
           setMessage('');
           setHoneypot('');

@@ -2,6 +2,7 @@ import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Int "mo:core/Int";
 import Array "mo:core/Array";
+import Float "mo:core/Float";
 import Time "mo:core/Time";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
@@ -90,7 +91,7 @@ actor {
     };
   };
 
-  func insertContactSubmission(submission : ContactSubmission) {
+  func insertContactSubmission(submission : ContactSubmission) : () {
     let id = submission.id;
     switch (contactSubmissions.get(id)) {
       case (?existing) {
@@ -102,7 +103,7 @@ actor {
     };
   };
 
-  func insertContactSubmissionJunk(submission : ContactSubmission) {
+  func insertContactSubmissionJunk(submission : ContactSubmission) : () {
     let id = submission.id;
     switch (contactSubmissionsJunk.get(id)) {
       case (?existing) {
@@ -123,7 +124,7 @@ actor {
     submissions.sort(ContactSubmission.compareByTimestamp);
   };
 
-  var recaptchaSecretKey : ?Text = null;
+  var recaptchaSecretKey : Text = "";
   var recaptchaMinScore : Float = 0.6;
 
   type RecaptchaResult = {
@@ -159,18 +160,13 @@ actor {
   };
 
   func verifyRecaptcha(token : Text) : async Float {
-    switch (recaptchaSecretKey) {
-      case (?key) {
-        let url = "https://www.google.com/recaptcha/api/siteverify?secret=" # key # "&response=" # token;
-        let result = await OutCall.httpGetRequest(url, [], transform);
-        switch (parseRecaptchaResponse(result)) {
-          case (?{ success; score }) {
-            if (success) { score } else { 0 };
-          };
-          case (null) { 0 };
-        };
-      };
-      case (null) { 0 };
+    if (recaptchaSecretKey == "") { Runtime.trap("reCAPTCHA not enabled") };
+
+    let url = "https://www.google.com/recaptcha/api/siteverify?secret=" # recaptchaSecretKey # "&response=" # token;
+    let result = await OutCall.httpGetRequest(url, [], transform);
+    switch (parseRecaptchaResponse(result)) {
+      case (?{ success; score }) { if (success) { score } else { 0.0 } };
+      case (null) { 0.0 };
     };
   };
 
@@ -182,15 +178,44 @@ actor {
     message : Text,
     honeypot : Text,
     elapsedTime : Float,
-    _recaptchaToken : Text,
+    recaptchaToken : Text,
   ) : async Text {
+    if (phoneCountry != "" and phoneNumber == "") {
+      Runtime.trap("If country code is set, phone number must be present");
+    };
+
     let newSubmission = createContactSubmission(name, email, phoneCountry, phoneNumber, message);
 
-    if (honeypot != "" or elapsedTime < 1.0) {
+    if (honeypot != "") {
       insertContactSubmissionJunk(newSubmission);
       return newSubmission.id;
     };
 
+    if (elapsedTime < 1.0) {
+      insertContactSubmissionJunk(newSubmission);
+      Runtime.trap("Form submitted too fast, likely not human but bot");
+    } else if (elapsedTime < 2.0) {
+      insertContactSubmissionJunk(newSubmission);
+      return newSubmission.id;
+    };
+
+    if (recaptchaSecretKey != "" and recaptchaToken != "") {
+      let score = await verifyRecaptcha(recaptchaToken);
+      var threshold = recaptchaMinScore;
+      if (honeypot != "" or elapsedTime < 5.0) { threshold := elapsedTime / 10.0 };
+
+      if (score < threshold) {
+        insertContactSubmissionJunk(newSubmission);
+        Runtime.trap(
+          "Likely bot submission, score "
+          # score.toText()
+          # " < threshold "
+          # threshold.toText()
+          # ", honeypot '"
+          # honeypot # "' ",
+        );
+      };
+    };
     insertContactSubmission(newSubmission);
     newSubmission.id;
   };
@@ -208,7 +233,7 @@ actor {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can update reCAPTCHA secret");
     };
-    recaptchaSecretKey := ?key;
+    recaptchaSecretKey := key;
   };
 
   // Admin-only: Update reCAPTCHA minimum score threshold

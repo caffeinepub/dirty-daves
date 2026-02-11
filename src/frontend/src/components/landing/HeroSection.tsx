@@ -22,7 +22,7 @@ export default function HeroSection() {
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <a
-            href="#contact"
+            href="#get-in-touch"
             className="group px-10 py-5 bg-navy text-white rounded-2xl font-black text-xl hover:bg-navy/90 transition-all shadow-2xl hover:shadow-navy/50 transform hover:scale-110 hover:rotate-1 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
           >
             <span className="inline-block group-hover:animate-wiggle">🚀</span> Book Your Adventure

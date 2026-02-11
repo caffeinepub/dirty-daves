@@ -1,14 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Restore a Phone field in the landing page contact form, allowing users to choose a country calling code (shown with a country abbreviation) and enter a phone number, and ensure this data is saved with contact submissions.
+**Goal:** Persist website contact form submissions in the backend and provide an in-app admin page to view both valid and junk/spam submissions.
 
 **Planned changes:**
-- Update `frontend/src/components/landing/ContactForm.tsx` to add a Phone field composed of a country calling code dropdown (labels like “+1 US”) and a phone number text input.
-- Add a typed, exported calling-code option list in `frontend/src/content/countryCallingCodes.ts` containing `callingCode`, `countryAbbrev`, and a stable dropdown value; drive the dropdown from this list.
-- Extend `frontend/src/hooks/useSubmitContactForm.ts` to include the selected calling code and phone number in the contact form submission payload and types.
-- Update `backend/main.mo` to accept, persist, and return phone-related fields on `ContactSubmission` records for both normal and junk submissions, keeping existing anti-bot routing intact.
-- Add/update `backend/migration.mo` to migrate existing stored submissions by adding default empty values for the new phone fields on upgrade.
-- Update `frontend/SMOKE_TEST_PRODUCTION.md` to include production smoke-test steps verifying the phone field UI (dropdown label format), phone entry, and successful submission including phone data.
+- Update the contact form flow so submissions are sent to the backend, persisted as ContactSubmission records (name, email, phone with calling code + number, message, timestamp), and return success so the existing success UI is shown.
+- Implement server-side spam handling for contact submissions using the provided reCAPTCHA token (when a secret is configured), plus existing honeypot/elapsed-time checks; store low-confidence/invalid items in a separate junk submissions collection while still returning an id.
+- Add a new admin-only route/page in the React app that lists normal and junk contact submissions, supports viewing full message details, and includes a manual refresh that refetches via React Query.
+- Ensure unauthorized access to the admin page/queries shows a clear English access-denied message without crashing.
 
-**User-visible outcome:** The contact form includes a phone number field with a country calling code dropdown (e.g., “+1 US”); users can select a code, enter a phone number, submit the form successfully, and admins can see saved phone details on submissions.
+**User-visible outcome:** Visitors can submit the contact form and see the existing success state; admins can open an in-app admin page to review contact messages (including junk/spam), view full details, and refresh the list on demand.
