@@ -23,28 +23,11 @@ export const ContactSubmission = IDL.Record({
   'phoneNumber' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
-export const http_header = IDL.Record({
-  'value' : IDL.Text,
-  'name' : IDL.Text,
-});
-export const http_request_result = IDL.Record({
-  'status' : IDL.Nat,
-  'body' : IDL.Vec(IDL.Nat8),
-  'headers' : IDL.Vec(http_header),
-});
-export const TransformationInput = IDL.Record({
-  'context' : IDL.Vec(IDL.Nat8),
-  'response' : http_request_result,
-});
-export const TransformationOutput = IDL.Record({
-  'status' : IDL.Nat,
-  'body' : IDL.Vec(IDL.Nat8),
-  'headers' : IDL.Vec(http_header),
-});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'bootstrapAdminWithCredentials' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'getAllContactSubmissions' : IDL.Func(
       [],
       [IDL.Vec(ContactSubmission)],
@@ -62,29 +45,15 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'incrementSystemUserCounter' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitContactForm' : IDL.Func(
-      [
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Float64,
-        IDL.Text,
-      ],
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Float64],
       [IDL.Text],
       [],
     ),
-  'transform' : IDL.Func(
-      [TransformationInput],
-      [TransformationOutput],
-      ['query'],
-    ),
-  'updateRecaptchaMinScore' : IDL.Func([IDL.Float64], [], []),
-  'updateRecaptchaSecret' : IDL.Func([IDL.Text], [], []),
+  'testConnection' : IDL.Func([], [IDL.Text], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -105,25 +74,11 @@ export const idlFactory = ({ IDL }) => {
     'phoneNumber' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
-  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
-  const http_request_result = IDL.Record({
-    'status' : IDL.Nat,
-    'body' : IDL.Vec(IDL.Nat8),
-    'headers' : IDL.Vec(http_header),
-  });
-  const TransformationInput = IDL.Record({
-    'context' : IDL.Vec(IDL.Nat8),
-    'response' : http_request_result,
-  });
-  const TransformationOutput = IDL.Record({
-    'status' : IDL.Nat,
-    'body' : IDL.Vec(IDL.Nat8),
-    'headers' : IDL.Vec(http_header),
-  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'bootstrapAdminWithCredentials' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'getAllContactSubmissions' : IDL.Func(
         [],
         [IDL.Vec(ContactSubmission)],
@@ -141,6 +96,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'incrementSystemUserCounter' : IDL.Func(
+        [IDL.Text, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitContactForm' : IDL.Func(
@@ -152,18 +112,11 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Text,
           IDL.Float64,
-          IDL.Text,
         ],
         [IDL.Text],
         [],
       ),
-    'transform' : IDL.Func(
-        [TransformationInput],
-        [TransformationOutput],
-        ['query'],
-      ),
-    'updateRecaptchaMinScore' : IDL.Func([IDL.Float64], [], []),
-    'updateRecaptchaSecret' : IDL.Func([IDL.Text], [], []),
+    'testConnection' : IDL.Func([], [IDL.Text], ['query']),
   });
 };
 

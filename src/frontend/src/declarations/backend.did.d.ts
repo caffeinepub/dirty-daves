@@ -19,42 +19,27 @@ export interface ContactSubmission {
   'timestamp' : bigint,
   'phoneNumber' : string,
 }
-export interface TransformationInput {
-  'context' : Uint8Array,
-  'response' : http_request_result,
-}
-export interface TransformationOutput {
-  'status' : bigint,
-  'body' : Uint8Array,
-  'headers' : Array<http_header>,
-}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
-export interface http_header { 'value' : string, 'name' : string }
-export interface http_request_result {
-  'status' : bigint,
-  'body' : Uint8Array,
-  'headers' : Array<http_header>,
-}
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'bootstrapAdminWithCredentials' : ActorMethod<[string, string], undefined>,
   'getAllContactSubmissions' : ActorMethod<[], Array<ContactSubmission>>,
   'getAllContactSubmissionsJunk' : ActorMethod<[], Array<ContactSubmission>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'incrementSystemUserCounter' : ActorMethod<[string, string], bigint>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitContactForm' : ActorMethod<
-    [string, string, string, string, string, string, number, string],
+    [string, string, string, string, string, string, number],
     string
   >,
-  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
-  'updateRecaptchaMinScore' : ActorMethod<[number], undefined>,
-  'updateRecaptchaSecret' : ActorMethod<[string], undefined>,
+  'testConnection' : ActorMethod<[], string>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

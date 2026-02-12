@@ -89,16 +89,6 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface http_request_result {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
-export interface TransformationOutput {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
 export interface ContactSubmission {
     id: string;
     name: string;
@@ -108,15 +98,7 @@ export interface ContactSubmission {
     timestamp: bigint;
     phoneNumber: string;
 }
-export interface TransformationInput {
-    context: Uint8Array;
-    response: http_request_result;
-}
 export interface UserProfile {
-    name: string;
-}
-export interface http_header {
-    value: string;
     name: string;
 }
 export enum UserRole {
@@ -127,17 +109,17 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    bootstrapAdminWithCredentials(userName: string, password: string): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    incrementSystemUserCounter(userName: string, password: string): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number, recaptchaToken: string): Promise<string>;
-    transform(input: TransformationInput): Promise<TransformationOutput>;
-    updateRecaptchaMinScore(score: number): Promise<void>;
-    updateRecaptchaSecret(key: string): Promise<void>;
+    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number): Promise<string>;
+    testConnection(): Promise<string>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -167,6 +149,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async bootstrapAdminWithCredentials(arg0: string, arg1: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.bootstrapAdminWithCredentials(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.bootstrapAdminWithCredentials(arg0, arg1);
             return result;
         }
     }
@@ -240,6 +236,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
         }
     }
+    async incrementSystemUserCounter(arg0: string, arg1: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.incrementSystemUserCounter(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.incrementSystemUserCounter(arg0, arg1);
+            return result;
+        }
+    }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -268,59 +278,31 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: number, arg7: string): Promise<string> {
+    async submitContactForm(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: number): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            const result = await this.actor.submitContactForm(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
             return result;
         }
     }
-    async transform(arg0: TransformationInput): Promise<TransformationOutput> {
+    async testConnection(): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.transform(arg0);
+                const result = await this.actor.testConnection();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.transform(arg0);
-            return result;
-        }
-    }
-    async updateRecaptchaMinScore(arg0: number): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateRecaptchaMinScore(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateRecaptchaMinScore(arg0);
-            return result;
-        }
-    }
-    async updateRecaptchaSecret(arg0: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateRecaptchaSecret(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateRecaptchaSecret(arg0);
+            const result = await this.actor.testConnection();
             return result;
         }
     }

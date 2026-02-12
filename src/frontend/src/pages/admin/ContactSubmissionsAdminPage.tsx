@@ -33,6 +33,7 @@ export default function ContactSubmissionsAdminPage() {
   const isAccessDenied =
     normalError?.message === 'ACCESS_DENIED' || junkError?.message === 'ACCESS_DENIED';
 
+  // Show access denied screen if not authenticated OR if access is denied
   if (!isAuthenticated || isAccessDenied) {
     return <AccessDeniedScreen />;
   }

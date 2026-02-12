@@ -23,12 +23,17 @@ function PageLoader() {
   );
 }
 
-const rootRoute = createRootRoute({
-  component: () => (
+// Root layout component
+function RootLayout() {
+  return (
     <div className="min-h-screen">
       <Outlet />
     </div>
-  ),
+  );
+}
+
+const rootRoute = createRootRoute({
+  component: RootLayout,
 });
 
 const indexRoute = createRoute({
@@ -97,6 +102,18 @@ const chooseYourOwnAdventureRoute = createRoute({
   ),
 });
 
+// Primary admin contact/messages route
+const adminContactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/contact',
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <ContactSubmissionsAdminPage />
+    </Suspense>
+  ),
+});
+
+// Legacy admin submissions route (alias to /admin/contact)
 const adminSubmissionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/submissions',
@@ -115,6 +132,7 @@ const routeTree = rootRoute.addChildren([
   storiesAndBanterRoute,
   stayYourWayRoute,
   chooseYourOwnAdventureRoute,
+  adminContactRoute,
   adminSubmissionsRoute,
 ]);
 

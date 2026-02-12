@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Persist website contact form submissions in the backend and provide an in-app admin page to view both valid and junk/spam submissions.
+**Goal:** Persist contact form submissions in stable canister storage and add a protected admin-only messages page to view them.
 
 **Planned changes:**
-- Update the contact form flow so submissions are sent to the backend, persisted as ContactSubmission records (name, email, phone with calling code + number, message, timestamp), and return success so the existing success UI is shown.
-- Implement server-side spam handling for contact submissions using the provided reCAPTCHA token (when a secret is configured), plus existing honeypot/elapsed-time checks; store low-confidence/invalid items in a separate junk submissions collection while still returning an id.
-- Add a new admin-only route/page in the React app that lists normal and junk contact submissions, supports viewing full message details, and includes a manual refresh that refetches via React Query.
-- Ensure unauthorized access to the admin page/queries shows a clear English access-denied message without crashing.
+- Update the backend contact submission flow to save every successful (non-junk) contact form submission to stable storage with: name, email, phoneCountryCallingCode, phoneNumber, message, and timestamp.
+- Add admin bootstrapping via `bootstrapAdminWithCredentials(username, password)` that grants admin permissions to the authenticated caller only when credentials match, without storing plaintext passwords in canister state.
+- Ensure admin-only backend endpoints exist for retrieving saved submissions (normal and junk), sorted by timestamp, and return authorization errors for non-admin callers.
+- Create a private admin-only frontend route (choose one: `/admin/contact` or `/dashboard/messages`) that requires Internet Identity login and admin permission, and supports credential bootstrap when authenticated but not yet an admin.
+- Keep `/admin/submissions` working by redirecting or aliasing it to the new admin messages route with identical access control.
 
-**User-visible outcome:** Visitors can submit the contact form and see the existing success state; admins can open an in-app admin page to review contact messages (including junk/spam), view full details, and refresh the list on demand.
+**User-visible outcome:** Contact form messages are retained across canister upgrades, and an authenticated Internet Identity admin can bootstrap access and view all saved submissions (including junk) on a protected admin messages page; existing `/admin/submissions` links still work.

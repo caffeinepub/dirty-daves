@@ -1,28 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Build backend storage for contact form submissions and a protected admin-only interface to view them.",
   "architectural_notes": [
-    "Provide an in-project admin/submissions view for contact form entries (a 'Data'/'Submissions' area or equivalent) so messages can be accessed without email notifications."
+    "Contact form submissions must be stored persistently (not ephemeral) and retrievable for admin viewing.",
+    "Admin dashboard route should be protected with authentication/authorization; unauthenticated users cannot access messages."
   ],
   "known_issues": [
-    "Current contact form exists on the site but does not work yet; submissions are not accessible via an admin/submissions panel."
+    "Contact form submissions are not appearing in the admin page; may indicate missing/incorrect form-to-backend persistence or admin view wiring."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-make-the-existing-website-contact-form-save-each-submission-in-the-backend-and-return-a-successful-response-to-the-frontend-so-the-user-sees-the-success-state-after-submitting",
-      "title": "Make the existing website contact form save each submission in the backend and return a successful response to the frontend so the user sees the success state after submitting.",
+      "id": "feature-create-a-private-admin-only-page-for-viewing-contact-form-submissions-at-either-admin-contact-or-dashboard-messages-choose-one-and-implement-it-the-page-must-be-protected-so-only-an-authenticated-internet-identity-user-with-admin-permissions-can-view-submissions-otherwise-show-the-existing-access-denied-flow-with-credential-bootstrap",
+      "title": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
       "reqIds": [
-        "REQ-1"
+        "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-in-app-admin-page-admin-panel-that-allows-an-admin-user-to-view-contact-form-submissions-stored-in-the-backend",
-      "title": "Add an in-app admin page (admin panel) that allows an admin user to view contact form submissions stored in the backend.",
+      "id": "feature-keep-existing-admin-route-compatibility-by-redirecting-or-aliasing-the-current-admin-submissions-route-to-the-new-admin-messages-route-so-previously-shared-links-continue-to-work",
+      "title": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
       "reqIds": [
-        "REQ-3"
+        "REQ-5"
       ],
       "version": 1
     }
@@ -30,20 +31,48 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Make the existing contact form functional so submissions are stored and viewable in an admin/submissions panel within the project.",
+      "summary": "Persist contact form submissions permanently in secure backend storage (name, email, phone, message at minimum).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Create a private admin-only page at /admin/contact or /dashboard/messages to view contact form submissions (protected access).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Implement reCAPTCHA/spam-handling on the backend submission endpoint by using the provided reCAPTCHA token and the configured minimum score, and store low-confidence or bot-like submissions in the junk submissions collection.",
+      "summary": "Add admin authentication for the submissions dashboard using the provided username/password credentials.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
       "reqIds": [
         "REQ-2"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
     }
   ],
-  "projectName": "Store contact form submissions and provide an admin panel to view them",
+  "projectName": "Persist contact form submissions and add protected admin messages page",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

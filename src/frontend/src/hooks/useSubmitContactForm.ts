@@ -9,7 +9,6 @@ interface ContactFormData {
   message: string;
   honeypot: string;
   elapsedTime: number;
-  recaptchaToken: string;
 }
 
 export function useSubmitContactForm() {
@@ -29,8 +28,7 @@ export function useSubmitContactForm() {
         data.phoneNumber,
         data.message,
         data.honeypot,
-        data.elapsedTime,
-        data.recaptchaToken
+        data.elapsedTime
       );
 
       return submissionId;

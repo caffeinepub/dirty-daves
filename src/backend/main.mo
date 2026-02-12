@@ -3,49 +3,106 @@ import Text "mo:core/Text";
 import Int "mo:core/Int";
 import Array "mo:core/Array";
 import Float "mo:core/Float";
-import Time "mo:core/Time";
-import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
-import OutCall "http-outcalls/outcall";
 import Principal "mo:core/Principal";
+import Order "mo:core/Order";
+import Time "mo:core/Time";
+import Iter "mo:core/Iter";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
-  // Initialize the access control system
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
-
+  //------------------- User Management System -------------------------
   public type UserProfile = {
     name : Text;
   };
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
+  func authorizeAdminOnly(caller : Principal) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+  };
+
+  // Initialize the access control system
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access profiles");
+      Runtime.trap("Unauthorized: Only users can view profiles");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only the owner or admins can view this profile");
+      Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save and update profiles");
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
-  // Contact Form system with phone fields (add subject later)
+  //------------------- NEW: Username/Password Bootstrapping -------------------------
+
+  var isBootstrapped : Bool = false;
+
+  func isPasswordValid(userName : Text, password : Text) : Bool {
+    userName == "dirtydave69" and password == "Tomlikesboys69";
+  };
+
+  public shared ({ caller }) func bootstrapAdminWithCredentials(userName : Text, password : Text) : async () {
+    // First check if already bootstrapped
+    if (isBootstrapped) {
+      Runtime.trap("Admin already bootstrapped. Bootstrapping can only be done once.");
+    };
+    if (not isPasswordValid(userName, password)) {
+      Runtime.trap("Login failed: Invalid credentials (username/password incorrect)");
+    };
+
+    // Store the credentials and mark as bootstrapped
+    isBootstrapped := true;
+
+    // Grant admin role to caller
+    AccessControl.initialize(accessControlState, caller, "adminToken", "userProvidedToken");
+  };
+
+  func verifyCredentials(userName : Text, password : Text) : Nat {
+    if (not isPasswordValid(userName, password)) {
+      Runtime.trap("Invalid username or password");
+    };
+    getAllContactSubmissionsSize();
+  };
+
+  //------------------- NEW: System User Management -------------------------
+
+  let systemUserCounter = Map.empty<Text, Nat>();
+
+  public shared ({ caller }) func incrementSystemUserCounter(userName : Text, password : Text) : async Nat {
+    // Require admin permission for this operation
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    ignore verifyCredentials(userName, password);
+    let currentCount = switch (systemUserCounter.get(userName)) {
+      case (?count) { count };
+      case (null) { 0 };
+    };
+    let newCount = currentCount + 1;
+    systemUserCounter.add(userName, newCount);
+    newCount;
+  };
+
+  //------------------- Contact Form System without reCAPTCHA -------------------------
+
   public type ContactSubmission = {
     id : Text;
     name : Text;
@@ -117,59 +174,23 @@ actor {
 
   // Admin-only: Retrieve all junk contact submissions
   public query ({ caller }) func getAllContactSubmissionsJunk() : async [ContactSubmission] {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can view all junk submissions");
-    };
-    let submissions = Array.fromIter(contactSubmissionsJunk.values());
+    authorizeAdminOnly(caller);
+    let submissions = contactSubmissionsJunk.values().toArray();
     submissions.sort(ContactSubmission.compareByTimestamp);
   };
 
-  var recaptchaSecretKey : Text = "";
-  var recaptchaMinScore : Float = 0.6;
-
-  type RecaptchaResult = {
-    success : Bool;
-    score : Float;
+  // Admin-only: Retrieve all contact submissions
+  public query ({ caller }) func getAllContactSubmissions() : async [ContactSubmission] {
+    authorizeAdminOnly(caller);
+    let submissions = contactSubmissions.values().toArray();
+    submissions.sort(ContactSubmission.compareByTimestamp);
   };
 
-  func parseRecaptchaResponse(response : Text) : ?RecaptchaResult {
-    let score = (response.contains(#char 't') or response.contains(#char 'T'));
-    if (response.contains(#text "ratedgood")) {
-      ?{
-        success = score;
-        score = 0.9;
-      };
-    } else if (response.contains(#text "ratedfair")) {
-      ?{
-        success = score;
-        score = 0.5;
-      };
-    } else if (response.contains(#text "ratedbad")) {
-      if (score) {
-        ?{ success = true; score = 0.2 };
-      } else {
-        ?{ success = false; score = 0.0 };
-      };
-    } else {
-      ?{ success = score; score = 0.0 };
-    };
+  func getAllContactSubmissionsSize() : Nat {
+    contactSubmissions.size();
   };
 
-  public shared query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
-    OutCall.transform(input);
-  };
-
-  func verifyRecaptcha(token : Text) : async Float {
-    if (recaptchaSecretKey == "") { Runtime.trap("reCAPTCHA not enabled") };
-
-    let url = "https://www.google.com/recaptcha/api/siteverify?secret=" # recaptchaSecretKey # "&response=" # token;
-    let result = await OutCall.httpGetRequest(url, [], transform);
-    switch (parseRecaptchaResponse(result)) {
-      case (?{ success; score }) { if (success) { score } else { 0.0 } };
-      case (null) { 0.0 };
-    };
-  };
-
+  // Contact form submission without reCAPTCHA - accessible to anyone including guests
   public shared ({ caller }) func submitContactForm(
     name : Text,
     email : Text,
@@ -178,7 +199,6 @@ actor {
     message : Text,
     honeypot : Text,
     elapsedTime : Float,
-    recaptchaToken : Text,
   ) : async Text {
     if (phoneCountry != "" and phoneNumber == "") {
       Runtime.trap("If country code is set, phone number must be present");
@@ -199,48 +219,13 @@ actor {
       return newSubmission.id;
     };
 
-    if (recaptchaSecretKey != "" and recaptchaToken != "") {
-      let score = await verifyRecaptcha(recaptchaToken);
-      var threshold = recaptchaMinScore;
-      if (honeypot != "" or elapsedTime < 5.0) { threshold := elapsedTime / 10.0 };
-
-      if (score < threshold) {
-        insertContactSubmissionJunk(newSubmission);
-        Runtime.trap(
-          "Likely bot submission, score "
-          # score.toText()
-          # " < threshold "
-          # threshold.toText()
-          # ", honeypot '"
-          # honeypot # "' ",
-        );
-      };
-    };
     insertContactSubmission(newSubmission);
     newSubmission.id;
   };
 
-  public query ({ caller }) func getAllContactSubmissions() : async [ContactSubmission] {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can view all submissions");
-    };
-    let submissions = Array.fromIter(contactSubmissions.values());
-    submissions.sort(ContactSubmission.compareByTimestamp);
-  };
-
-  // Admin-only: Update reCAPTCHA secret key
-  public shared ({ caller }) func updateRecaptchaSecret(key : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update reCAPTCHA secret");
-    };
-    recaptchaSecretKey := key;
-  };
-
-  // Admin-only: Update reCAPTCHA minimum score threshold
-  public shared ({ caller }) func updateRecaptchaMinScore(score : Float) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update reCAPTCHA minimum score");
-    };
-    recaptchaMinScore := score;
+  // Test endpoint - accessible to anyone
+  public query ({ caller }) func testConnection() : async Text {
+    "test";
   };
 };
+

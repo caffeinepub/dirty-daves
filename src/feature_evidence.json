@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-make-the-existing-website-contact-form-save-each-submission-in-the-backend-and-return-a-successful-response-to-the-frontend-so-the-user-sees-the-success-state-after-submitting",
-      "featureTitle": "Make the existing website contact form save each submission in the backend and return a successful response to the frontend so the user sees the success state after submitting.",
+      "featureId": "feature-create-a-private-admin-only-page-for-viewing-contact-form-submissions-at-either-admin-contact-or-dashboard-messages-choose-one-and-implement-it-the-page-must-be-protected-so-only-an-authenticated-internet-identity-user-with-admin-permissions-can-view-submissions-otherwise-show-the-existing-access-denied-flow-with-credential-bootstrap",
+      "featureTitle": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
       "files": [
-        "frontend/src/hooks/useSubmitContactForm.ts"
+        "frontend/PRODUCTION_CONFIGURATION.md",
+        "frontend/src/App.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,19 +18,15 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-4"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-an-in-app-admin-page-admin-panel-that-allows-an-admin-user-to-view-contact-form-submissions-stored-in-the-backend",
-      "featureTitle": "Add an in-app admin page (admin panel) that allows an admin user to view contact form submissions stored in the backend.",
+      "featureId": "feature-keep-existing-admin-route-compatibility-by-redirecting-or-aliasing-the-current-admin-submissions-route-to-the-new-admin-messages-route-so-previously-shared-links-continue-to-work",
+      "featureTitle": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/admin/AccessDeniedScreen.tsx",
-        "frontend/src/hooks/useAdminContactSubmissions.ts",
-        "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-        "frontend/src/utils/formatTimestamp.ts"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -41,7 +38,7 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-5"
       ],
       "confidence": "high"
     }

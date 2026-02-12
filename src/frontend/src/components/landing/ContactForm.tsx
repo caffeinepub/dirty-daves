@@ -1,14 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSubmitContactForm } from '../../hooks/useSubmitContactForm';
-import { useRecaptchaV3 } from '../../hooks/useRecaptchaV3';
 import { countryCallingCodes } from '../../content/countryCallingCodes';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
-interface ContactFormProps {
-  shouldLoadRecaptcha?: boolean;
-}
-
-export default function ContactForm({ shouldLoadRecaptcha = false }: ContactFormProps) {
+export default function ContactForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneCountryCallingCode, setPhoneCountryCallingCode] = useState('+1');
@@ -20,7 +15,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
     email?: string; 
     phoneNumber?: string;
     message?: string;
-    recaptcha?: string;
   }>({});
 
   // Track form start time for bot detection
@@ -32,14 +26,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
   }, []);
 
   const { mutate: submitForm, isPending, isSuccess, isError, error } = useSubmitContactForm();
-  const { isReady: recaptchaReady, executeRecaptcha, isConfigured: recaptchaConfigured, initializeRecaptcha } = useRecaptchaV3();
-
-  // Initialize reCAPTCHA when contact section becomes visible
-  useEffect(() => {
-    if (shouldLoadRecaptcha && recaptchaConfigured && !recaptchaReady) {
-      initializeRecaptcha();
-    }
-  }, [shouldLoadRecaptcha, recaptchaConfigured, recaptchaReady, initializeRecaptcha]);
 
   const validateForm = () => {
     const newErrors: { 
@@ -47,7 +33,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
       email?: string; 
       phoneNumber?: string;
       message?: string;
-      recaptcha?: string;
     } = {};
 
     if (!name.trim()) {
@@ -75,28 +60,8 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
       return;
     }
 
-    // Check reCAPTCHA configuration and readiness
-    if (!recaptchaConfigured) {
-      setErrors({ recaptcha: 'Security verification is not configured. Please contact support.' });
-      return;
-    }
-
-    if (!recaptchaReady) {
-      setErrors({ recaptcha: 'Security verification is not ready. Please wait a moment and try again.' });
-      return;
-    }
-
-    // Generate reCAPTCHA token
-    let recaptchaToken: string;
-    try {
-      recaptchaToken = await executeRecaptcha('contact_form');
-    } catch (err) {
-      setErrors({ recaptcha: 'Failed to verify security. Please refresh the page and try again.' });
-      return;
-    }
-
-    // Calculate elapsed time since form was presented
-    const elapsedTime = Date.now() - formStartTimeRef.current;
+    // Calculate elapsed time since form was presented (in seconds)
+    const elapsedTime = (Date.now() - formStartTimeRef.current) / 1000;
 
     submitForm(
       { 
@@ -107,7 +72,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
         message: message.trim(),
         honeypot,
         elapsedTime,
-        recaptchaToken,
       },
       {
         onSuccess: () => {
@@ -237,12 +201,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
         {errors.message && <p className="text-black text-sm mt-1 font-bold text-shadow-subtle">{errors.message}</p>}
       </div>
 
-      {errors.recaptcha && (
-        <div className="bg-red-100/80 backdrop-blur-sm border-2 border-red-500 text-red-800 px-4 py-3 rounded-xl font-medium">
-          {errors.recaptcha}
-        </div>
-      )}
-
       {isError && (
         <div className="bg-red-100/80 backdrop-blur-sm border-2 border-red-500 text-red-800 px-4 py-3 rounded-xl font-medium">
           {error?.message || 'Failed to send message. Please try again.'}
@@ -263,18 +221,6 @@ export default function ContactForm({ shouldLoadRecaptcha = false }: ContactForm
           'Send Message 🚀'
         )}
       </button>
-
-      <p className="text-xs text-black/70 text-center font-medium text-shadow-subtle">
-        This site is protected by reCAPTCHA and the Google{' '}
-        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal">
-          Privacy Policy
-        </a>{' '}
-        and{' '}
-        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal">
-          Terms of Service
-        </a>{' '}
-        apply.
-      </p>
     </form>
   );
 }

@@ -1,55 +1,79 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T12:32:49.518Z",
-  "summary": "Diff adds backend storage types/collections for contact submissions (including phone fields) and a new React admin page at /admin/submissions with React Query fetching normal/junk submissions and an access-denied screen. However, reCAPTCHA/junk-routing behavior in submitContactForm() is not evidenced in the provided backend diff (truncated), and there is a clear type mismatch indicated by frontend backend.d.ts lacking phone fields required by the admin UI/REQs. Several unrelated UI/content changes and a backend migration were also introduced but not requested.",
+  "generatedAt": "2026-02-11T13:41:17.870Z",
+  "summary": "Diff adds an admin contact route aliasing /admin/submissions to /admin/contact, and adds a backend method named bootstrapAdminWithCredentials. However, key security and persistence requirements are either not shown (due to truncation) or appear violated (plaintext credentials in backend), and the admin submissions UI implementation is not evidenced in the provided diff summary.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "submitContactForm() must verify the provided reCAPTCHA token server-side (when secret configured), apply min score, and route spam/low-score submissions into the junk submissions collection deterministically without trapping (store as junk and return an id).",
-      "reason": "The backend diff shown defines ContactSubmission types and junk/normal maps and adds getAllContactSubmissionsJunk(), but the submitContactForm() implementation and any reCAPTCHA verification logic are not present in the visible (truncated) backend/main.mo excerpt, so this requirement is not verifiable from the diff summary.",
+      "id": "REQ-1",
+      "requirement": "Persist contact form submissions in stable storage so they survive canister upgrades, saving all non-junk submissions with required fields (name, email, phoneCountryCallingCode, phoneNumber, message, timestamp, id if used).",
+      "reason": "The diff excerpt shows the ContactSubmission type definition but does not show any stable variables, preupgrade/postupgrade hooks, or migration logic to persist/restore submissions across upgrades. With backend/main.mo truncated, stable persistence cannot be confirmed from the provided evidence.",
       "evidence": [
-        "backend/main.mo (truncated; submitContactForm not shown)"
+        "backend/main.mo (truncated)"
       ]
     },
     {
-      "id": "REQ-1",
-      "requirement": "Persist successful contact form submissions as ContactSubmission records with name, email, phone (calling code + number), message, and timestamp, and ensure the frontend can submit and handle errors via existing UI.",
-      "reason": "Backend ContactSubmission includes phone fields, but the frontend type definition for ContactSubmission is explicitly summarized as missing phone fields, which would prevent the admin page and/or other frontend code from reliably accessing required fields (phone calling code/number) without type errors or unsafe casts.",
+      "id": "REQ-2",
+      "requirement": "Bootstrap admin with credentials using secure password storage/comparison (no plaintext password in canister state or frontend code).",
+      "reason": "The backend code contains hardcoded plaintext credentials and compares the plaintext password directly (isPasswordValid). This violates the constraint/AC requiring no plaintext password stored in canister state or frontend code and secure comparison (e.g., hash).",
       "evidence": [
-        "frontend/src/backend.d.ts (summary indicates ContactSubmission has no phone fields)",
-        "backend/main.mo (ContactSubmission includes phoneCountryCallingCode and phoneNumber)"
+        "backend/main.mo (truncated): isPasswordValid(userName, password) checks password == \"Tomlikesboys69\""
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Admin-only retrieval endpoints getAllContactSubmissions and getAllContactSubmissionsJunk return all saved submissions (non-junk/junk) sorted by timestamp, and non-admins receive an authorization error.",
+      "reason": "The diff excerpt does not show implementations of getAllContactSubmissions/getAllContactSubmissionsJunk, their admin checks, or sorting behavior. Therefore compliance can’t be verified from the provided evidence.",
+      "evidence": [
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Create a private admin-only page at /admin/contact or /dashboard/messages that enforces Internet Identity authentication and admin permission checks, showing access-denied + credential bootstrap when needed, then listing/viewing submissions.",
+      "reason": "Routes for /admin/contact and /admin/submissions are added, but no diff evidence is provided for the actual page component behavior (authentication gating, access denied flow, credential bootstrap UI, listing/details).",
+      "evidence": [
+        "frontend/src/App.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added backend migration changing recaptchaSecretKey from optional (?Text) to non-optional Text with empty-string default.",
-      "reason": "BuildRequest does not request any schema migration or changing the recaptchaSecretKey storage type; it only specifies using the configured secret when verifying reCAPTCHA.",
+      "description": "Added a 'system user counter' feature and incrementSystemUserCounter admin method with credential verification unrelated to contact submissions admin/messages requirements.",
+      "reason": "Not requested by any requirement; introduces extra admin-only functionality and credential checks beyond the specified bootstrap + submissions retrieval.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo (with migration = Migration.run)"
+        "backend/main.mo (truncated): systemUserCounter, incrementSystemUserCounter, verifyCredentials"
       ]
     },
     {
-      "description": "Multiple landing-page/UI/content changes unrelated to storing contact submissions or the admin submissions panel (e.g., hero copy/CTA changes, TripAdvisor CTA styling, reviews visibility changes, footer text/links changes, offers cards converted to links, global CSS and Tailwind theme adjustments).",
-      "reason": "BuildRequest scope is contact form persistence, backend spam handling, and an admin panel page; it explicitly constrains editing certain UI paths and does not request broader site redesign/content changes.",
+      "description": "Added a one-time global isBootstrapped flag that prevents future admin bootstrapping entirely after the first successful call.",
+      "reason": "Requirement specifies bootstrapping grants admin to the authenticated caller after credential verification; it does not specify a canister-wide one-time bootstrap lockout (and PRODUCTION_CONFIGURATION.md claims 'one-time per principal', which the shown backend code does not implement).",
       "evidence": [
-        "frontend-file-summaries.txt (summaries referencing changes in frontend/src/components/landing/*, frontend/src/index.css, frontend/tailwind.config.js, frontend/src/content/* files)"
+        "backend/main.mo (truncated): var isBootstrapped : Bool = false; traps if isBootstrapped"
+      ]
+    },
+    {
+      "description": "Added frontend URL/session parameter utilities emphasizing token persistence in sessionStorage.",
+      "reason": "Not requested in REQ-4/REQ-5; introduces additional behavior around storing parameters (including mention of 'admin tokens') not part of the stated requirements.",
+      "evidence": [
+        "frontend/src/utils/urlParams.ts (truncated)"
+      ]
+    },
+    {
+      "description": "Added/updated production configuration documentation describing security properties (e.g., 'secure credential verification (not plaintext storage)').",
+      "reason": "Documentation changes were not requested as part of the build; also conflicts with the shown backend implementation that uses plaintext credentials in code.",
+      "evidence": [
+        "frontend/PRODUCTION_CONFIGURATION.md"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.64,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/src/App.tsx",
-    "frontend/src/components/admin/AccessDeniedScreen.tsx",
-    "frontend/src/hooks/useAdminContactSubmissions.ts",
-    "frontend/src/hooks/useSubmitContactForm.ts",
-    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-    "frontend/src/utils/formatTimestamp.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

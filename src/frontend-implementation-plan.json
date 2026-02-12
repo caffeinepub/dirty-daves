@@ -1,64 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin panel for viewing stored contact form submissions",
+  "title": "Admin messages route + legacy admin submissions alias (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Ensure the landing-page contact form submits to the backend successfully and surfaces success/error states reliably.",
+      "id": "REQ-4",
+      "summary": "Add a private admin-only route at /admin/contact that renders the existing submissions admin UI and enforces Internet Identity + admin permission checks with the existing access-denied bootstrap flow.",
       "acceptanceCriteria": [
-        "Submitting the contact form from the landing page completes without client-side errors and shows the existing success UI state.",
-        "A successful submission is persisted in the backend as a ContactSubmission record with name, email, phone fields (calling code + number), message, and timestamp.",
-        "If the backend is unavailable or rejects the submission, the form shows a clear error message (using the existing error UI)."
+        "Navigating to /admin/contact renders the submissions admin UI.",
+        "If the visitor is not authenticated with Internet Identity, the page shows the access denied screen prompting Internet Identity login.",
+        "If authenticated but not an admin yet, the page shows the credential bootstrap UI and, after successful bootstrap, loads submissions.",
+        "Once admin access is granted, the page lists saved submissions and allows viewing details (using the existing admin submissions UI behavior)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useSubmitContactForm.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Align React Query invalidation keys with the new admin submissions queries (so admin lists can be refreshed after a successful form submission), and ensure backend failures propagate a clear Error message for the existing error UI to display."
+          "description": "Register a new TanStack Router route for /admin/contact that renders the existing ContactSubmissionsAdminPage (lazy-loaded with the existing PageLoader). Use the existing authorization component patterns (Internet Identity via useInternetIdentity and access-denied bootstrap via AccessDeniedScreen) to keep the page protected. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/landing/ContactForm.tsx",
+          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
           "operation": "modify",
-          "description": "Confirm the existing error UI renders readable messages for backend unavailability/authorization traps, and ensure the submit flow keeps using the existing success state UI after mutation success."
+          "description": "Confirm the page’s access gating remains correct when accessed from /admin/contact: unauthenticated users see AccessDeniedScreen (Internet Identity login prompt), and authenticated-but-unauthorized users see AccessDeniedScreen with credential bootstrap; on successful bootstrap, submissions load without requiring manual navigation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/PRODUCTION_CONFIGURATION.md",
+          "operation": "modify",
+          "description": "Update the documented admin route to include /admin/contact as the primary admin messages/submissions page and note that admin access requires Internet Identity plus credential bootstrap (do not include or store plaintext credentials in this document)."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Add an admin-only React route to view normal and junk contact submissions with drill-in and manual refresh.",
+      "id": "REQ-5",
+      "summary": "Maintain /admin/submissions compatibility by aliasing it to the new /admin/contact admin messages route with identical access control behavior.",
       "acceptanceCriteria": [
-        "A new route exists in the React app for an admin submissions page (reachable by URL) that lists stored contact submissions.",
-        "The page fetches data from the backend admin-only queries (getAllContactSubmissions and getAllContactSubmissionsJunk) and renders submission rows with at least timestamp, name, email, phone, and a message preview.",
-        "An admin can open a submission to view the full message content.",
-        "If a non-admin visits the admin page or the query traps as unauthorized, the UI shows an English access-denied message and does not crash.",
-        "The page supports manual refresh (button) that refetches the submissions list via React Query."
+        "Visiting /admin/submissions still reaches the admin submissions UI (either via redirect or rendering the same page component).",
+        "The new chosen route and /admin/submissions both enforce the same access control behavior."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-          "operation": "create",
-          "description": "Create the admin submissions page UI that renders tabs/sections for normal vs junk submissions, shows a list with message previews, supports selecting a submission to view full message content, and includes a manual refresh button wired to React Query refetch. Use the authorization component’s role-based access control guidance to handle unauthorized/trap errors gracefully (show an English access-denied message). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useAdminContactSubmissions.ts",
-          "operation": "create",
-          "description": "Add React Query hooks to fetch normal and junk submissions via the backend actor (getAllContactSubmissions, getAllContactSubmissionsJunk), including stable query keys and error mapping for unauthorized/trap cases. Use the authorization component guidance for handling authorization failures in UI without crashes. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/AccessDeniedScreen.tsx",
-          "operation": "create",
-          "description": "Add a small reusable AccessDeniedScreen component used by the admin submissions page when the user is not logged in or backend calls fail as unauthorized. Use the authorization component’s UI guidance for access-denied states. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/formatTimestamp.ts",
-          "operation": "create",
-          "description": "Create a utility to format ContactSubmission.timestamp (bigint) into a readable date/time string for the admin submissions list."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register a new admin route (e.g., /admin/submissions) in the TanStack router that renders the ContactSubmissionsAdminPage so it is reachable by URL (no orphan page)."
+          "description": "Keep /admin/submissions working by aliasing it to the same page as /admin/contact (either render ContactSubmissionsAdminPage for both routes, or implement a redirect). Ensure both routes share the same protected behavior provided by the authorization component’s Internet Identity + access-denied bootstrap flow. Verify the component's usage instructions before implementing."
         }
       ]
     }

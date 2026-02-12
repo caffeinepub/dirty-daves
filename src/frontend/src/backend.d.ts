@@ -7,16 +7,6 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface http_request_result {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
-export interface TransformationOutput {
-    status: bigint;
-    body: Uint8Array;
-    headers: Array<http_header>;
-}
 export interface ContactSubmission {
     id: string;
     name: string;
@@ -26,15 +16,7 @@ export interface ContactSubmission {
     timestamp: bigint;
     phoneNumber: string;
 }
-export interface TransformationInput {
-    context: Uint8Array;
-    response: http_request_result;
-}
 export interface UserProfile {
-    name: string;
-}
-export interface http_header {
-    value: string;
     name: string;
 }
 export enum UserRole {
@@ -44,15 +26,15 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    bootstrapAdminWithCredentials(userName: string, password: string): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    incrementSystemUserCounter(userName: string, password: string): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number, recaptchaToken: string): Promise<string>;
-    transform(input: TransformationInput): Promise<TransformationOutput>;
-    updateRecaptchaMinScore(score: number): Promise<void>;
-    updateRecaptchaSecret(key: string): Promise<void>;
+    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number): Promise<string>;
+    testConnection(): Promise<string>;
 }

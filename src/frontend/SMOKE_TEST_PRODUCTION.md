@@ -1,4 +1,4 @@
-# Production Smoke Test Checklist - Version 34
+# Production Smoke Test Checklist
 
 Run these tests immediately after deploying to production to verify core functionality.
 
@@ -63,30 +63,19 @@ For each offer route, perform the following:
 
 ### Test Steps
 
-#### 3A. reCAPTCHA Not Configured (Expected if VITE_RECAPTCHA_SITE_KEY is not set)
+#### 3A. Form Submission
 1. Scroll to contact form section
-2. Fill in all fields (name, email, phone, message)
-3. Click "Send Message 🚀"
-
-**Expected Results:**
-- [ ] Form shows error: "Security verification is not configured. Please contact support."
-- [ ] Form does NOT submit
-- [ ] No console errors (reCAPTCHA script should not load)
-
-#### 3B. reCAPTCHA Configured (Expected if VITE_RECAPTCHA_SITE_KEY is set)
-1. Scroll to contact form section (reCAPTCHA should initialize when visible)
-2. Wait 2-3 seconds for reCAPTCHA to become ready
-3. Fill in all fields (name, email, phone, message)
+2. Fill in all required fields (name, email, message)
+3. Optionally fill in phone number
 4. Click "Send Message 🚀"
 
 **Expected Results:**
-- [ ] reCAPTCHA badge appears in bottom-right corner when form is visible
 - [ ] Form submits successfully (shows success message with checkmark)
 - [ ] Success message: "Thanks! Your message has been sent to Dirty Dave. 🎉"
 - [ ] "Send Another Message" button is visible
 - [ ] No console errors
 
-#### 3C. Phone Field Behavior
+#### 3B. Phone Field Behavior
 1. Locate the Phone Number field in the contact form
 2. Click on the country code dropdown
 3. Select different country codes (e.g., "+1 US", "+44 GB", "+61 AU")
@@ -100,7 +89,7 @@ For each offer route, perform the following:
 - [ ] Phone number input accepts numeric input
 - [ ] Form can be submitted with phone data included
 
-#### 3D. Form Validation
+#### 3C. Form Validation
 1. Try submitting empty form
 2. Try submitting with invalid email
 
@@ -111,11 +100,19 @@ For each offer route, perform the following:
 - [ ] Form does NOT submit until all required fields are valid
 - [ ] Phone field is optional (form can submit without phone number)
 
+#### 3D. Spam Protection
+1. Fill out form and submit immediately (within 1 second)
+2. Check if submission is flagged
+
+**Expected Results:**
+- [ ] Very fast submissions (< 1 second) may be rejected or flagged as junk
+- [ ] Normal submissions (> 2 seconds) are accepted
+- [ ] Honeypot field (hidden) catches bot submissions
+
 ### Common Issues
-- reCAPTCHA not loading: Check VITE_RECAPTCHA_SITE_KEY is set correctly
-- reCAPTCHA "not ready" error: Wait longer for initialization, or check network tab for script load failures
 - Form submits but no success message: Check backend canister is deployed and accessible
 - Phone dropdown not showing correct format: Verify countryCallingCodes.ts exports correct label format
+- All submissions flagged as spam: Check timing logic in backend
 
 ---
 
@@ -154,7 +151,6 @@ For each offer route, perform the following:
 **Expected Results:**
 - [ ] Admin can successfully call `getAllContactSubmissions()`
 - [ ] Admin can successfully call `getAllContactSubmissionsJunk()`
-- [ ] Admin can update reCAPTCHA configuration
 - [ ] Retrieved submissions include phone-related fields (phoneCountryCallingCode, phoneNumber)
 
 ### Common Issues
@@ -175,7 +171,7 @@ For each offer route, perform the following:
 - [ ] Hero background image loads quickly (preloaded)
 - [ ] Initial bundle size is reasonable (offer pages are code-split)
 - [ ] Lazy-loaded offer pages fetch separate chunks
-- [ ] reCAPTCHA script loads only when contact section is visible (deferred)
+- [ ] No unnecessary third-party scripts loading
 
 ---
 
@@ -183,10 +179,11 @@ For each offer route, perform the following:
 
 - [ ] Landing page renders without errors
 - [ ] All 6 offer routes load with proper lazy-loading fallback
-- [ ] Contact form behaves correctly based on reCAPTCHA configuration
+- [ ] Contact form submits successfully without CAPTCHA
 - [ ] Phone field displays with country code dropdown in "+<code> <abbrev>" format
 - [ ] Phone field allows user to select country code and enter phone number
 - [ ] Form submission includes phone data
+- [ ] Spam protection (honeypot + timing) works as expected
 - [ ] Access control prevents unauthorized access to admin methods
 - [ ] Navigation and routing work as expected
 - [ ] No critical console errors
@@ -197,10 +194,7 @@ For each offer route, perform the following:
 
 If any tests fail:
 1. Check browser console for specific error messages
-2. Verify environment variables are set correctly
+2. Verify environment variables are set correctly (if any)
 3. Confirm all assets exist in `dist/assets/generated/`
 4. Review backend canister deployment status
 5. Check network tab for failed requests
-
-If reCAPTCHA is not configured:
-- See `PRODUCTION_CONFIGURATION.md` for setup instructions

@@ -1,50 +1,58 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T12:32:49.521Z",
+  "generatedAt": "2026-02-11T13:41:17.873Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 5,
     "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Make the existing website contact form save each submission in the backend and return a successful response to the frontend so the user sees the success state after submitting.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useSubmitContactForm.ts",
-          "frontend/src/components/landing/ContactForm.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useSubmitContactForm.ts"
-        ]
+        "summary": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Implement reCAPTCHA/spam-handling on the backend submission endpoint by using the provided reCAPTCHA token and the configured minimum score, and store low-confidence or bot-like submissions in the junk submissions collection.",
+        "summary": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Add an in-app admin page (admin panel) that allows an admin user to view contact form submissions stored in the backend.",
+        "summary": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/App.tsx",
           "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-          "frontend/src/hooks/useAdminContactSubmissions.ts",
-          "frontend/src/components/admin/AccessDeniedScreen.tsx",
-          "frontend/src/utils/formatTimestamp.ts",
+          "frontend/PRODUCTION_CONFIGURATION.md"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/PRODUCTION_CONFIGURATION.md"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-          "frontend/src/hooks/useAdminContactSubmissions.ts",
-          "frontend/src/components/admin/AccessDeniedScreen.tsx",
-          "frontend/src/utils/formatTimestamp.ts",
           "frontend/src/App.tsx"
         ]
       }
@@ -52,20 +60,17 @@
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/admin/AccessDeniedScreen.tsx",
-    "frontend/src/hooks/useAdminContactSubmissions.ts",
-    "frontend/src/hooks/useSubmitContactForm.ts",
-    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-    "frontend/src/utils/formatTimestamp.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

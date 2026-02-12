@@ -1,88 +1,111 @@
 {
   "kind": "build_request",
-  "title": "Store contact form submissions and provide an admin panel to view them",
+  "title": "Persist contact form submissions and add protected admin messages page",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Make the existing website contact form save each submission in the backend and return a successful response to the frontend so the user sees the success state after submitting.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "there is a contact form on the website..... when someone fills it in I want to be able to access their message in the admin pannel"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Submitting the contact form from the landing page completes without client-side errors and shows the existing success UI state.",
-        "A successful submission is persisted in the backend as a ContactSubmission record with name, email, phone fields (calling code + number), message, and timestamp.",
-        "If the backend is unavailable or rejects the submission, the form shows a clear error message (using the existing error UI)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Implement reCAPTCHA/spam-handling on the backend submission endpoint by using the provided reCAPTCHA token and the configured minimum score, and store low-confidence or bot-like submissions in the junk submissions collection.",
+      "text": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "there is a contact form on the website..... when someone fills it in I want to be able to access their message in the admin pannel"
+          "Save every submission permanently to a secure database. Store at minimum: name, email, phone number and message"
         ]
       },
       "acceptanceCriteria": [
-        "backend/main.mo submitContactForm() uses the provided recaptcha token parameter (currently named _recaptchaToken) and verifies it server-side (when a secret key is configured).",
-        "Submissions that fail honeypot/elapsed-time checks and/or fail reCAPTCHA verification (or fall below the configured min score) are stored via the existing junk storage path, not mixed into normal submissions.",
-        "Valid submissions are stored in the normal submissions collection and are retrievable via the existing admin-only getAllContactSubmissions() query.",
-        "Behavior is deterministic and does not trap for common spam outcomes (it should store as junk and return an id)."
+        "After submitting the contact form, the submission is returned by an admin-only query even after a canister upgrade (no data loss).",
+        "Stored submission data includes: name, email, phoneCountryCallingCode, phoneNumber, message, timestamp (and an id if used).",
+        "submitContactForm continues to accept the existing parameters used by the frontend (including honeypot and elapsedTime) and saves non-junk submissions to the main storage."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "make sure it's protected — only I can access it. username dirtydave69\npassword Tomlikesboys69"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calling `bootstrapAdminWithCredentials` with incorrect credentials traps with an authorization/invalid-credentials error.",
+        "Calling `bootstrapAdminWithCredentials` with the correct credentials grants the caller admin permission so subsequent calls to `getAllContactSubmissions` and `getAllContactSubmissionsJunk` succeed for that caller.",
+        "The password is not stored in plaintext in canister stable state (e.g., store a hash and compare hashes)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add an in-app admin page (admin panel) that allows an admin user to view contact form submissions stored in the backend.",
+      "text": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Create a private admin-only page ... (make sure it's protected — only I can access it.)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`getAllContactSubmissions` is admin-only and returns all non-junk submissions sorted by timestamp.",
+        "`getAllContactSubmissionsJunk` is admin-only and returns all junk submissions sorted by timestamp.",
+        "Non-admin callers receive an authorization error that the frontend maps to access denied."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "I want to be able to access their message in the admin pannel"
+          "Create a private admin-only page at /admin/contact or /dashboard/messages (make sure it's protected — only I can access it.)"
         ]
       },
       "acceptanceCriteria": [
-        "A new route exists in the React app for an admin submissions page (reachable by URL) that lists stored contact submissions.",
-        "The page fetches data from the backend admin-only queries (getAllContactSubmissions and getAllContactSubmissionsJunk) and renders submission rows with at least timestamp, name, email, phone, and a message preview.",
-        "An admin can open a submission to view the full message content.",
-        "If a non-admin visits the admin page or the query traps as unauthorized, the UI shows an English access-denied message and does not crash.",
-        "The page supports manual refresh (button) that refetches the submissions list via React Query."
+        "Navigating to the chosen route renders the submissions admin UI.",
+        "If the visitor is not authenticated with Internet Identity, the page shows the access denied screen prompting Internet Identity login.",
+        "If authenticated but not an admin yet, the page shows the credential bootstrap UI and, after successful bootstrap, loads submissions.",
+        "Once admin access is granted, the page lists saved submissions and allows viewing details (using the existing admin submissions UI behavior)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Create a private admin-only page at /admin/contact or /dashboard/messages"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Visiting `/admin/submissions` still reaches the admin submissions UI (either via redirect or rendering the same page component).",
+        "The new chosen route and `/admin/submissions` both enforce the same access control behavior."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit files under frontend/src/components/ui or any other immutablePaths listed in SYSTEM_CONTEXT.",
-    "Use Internet Identity / existing access-control initialization flow (do not add third-party auth)."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if needed for stable-state upgrades.",
+    "Do not edit files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT.",
+    "Do not store admin passwords in plaintext in canister state or in frontend code."
   ],
   "nonGoals": [
-    "Sending contact form submissions via email or SMS.",
-    "Adding third-party admin dashboards or external databases.",
-    "Implementing real-time updates (WebSockets) for incoming submissions."
+    "Integrating an external database (PostgreSQL/MySQL/MongoDB/Redis) or any non-IC storage service.",
+    "Adding third-party authentication providers beyond Internet Identity.",
+    "Implementing real-time updates (WebSockets/push notifications) for new submissions."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }
