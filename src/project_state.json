@@ -1,34 +1,42 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Website project with a critical issue: publishing/deploying the current draft to production creates new drafts instead of updating the live site.",
+  "summary": "Set up ICP custom domain (dirtydaves.co.uk, optionally www) for canister fd6rd-maaaa-aaaah-atocq-cai by adding required .well-known assets, optionally configuring .ic-assets.json headers, redeploying, and validating public accessibility.",
   "architectural_notes": [
-    "When user requests publish/go-live, the system must compare current draft vs live, identify deployment blockers, and deploy the exact current draft to production without creating/regenerating new drafts."
+    "Target ICP canister: fd6rd-maaaa-aaaah-atocq-cai",
+    "Custom domains to support: dirtydaves.co.uk and www.dirtydaves.co.uk",
+    "Serve static verification files at /.well-known/ic-domains (text/plain) and /.well-known/ii-alternative-origins (application/json); consider adding .ic-assets.json to control content-type and disable caching (max_age: 0)"
   ],
-  "known_issues": [
-    "Publishing/deploying to live currently creates new draft versions or regenerates draft code; production/live site never updates."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-enhance-the-frontend-backend-health-check-diagnostics-to-retrieve-and-display-the-backend-deployment-identity-information-canister-id-server-timestamp-and-to-log-a-single-clearly-labeled-diagnostic-line-that-helps-detect-draft-live-mismatch-e-g-frontend-host-vs-backend-canister-id",
-      "title": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
+      "id": "feature-ensure-the-deployed-frontend-serves-a-well-known-ic-domains-text-file-that-contains-exactly-two-lines-one-domain-per-line-with-no-extra-spaces-quotes-or-trailing-blank-lines-1-dirtydaves-co-uk-2-www-dirtydaves-co-uk-the-file-must-be-located-at-frontend-public-well-known-ic-domains-so-it-is-included-in-the-static-asset-deployment",
+      "title": "Ensure the deployed frontend serves a `/.well-known/ic-domains` text file that contains exactly two lines (one domain per line) with no extra spaces, quotes, or trailing blank lines:\n1) `dirtydaves.co.uk`\n2) `www.dirtydaves.co.uk`\nThe file must be located at `frontend/public/.well-known/ic-domains` so it is included in the static asset deployment.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-static-file-frontend-public-well-known-ii-alternative-origins-no-file-extension-containing-exactly-this-one-line-json-alternativeorigins-https-dirtydaves-co-uk-https-www-dirtydaves-co-uk-ensure-it-is-deployed-as-a-public-static-asset-at-well-known-ii-alternative-origins",
+      "title": "Create a static file `frontend/public/.well-known/ii-alternative-origins` (no file extension) containing exactly this one-line JSON:\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}\nEnsure it is deployed as a public static asset at `/.well-known/ii-alternative-origins`.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-in-app-draft-vs-live-verification-diagnostics-view-that-makes-it-obvious-which-environment-a-user-is-currently-viewing-and-whether-the-frontend-is-connected-to-the-expected-backend-show-hostname-build-version-timestamp-backend-canister-id-and-backend-health-status",
-      "title": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
+      "id": "feature-add-an-asset-configuration-file-frontend-public-ic-assets-json-that-configures-content-types-and-disables-caching-max-age-0-for-the-two-well-known-files-using-exactly-this-json-structure-and-paths-assets-path-well-known-ic-domains-content-type-text-plain-cache-max-age-0-path-well-known-ii-alternative-origins-content-type-application-json-cache-max-age-0",
+      "title": "Add an asset configuration file `frontend/public/.ic-assets.json` that configures content types and disables caching (max_age: 0) for the two `/.well-known` files, using exactly this JSON structure and paths:\n{\n  \"assets\": [\n    {\n      \"path\": \"/.well-known/ic-domains\",\n      \"content_type\": \"text/plain\",\n      \"cache\": { \"max_age\": 0 }\n    },\n    {\n      \"path\": \"/.well-known/ii-alternative-origins\",\n      \"content_type\": \"application/json\",\n      \"cache\": { \"max_age\": 0 }\n    }\n  ]\n}",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-admin-backend-connectivity-diagnostics-ui-to-include-backend-canister-identity-info-when-available-and-provide-more-actionable-troubleshooting-guidance-specifically-for-draft-live-mismatch-and-missing-backend-deployment-scenarios",
-      "title": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
+      "id": "feature-update-the-production-smoke-test-documentation-to-reflect-the-new-expected-well-known-ic-domains-content-two-lines-including-www-and-add-a-verification-check-for-well-known-ii-alternative-origins-returning-the-exact-json-payload",
+      "title": "Update the production smoke test documentation to reflect the new expected `/.well-known/ic-domains` content (two lines including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
       "reqIds": [
         "REQ-4"
       ],
@@ -38,20 +46,21 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix publish/deploy workflow so the exact current draft is pushed to live/production (no new drafts), including draft-vs-live comparison, blocker identification, and successful zero-downtime deployment when possible.",
+      "summary": "Add ICP custom domain support for dirtydaves.co.uk (and www) by creating /.well-known/ic-domains and /.well-known/ii-alternative-origins (plus optional .ic-assets.json), redeploying to canister fd6rd-maaaa-aaaah-atocq-cai, and verifying files are publicly accessible.",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-2",
-      "summary": "Add a backend query method that returns unambiguous deployment/runtime identity information so the frontend can confirm it is talking to the intended live backend canister (e.g., include the backend canister principal ID and current canister time).",
+      "id": "AR-6",
+      "summary": "Add a short post-deploy checklist note (in an existing deployment/production doc) listing the remaining manual steps outside Caffeine for domain setup for canister `fd6rd-maaaa-aaaah-atocq-cai`, including the exact DNS records and the optional boundary-node registration/status URLs the user provided.",
       "reqIds": [
-        "REQ-1"
+        "REQ-5"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Add draft-vs-live deployment verification diagnostics and canister identity reporting",
+  "gameProjectType": "none",
+  "projectName": "Configure ICP custom domain verification assets for dirtydaves.co.uk (+ www) and prepare for redeploy",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

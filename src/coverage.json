@@ -1,75 +1,79 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T10:43:03.177Z",
+  "generatedAt": "2026-02-12T14:38:39.107Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 5,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a backend query method that returns unambiguous deployment/runtime identity information so the frontend can confirm it is talking to the intended live backend canister (e.g., include the backend canister principal ID and current canister time).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Ensure the deployed frontend serves a `/.well-known/ic-domains` text file that contains exactly two lines (one domain per line) with no extra spaces, quotes, or trailing blank lines:\n1) `dirtydaves.co.uk`\n2) `www.dirtydaves.co.uk`\nThe file must be located at `frontend/public/.well-known/ic-domains` so it is included in the static asset deployment.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/.well-known/ic-domains"
+        ],
+        "matchedFiles": [
+          "frontend/public/.well-known/ic-domains"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
+        "summary": "Create a static file `frontend/public/.well-known/ii-alternative-origins` (no file extension) containing exactly this one-line JSON:\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}\nEnsure it is deployed as a public static asset at `/.well-known/ii-alternative-origins`.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useBackendHealthCheck.ts",
-          "frontend/src/backend.d.ts"
+          "frontend/public/.well-known/ii-alternative-origins"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useBackendHealthCheck.ts",
-          "frontend/src/backend.d.ts"
+          "frontend/public/.well-known/ii-alternative-origins"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
+        "summary": "Add an asset configuration file `frontend/public/.ic-assets.json` that configures content types and disables caching (max_age: 0) for the two `/.well-known` files, using exactly this JSON structure and paths:\n{\n  \"assets\": [\n    {\n      \"path\": \"/.well-known/ic-domains\",\n      \"content_type\": \"text/plain\",\n      \"cache\": { \"max_age\": 0 }\n    },\n    {\n      \"path\": \"/.well-known/ii-alternative-origins\",\n      \"content_type\": \"application/json\",\n      \"cache\": { \"max_age\": 0 }\n    }\n  ]\n}\n",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/public/.ic-assets.json"
         ],
         "matchedFiles": [
-          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/public/.ic-assets.json"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
+        "summary": "Update the production smoke test documentation to reflect the new expected `/.well-known/ic-domains` content (two lines including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx"
+          "frontend/SMOKE_TEST_PRODUCTION.md"
         ],
         "matchedFiles": [
-          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx"
+          "frontend/SMOKE_TEST_PRODUCTION.md"
         ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add a short post-deploy checklist note (in an existing deployment/production doc) listing the remaining manual steps outside Caffeine for domain setup for canister `fd6rd-maaaa-aaaah-atocq-cai`, including the exact DNS records and the optional boundary-node registration/status URLs the user provided.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/PRODUCTION_DEPLOYMENT_NOTES.md"
+        ],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useBackendHealthCheck.ts",
-    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
+    "frontend/SMOKE_TEST_PRODUCTION.md",
+    "frontend/public/.ic-assets.json",
+    "frontend/public/.well-known/ic-domains",
+    "frontend/public/.well-known/ii-alternative-origins",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

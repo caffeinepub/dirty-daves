@@ -1,65 +1,82 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Draft-vs-live verification diagnostics with backend identity reporting (frontend-only)",
+  "title": "Configure ICP custom domain verification static assets and update production docs",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Extend backend health check hook to fetch and expose backend deployment identity info and emit a single mismatch-detection diagnostic log line.",
+      "id": "REQ-1",
+      "summary": "Serve /.well-known/ic-domains with exactly two domain lines (apex + www) from frontend/public for ICP custom domain verification.",
       "acceptanceCriteria": [
-        "`useBackendHealthCheck` continues to perform the existing `testConnection` check and additionally attempts to fetch backend deployment identity info.",
-        "On success, console output includes one labeled line that contains: current hostname + backend canister ID + build version info (if available).",
-        "On failure, console output includes one labeled line with hostname and the exact error message (no repeated loops/spam).",
-        "Hook return value includes the fetched backend canister ID (when available) for use in UI components."
+        "Repository contains `frontend/public/.well-known/ic-domains`.",
+        "`frontend/public/.well-known/ic-domains` content matches exactly:\n`dirtydaves.co.uk\\nwww.dirtydaves.co.uk` (newline-separated, no additional newline at end preferred).",
+        "When deployed, `GET /.well-known/ic-domains` returns HTTP 200 and the response body is exactly those two lines."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useBackendHealthCheck.ts",
+          "path": "frontend/public/.well-known/ic-domains",
           "operation": "modify",
-          "description": "Enhance the hook to (1) keep the existing one-time `testConnection` check, (2) additionally attempt `getDeploymentInfo` and store the returned identity fields, and (3) emit exactly one clearly-labeled diagnostic console line per app load/health-check run: on success include hostname + backend canister ID + build version/timestamp info (when available), on failure include hostname + exact error message. Also extend the hook return value to include backend canister ID (when available), backend server timestamp, and the captured deployment-info fetch error (if any)."
-        },
+          "description": "Update file contents to be exactly two lines with no extra spaces/quotes and no trailing blank line: first line `dirtydaves.co.uk`, second line `www.dirtydaves.co.uk`."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Serve /.well-known/ii-alternative-origins as a static one-line JSON file for Internet Identity alternative origins.",
+      "acceptanceCriteria": [
+        "Repository contains `frontend/public/.well-known/ii-alternative-origins`.",
+        "File content matches exactly the provided JSON on a single line.",
+        "When deployed, `GET /.well-known/ii-alternative-origins` returns HTTP 200."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/backend.d.ts",
-          "operation": "modify",
-          "description": "Update the TypeScript backend interface typing for `getDeploymentInfo()` so the frontend can read the backend canister principal ID text in addition to the server timestamp (e.g., add a `canisterIdText`/`canisterPrincipalText` string field alongside `canisterTime`). Keep the typing backward-compatible if needed so builds don’t break while draft/live changes roll out."
+          "path": "frontend/public/.well-known/ii-alternative-origins",
+          "operation": "create",
+          "description": "Create a no-extension static asset containing exactly this single line (no trailing newline): {\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add a public Draft vs Live Verification diagnostics view that shows environment + build metadata and backend identity/health in one place with clear mismatch guidance.",
+      "summary": "Add .ic-assets.json to set explicit content types and disable caching (max_age 0) for the two /.well-known assets.",
       "acceptanceCriteria": [
-        "Diagnostics view can be accessed without admin privileges (e.g., via a dedicated route or a query-param gated panel) and does not expose sensitive data.",
-        "View displays: current hostname, build mode/prod flag, build version, build timestamp, backend health status, backend canister ID, and backend server timestamp.",
-        "View includes clear English copy explaining how to interpret mismatches (e.g., “If hostname is a live domain but backend canister ID differs from expected, publish/binding may be misconfigured”).",
-        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT."
+        "Repository contains `frontend/public/.ic-assets.json` with the exact JSON provided in the request (paths, content_type values, and cache.max_age).",
+        "On deployment, responses for `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins` are served with appropriate `Content-Type` and are not aggressively cached (max-age 0)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
+          "path": "frontend/public/.ic-assets.json",
           "operation": "create",
-          "description": "Create a new public diagnostics page/view that uses `useBackendHealthCheck` to display: hostname, build mode/prod flag, build version, build timestamp, backend health status/error, backend canister ID (when available), and backend server timestamp formatted for readability. Include clear English guidance explaining how to interpret draft/live mismatch signals (hostname vs backend canister ID vs health)."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wire the new Draft vs Live Verification diagnostics page into routing with a dedicated public route (e.g., under a `/diagnostics/...` path) using the existing TanStack Router pattern (lazy loading + Suspense fallback) so it is navigable and not orphaned."
+          "description": "Create the asset configuration file with exactly the JSON structure and paths specified in the request to set content_type and cache.max_age: 0 for `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins`."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Improve the admin Backend Connectivity diagnostics panel to show backend canister identity info and provide actionable draft/live troubleshooting guidance.",
+      "summary": "Update production smoke test doc to expect the new ic-domains two-line content and to verify ii-alternative-origins payload.",
       "acceptanceCriteria": [
-        "Admin page diagnostics shows backend canister ID and backend server timestamp when health check data is available.",
-        "If backend is unhealthy, UI shows the captured error message and a short checklist that distinguishes: (1) frontend published but backend not, (2) canister binding mismatch, (3) network/agent errors.",
-        "UI changes do not break existing admin access flow and do not require new auth mechanisms."
+        "`frontend/SMOKE_TEST_PRODUCTION.md` section \"Custom Domain Verification\" expects `dirtydaves.co.uk` and `www.dirtydaves.co.uk` (and no extra lines).",
+        "Smoke test includes a step to fetch and verify `/.well-known/ii-alternative-origins` content."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
           "operation": "modify",
-          "description": "Update the existing \"Backend Connectivity\" diagnostics card to consume the expanded `useBackendHealthCheck` return values and display backend canister ID and backend server timestamp when available. When unhealthy, show the captured error message and replace/augment the current bullet list with a short, more actionable checklist that distinguishes: (1) frontend published but backend not deployed/available, (2) canister binding/hostname mismatch (live hostname but unexpected backend canister ID), (3) network/agent/browser issues. Keep the existing admin access flow unchanged."
+          "description": "Revise the \"Custom Domain Verification\" section to expect exactly two lines for `/.well-known/ic-domains` (including `www`) and add a new check to fetch `/.well-known/ii-alternative-origins` and verify it matches exactly {\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add post-deploy checklist note documenting remaining manual custom-domain setup steps (DNS + optional registration/status URLs) for canister fd6rd-maaaa-aaaah-atocq-cai.",
+      "acceptanceCriteria": [
+        "A production/deployment documentation file includes the user-provided DNS records verbatim:\n- CNAME @/apex → dirtydaves.co.uk.icp1.io\n- CNAME www → www.dirtydaves.co.uk.icp1.io\n- TXT _canister-id.dirtydaves.co.uk → fd6rd-maaaa-aaaah-atocq-cai\n- CNAME _acme-challenge.dirtydaves.co.uk → _acme-challenge.dirtydaves.co.uk.icp2.io\n(and note about www if needed).",
+        "Documentation includes verbatim optional commands/URLs:\n- `curl -sL -X POST https://icp0.io/custom-domains/v1/dirtydaves.co.uk`\n- `https://icp0.io/custom-domains/v1/dirtydaves.co.uk` for status."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
+          "operation": "modify",
+          "description": "Add a short post-deploy checklist note for canister `fd6rd-maaaa-aaaah-atocq-cai` listing the remaining manual steps outside Caffeine, including the DNS records verbatim (CNAME @/apex → dirtydaves.co.uk.icp1.io; CNAME www → www.dirtydaves.co.uk.icp1.io; TXT _canister-id.dirtydaves.co.uk → fd6rd-maaaa-aaaah-atocq-cai; CNAME _acme-challenge.dirtydaves.co.uk → _acme-challenge.dirtydaves.co.uk.icp2.io; plus the note about www if needed) and the optional registration/status command and URL verbatim (`curl -sL -X POST https://icp0.io/custom-domains/v1/dirtydaves.co.uk` and `https://icp0.io/custom-domains/v1/dirtydaves.co.uk`)."
         }
       ]
     }

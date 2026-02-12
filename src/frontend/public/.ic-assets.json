@@ -1,0 +1,14 @@
+{
+  "assets": [
+    {
+      "path": "/.well-known/ic-domains",
+      "content_type": "text/plain",
+      "cache": { "max_age": 0 }
+    },
+    {
+      "path": "/.well-known/ii-alternative-origins",
+      "content_type": "application/json",
+      "cache": { "max_age": 0 }
+    }
+  ]
+}

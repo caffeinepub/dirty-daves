@@ -1,65 +1,58 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T10:43:03.172Z",
-  "summary": "Core diagnostics plumbing was added (new backend getDeploymentInfo query, enhanced useBackendHealthCheck, new public Draft vs Live diagnostics page, and admin diagnostics UI additions). However, the backend deployment info response is missing the required canister Principal text, and the diff evidence also indicates a number of unrelated frontend UI/style/content changes that violate the “don’t restructure unrelated features” constraint.",
+  "generatedAt": "2026-02-12T14:38:39.104Z",
+  "summary": "REQ-2 and REQ-3 appear implemented via new static assets under frontend/public. REQ-1 is present but the shown file content includes an extra trailing blank line. REQ-4 and REQ-5 are not evidenced in the provided SMOKE_TEST_PRODUCTION.md truncation / other docs. The diff summary also indicates multiple unrequested frontend code/UI changes (and updates to project metadata) that violate the stated constraint to limit changes to static assets and documentation.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Backend deployment info query must return the backend canister Principal ID (as text) and a server-side timestamp.",
-      "reason": "The added backend method getDeploymentInfo() returns only canisterTime and does not include the backend canister Principal ID as text.",
+      "requirement": "Ensure `frontend/public/.well-known/ic-domains` contains exactly two lines: `dirtydaves.co.uk` and `www.dirtydaves.co.uk` with no extra spaces/quotes/trailing blank lines.",
+      "reason": "The diff shows an extra blank line at the end of the file content, implying a trailing newline/blank line beyond the two required lines, so the content does not match the exact two-line requirement.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Diagnostics view includes clear English copy explaining how to interpret mismatches (e.g., live hostname but unexpected backend canister ID implies publish/binding misconfiguration).",
-      "reason": "A comment indicates guidance exists, but the added page file is truncated in the diff summary before showing the explanatory copy; cannot confirm it is implemented from available evidence.",
-      "evidence": [
-        "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx (truncated)"
+        "frontend/public/.well-known/ic-domains"
       ]
     },
     {
       "id": "REQ-4",
-      "requirement": "If backend is unhealthy, admin diagnostics UI shows the captured error message and a short checklist distinguishing (1) frontend published but backend not, (2) canister binding mismatch, (3) network/agent errors.",
-      "reason": "Admin page changes are truncated before confirming the presence of the requested actionable checklist and exact unhealthy-state guidance details.",
+      "requirement": "Update `frontend/SMOKE_TEST_PRODUCTION.md` to reflect the new expected `/.well-known/ic-domains` two-line content (including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
+      "reason": "The shown (truncated) modifications to `frontend/SMOKE_TEST_PRODUCTION.md` do not include any visible 'Custom Domain Verification' updates nor steps to fetch/verify `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins`.",
       "evidence": [
-        "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx (truncated)"
+        "frontend/SMOKE_TEST_PRODUCTION.md (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Add a post-deploy checklist note in an existing deployment/production doc including the provided DNS records verbatim and the optional boundary-node registration/status URLs/command.",
+      "reason": "No documentation file changes in the diff summary show the required DNS record block or the provided curl/URL status entries.",
+      "evidence": [
+        "frontend/SMOKE_TEST_PRODUCTION.md (truncated)",
+        "file-diff summary (no other production/deployment doc shown as modified)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Multiple landing page/offer/contact/footer UI, copy, and styling changes (including Tailwind/navy/teal theme work, CTA/link changes, reviews/contact section changes, and adding a build/environment indicator in the footer).",
-      "reason": "BuildRequest explicitly constrained not to regenerate or restructure unrelated app features (landing page, offers pages, contact form) while implementing diagnostics; diff evidence suggests many such unrelated changes.",
+      "description": "Multiple frontend application code/UI changes (new routes, landing page/hero/CTA/style changes, contact form behavior changes, Tailwind config changes, etc.).",
+      "reason": "BuildRequest constraints require keeping changes limited to static asset files and documentation and explicitly say not to modify immutable frontend paths; the diff summary indicates extensive frontend source changes unrelated to `.well-known` assets and docs.",
       "evidence": [
-        "frontend-file-summaries.txt (truncated)"
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Edits/additions to global styling and Tailwind configuration (OKLCH color system, new accent colors/utilities).",
-      "reason": "Not requested by the diagnostics-focused BuildRequest and falls under unrelated UI/styling changes.",
-      "evidence": [
-        "frontend-file-summaries.txt (truncated)"
-      ]
-    },
-    {
-      "description": "Modification/addition of project tracking metadata (project_state.json) marking items pending and describing publish workflow issues.",
-      "reason": "Not requested as part of implementing REQ-1..REQ-4 diagnostics features.",
+      "description": "Modification of `project_state.json` to add/update internal tracking entries for AR-1..AR-6.",
+      "reason": "Not requested in the BuildRequest; requirement scope is limited to static assets and documentation for custom domain verification and deployment checklist notes.",
       "evidence": [
         "project_state.json"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/hooks/useBackendHealthCheck.ts",
-    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
+    "frontend/SMOKE_TEST_PRODUCTION.md",
+    "frontend/public/.ic-assets.json",
+    "frontend/public/.well-known/ic-domains",
+    "frontend/public/.well-known/ii-alternative-origins",
     "project_state.json"
   ]
 }
