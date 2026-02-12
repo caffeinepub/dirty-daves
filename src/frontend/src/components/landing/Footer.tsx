@@ -1,5 +1,6 @@
 import { SiX, SiWhatsapp, SiYoutube } from 'react-icons/si';
 import { Mail } from 'lucide-react';
+import BuildEnvironmentIndicator from '../diagnostics/BuildEnvironmentIndicator';
 
 export default function Footer() {
   return (
@@ -59,10 +60,17 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-white/20 text-center">
-          <p className="text-sm text-white font-medium text-shadow-subtle">
-            built by Dave and thats why the website is so shit
-          </p>
+        <div className="mt-8 pt-8 border-t border-white/20 space-y-4">
+          <div className="text-center">
+            <p className="text-sm text-white font-medium text-shadow-subtle">
+              built by Dave and thats why the website is so shit
+            </p>
+          </div>
+          
+          {/* Build & Environment Indicator */}
+          <div className="flex justify-center">
+            <BuildEnvironmentIndicator />
+          </div>
         </div>
       </div>
     </footer>

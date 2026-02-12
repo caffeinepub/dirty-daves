@@ -1,26 +1,41 @@
 # Production Configuration
 
+This document describes the production configuration for the Dirty Daves application, including admin access, security, and deployment settings.
+
 ## Admin Access
 
 ### Admin Panel Routes
 The admin panel for viewing contact form submissions is accessible at:
-- **Primary route**: `/admin/contact`
-- **Legacy route**: `/admin/submissions` (alias to /admin/contact)
+- **Primary route**: `/admin`
+- **Legacy routes**: `/admin/contact` and `/admin/submissions` (both alias to /admin)
 
-Both routes provide the same functionality and access control.
+All three routes provide the same functionality and access control.
 
-### Access Control
-Admin access requires two steps:
+### Access Control System
+The application uses **role-based access control (RBAC)** provided by the authorization component:
+
 1. **Internet Identity Authentication**: Users must first log in with Internet Identity
-2. **Credential Bootstrap**: After authentication, users must enter admin credentials to gain admin permissions
+2. **Admin Role Check**: The backend verifies if the authenticated principal has admin permissions
+3. **Access Denied Screen**: Unauthorized users see a clear access denied message
 
-The credential bootstrap is a one-time process per principal. Once a principal is granted admin access, they can access the admin panel directly after Internet Identity login.
+### Admin Access Flow
+1. User navigates to `/admin`
+2. If not authenticated: AccessDeniedScreen shows "Admin Access Required" with login button
+3. If authenticated but not admin: AccessDeniedScreen shows "Access Denied" with logout option
+4. If authenticated and admin: ContactSubmissionsAdminPage loads successfully
+
+### First-Time Admin Setup
+For the first deployment, admin access is initialized automatically:
+- The first principal to authenticate is granted admin access
+- Subsequent admins must be added by existing admins
+- Admin credentials are managed securely by the backend canister
 
 ### Security Notes
-- Admin credentials are verified by the backend canister
-- Credentials are NOT stored in the frontend code or browser
-- The backend uses secure credential verification (not plaintext storage)
-- Only authenticated principals with admin permissions can view submissions
+- Admin permissions are verified on every backend call
+- The backend uses the authorization mixin for consistent access control
+- Only authenticated principals with admin role can view submissions
+- Anonymous principals are treated as guests with no admin access
+- Logging out clears all cached data including user profile
 
 ## Contact Form
 
@@ -29,36 +44,6 @@ The contact form includes built-in spam protection without requiring external se
 
 1. **Honeypot Field**: Hidden field that bots typically fill out
 2. **Timing Check**: Submissions faster than 2 seconds are flagged as suspicious
-3. **Junk Storage**: Suspicious submissions are stored separately in a junk collection
+3. **User-Friendly Error Handling**: Spam detection shows helpful messages, not critical errors
 
-Legitimate submissions are stored in the main submissions collection and visible in the "Normal Submissions" tab of the admin panel.
-
-### Data Storage
-All contact form submissions are permanently stored in the backend canister with the following fields:
-- Name
-- Email
-- Phone (country calling code + number)
-- Message
-- Timestamp
-- Unique ID
-
-## Deployment Checklist
-
-Before deploying to production:
-
-- [ ] Verify admin credentials are configured correctly in the backend
-- [ ] Test Internet Identity login flow
-- [ ] Test admin credential bootstrap process
-- [ ] Verify contact form submissions are saved correctly
-- [ ] Test spam protection (honeypot and timing checks)
-- [ ] Verify both admin routes work (`/admin/contact` and `/admin/submissions`)
-- [ ] Check that unauthorized users see the access denied screen
-- [ ] Verify all offer pages load correctly
-- [ ] Test mobile responsiveness
-- [ ] Verify all assets load correctly (images, fonts)
-- [ ] Test navigation between all pages
-- [ ] Verify footer attribution and links
-
-## Environment Variables
-
-No environment variables are required for production builds. All configuration is handled through the backend canister.
+Spam protection is logged to console for debugging:

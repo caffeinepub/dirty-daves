@@ -11,7 +11,6 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface ContactSubmission {
-  'id' : string,
   'name' : string,
   'email' : string,
   'phoneCountryCallingCode' : string,
@@ -26,13 +25,12 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'bootstrapAdminWithCredentials' : ActorMethod<[string, string], undefined>,
   'getAllContactSubmissions' : ActorMethod<[], Array<ContactSubmission>>,
-  'getAllContactSubmissionsJunk' : ActorMethod<[], Array<ContactSubmission>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getDeploymentInfo' : ActorMethod<[], { 'canisterTime' : bigint }>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'incrementSystemUserCounter' : ActorMethod<[string, string], bigint>,
+  'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitContactForm' : ActorMethod<

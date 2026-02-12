@@ -1,47 +1,65 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin messages route + legacy admin submissions alias (frontend-only)",
+  "title": "Draft-vs-live verification diagnostics with backend identity reporting (frontend-only)",
   "requirements": [
     {
-      "id": "REQ-4",
-      "summary": "Add a private admin-only route at /admin/contact that renders the existing submissions admin UI and enforces Internet Identity + admin permission checks with the existing access-denied bootstrap flow.",
+      "id": "REQ-2",
+      "summary": "Extend backend health check hook to fetch and expose backend deployment identity info and emit a single mismatch-detection diagnostic log line.",
       "acceptanceCriteria": [
-        "Navigating to /admin/contact renders the submissions admin UI.",
-        "If the visitor is not authenticated with Internet Identity, the page shows the access denied screen prompting Internet Identity login.",
-        "If authenticated but not an admin yet, the page shows the credential bootstrap UI and, after successful bootstrap, loads submissions.",
-        "Once admin access is granted, the page lists saved submissions and allows viewing details (using the existing admin submissions UI behavior)."
+        "`useBackendHealthCheck` continues to perform the existing `testConnection` check and additionally attempts to fetch backend deployment identity info.",
+        "On success, console output includes one labeled line that contains: current hostname + backend canister ID + build version info (if available).",
+        "On failure, console output includes one labeled line with hostname and the exact error message (no repeated loops/spam).",
+        "Hook return value includes the fetched backend canister ID (when available) for use in UI components."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/useBackendHealthCheck.ts",
           "operation": "modify",
-          "description": "Register a new TanStack Router route for /admin/contact that renders the existing ContactSubmissionsAdminPage (lazy-loaded with the existing PageLoader). Use the existing authorization component patterns (Internet Identity via useInternetIdentity and access-denied bootstrap via AccessDeniedScreen) to keep the page protected. Verify the component's usage instructions before implementing."
+          "description": "Enhance the hook to (1) keep the existing one-time `testConnection` check, (2) additionally attempt `getDeploymentInfo` and store the returned identity fields, and (3) emit exactly one clearly-labeled diagnostic console line per app load/health-check run: on success include hostname + backend canister ID + build version/timestamp info (when available), on failure include hostname + exact error message. Also extend the hook return value to include backend canister ID (when available), backend server timestamp, and the captured deployment-info fetch error (if any)."
         },
         {
-          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Confirm the page’s access gating remains correct when accessed from /admin/contact: unauthenticated users see AccessDeniedScreen (Internet Identity login prompt), and authenticated-but-unauthorized users see AccessDeniedScreen with credential bootstrap; on successful bootstrap, submissions load without requiring manual navigation. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/PRODUCTION_CONFIGURATION.md",
-          "operation": "modify",
-          "description": "Update the documented admin route to include /admin/contact as the primary admin messages/submissions page and note that admin access requires Internet Identity plus credential bootstrap (do not include or store plaintext credentials in this document)."
+          "description": "Update the TypeScript backend interface typing for `getDeploymentInfo()` so the frontend can read the backend canister principal ID text in addition to the server timestamp (e.g., add a `canisterIdText`/`canisterPrincipalText` string field alongside `canisterTime`). Keep the typing backward-compatible if needed so builds don’t break while draft/live changes roll out."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "Maintain /admin/submissions compatibility by aliasing it to the new /admin/contact admin messages route with identical access control behavior.",
+      "id": "REQ-3",
+      "summary": "Add a public Draft vs Live Verification diagnostics view that shows environment + build metadata and backend identity/health in one place with clear mismatch guidance.",
       "acceptanceCriteria": [
-        "Visiting /admin/submissions still reaches the admin submissions UI (either via redirect or rendering the same page component).",
-        "The new chosen route and /admin/submissions both enforce the same access control behavior."
+        "Diagnostics view can be accessed without admin privileges (e.g., via a dedicated route or a query-param gated panel) and does not expose sensitive data.",
+        "View displays: current hostname, build mode/prod flag, build version, build timestamp, backend health status, backend canister ID, and backend server timestamp.",
+        "View includes clear English copy explaining how to interpret mismatches (e.g., “If hostname is a live domain but backend canister ID differs from expected, publish/binding may be misconfigured”).",
+        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
+          "operation": "create",
+          "description": "Create a new public diagnostics page/view that uses `useBackendHealthCheck` to display: hostname, build mode/prod flag, build version, build timestamp, backend health status/error, backend canister ID (when available), and backend server timestamp formatted for readability. Include clear English guidance explaining how to interpret draft/live mismatch signals (hostname vs backend canister ID vs health)."
+        },
+        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Keep /admin/submissions working by aliasing it to the same page as /admin/contact (either render ContactSubmissionsAdminPage for both routes, or implement a redirect). Ensure both routes share the same protected behavior provided by the authorization component’s Internet Identity + access-denied bootstrap flow. Verify the component's usage instructions before implementing."
+          "description": "Wire the new Draft vs Live Verification diagnostics page into routing with a dedicated public route (e.g., under a `/diagnostics/...` path) using the existing TanStack Router pattern (lazy loading + Suspense fallback) so it is navigable and not orphaned."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Improve the admin Backend Connectivity diagnostics panel to show backend canister identity info and provide actionable draft/live troubleshooting guidance.",
+      "acceptanceCriteria": [
+        "Admin page diagnostics shows backend canister ID and backend server timestamp when health check data is available.",
+        "If backend is unhealthy, UI shows the captured error message and a short checklist that distinguishes: (1) frontend published but backend not, (2) canister binding mismatch, (3) network/agent errors.",
+        "UI changes do not break existing admin access flow and do not require new auth mechanisms."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+          "operation": "modify",
+          "description": "Update the existing \"Backend Connectivity\" diagnostics card to consume the expanded `useBackendHealthCheck` return values and display backend canister ID and backend server timestamp when available. When unhealthy, show the captured error message and replace/augment the current bullet list with a short, more actionable checklist that distinguishes: (1) frontend published but backend not deployed/available, (2) canister binding/hostname mismatch (live hostname but unexpected backend canister ID), (3) network/agent/browser issues. Keep the existing admin access flow unchanged."
         }
       ]
     }

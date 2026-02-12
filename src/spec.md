@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Persist contact form submissions in stable canister storage and add a protected admin-only messages page to view them.
+**Goal:** Add clear, in-app and console diagnostics to verify whether the frontend is connected to the intended live backend canister, and to help quickly detect draft/live mismatches or missing deployments.
 
 **Planned changes:**
-- Update the backend contact submission flow to save every successful (non-junk) contact form submission to stable storage with: name, email, phoneCountryCallingCode, phoneNumber, message, and timestamp.
-- Add admin bootstrapping via `bootstrapAdminWithCredentials(username, password)` that grants admin permissions to the authenticated caller only when credentials match, without storing plaintext passwords in canister state.
-- Ensure admin-only backend endpoints exist for retrieving saved submissions (normal and junk), sorted by timestamp, and return authorization errors for non-admin callers.
-- Create a private admin-only frontend route (choose one: `/admin/contact` or `/dashboard/messages`) that requires Internet Identity login and admin permission, and supports credential bootstrap when authenticated but not yet an admin.
-- Keep `/admin/submissions` working by redirecting or aliasing it to the new admin messages route with identical access control.
+- Add a backend public query method that returns deployment/runtime identity details (backend canister principal ID as text + server-side timestamp) without requiring auth and without breaking existing features.
+- Extend the existing frontend backend health check to also fetch and expose backend identity info, and emit a single clearly labeled diagnostic console line (hostname + backend canister ID + build/version info when available) or a single labeled error line on failure.
+- Add a non-admin “Draft vs Live Verification” diagnostics view (route or query-param gated) that shows hostname, build mode/prod flag, build version, build timestamp, backend health status, backend canister ID, and backend server timestamp, with short guidance on interpreting mismatches.
+- Update the admin “Backend Connectivity” diagnostics UI to display backend canister identity info when available and add a short troubleshooting checklist for draft/live mismatch, missing backend deployment, and network/agent errors.
 
-**User-visible outcome:** Contact form messages are retained across canister upgrades, and an authenticated Internet Identity admin can bootstrap access and view all saved submissions (including junk) on a protected admin messages page; existing `/admin/submissions` links still work.
+**User-visible outcome:** Users (and admins) can open diagnostics to immediately see which environment they’re viewing and confirm whether the frontend is talking to the expected backend canister, with clearer guidance when draft/live deployment or binding issues are present.

@@ -1,79 +1,65 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T13:41:17.870Z",
-  "summary": "Diff adds an admin contact route aliasing /admin/submissions to /admin/contact, and adds a backend method named bootstrapAdminWithCredentials. However, key security and persistence requirements are either not shown (due to truncation) or appear violated (plaintext credentials in backend), and the admin submissions UI implementation is not evidenced in the provided diff summary.",
+  "generatedAt": "2026-02-12T10:43:03.172Z",
+  "summary": "Core diagnostics plumbing was added (new backend getDeploymentInfo query, enhanced useBackendHealthCheck, new public Draft vs Live diagnostics page, and admin diagnostics UI additions). However, the backend deployment info response is missing the required canister Principal text, and the diff evidence also indicates a number of unrelated frontend UI/style/content changes that violate the “don’t restructure unrelated features” constraint.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Persist contact form submissions in stable storage so they survive canister upgrades, saving all non-junk submissions with required fields (name, email, phoneCountryCallingCode, phoneNumber, message, timestamp, id if used).",
-      "reason": "The diff excerpt shows the ContactSubmission type definition but does not show any stable variables, preupgrade/postupgrade hooks, or migration logic to persist/restore submissions across upgrades. With backend/main.mo truncated, stable persistence cannot be confirmed from the provided evidence.",
+      "requirement": "Backend deployment info query must return the backend canister Principal ID (as text) and a server-side timestamp.",
+      "reason": "The added backend method getDeploymentInfo() returns only canisterTime and does not include the backend canister Principal ID as text.",
       "evidence": [
-        "backend/main.mo (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Bootstrap admin with credentials using secure password storage/comparison (no plaintext password in canister state or frontend code).",
-      "reason": "The backend code contains hardcoded plaintext credentials and compares the plaintext password directly (isPasswordValid). This violates the constraint/AC requiring no plaintext password stored in canister state or frontend code and secure comparison (e.g., hash).",
-      "evidence": [
-        "backend/main.mo (truncated): isPasswordValid(userName, password) checks password == \"Tomlikesboys69\""
+        "backend/main.mo"
       ]
     },
     {
       "id": "REQ-3",
-      "requirement": "Admin-only retrieval endpoints getAllContactSubmissions and getAllContactSubmissionsJunk return all saved submissions (non-junk/junk) sorted by timestamp, and non-admins receive an authorization error.",
-      "reason": "The diff excerpt does not show implementations of getAllContactSubmissions/getAllContactSubmissionsJunk, their admin checks, or sorting behavior. Therefore compliance can’t be verified from the provided evidence.",
+      "requirement": "Diagnostics view includes clear English copy explaining how to interpret mismatches (e.g., live hostname but unexpected backend canister ID implies publish/binding misconfiguration).",
+      "reason": "A comment indicates guidance exists, but the added page file is truncated in the diff summary before showing the explanatory copy; cannot confirm it is implemented from available evidence.",
       "evidence": [
-        "backend/main.mo (truncated)"
+        "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx (truncated)"
       ]
     },
     {
       "id": "REQ-4",
-      "requirement": "Create a private admin-only page at /admin/contact or /dashboard/messages that enforces Internet Identity authentication and admin permission checks, showing access-denied + credential bootstrap when needed, then listing/viewing submissions.",
-      "reason": "Routes for /admin/contact and /admin/submissions are added, but no diff evidence is provided for the actual page component behavior (authentication gating, access denied flow, credential bootstrap UI, listing/details).",
+      "requirement": "If backend is unhealthy, admin diagnostics UI shows the captured error message and a short checklist distinguishing (1) frontend published but backend not, (2) canister binding mismatch, (3) network/agent errors.",
+      "reason": "Admin page changes are truncated before confirming the presence of the requested actionable checklist and exact unhealthy-state guidance details.",
       "evidence": [
-        "frontend/src/App.tsx"
+        "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added a 'system user counter' feature and incrementSystemUserCounter admin method with credential verification unrelated to contact submissions admin/messages requirements.",
-      "reason": "Not requested by any requirement; introduces extra admin-only functionality and credential checks beyond the specified bootstrap + submissions retrieval.",
+      "description": "Multiple landing page/offer/contact/footer UI, copy, and styling changes (including Tailwind/navy/teal theme work, CTA/link changes, reviews/contact section changes, and adding a build/environment indicator in the footer).",
+      "reason": "BuildRequest explicitly constrained not to regenerate or restructure unrelated app features (landing page, offers pages, contact form) while implementing diagnostics; diff evidence suggests many such unrelated changes.",
       "evidence": [
-        "backend/main.mo (truncated): systemUserCounter, incrementSystemUserCounter, verifyCredentials"
+        "frontend-file-summaries.txt (truncated)"
       ]
     },
     {
-      "description": "Added a one-time global isBootstrapped flag that prevents future admin bootstrapping entirely after the first successful call.",
-      "reason": "Requirement specifies bootstrapping grants admin to the authenticated caller after credential verification; it does not specify a canister-wide one-time bootstrap lockout (and PRODUCTION_CONFIGURATION.md claims 'one-time per principal', which the shown backend code does not implement).",
+      "description": "Edits/additions to global styling and Tailwind configuration (OKLCH color system, new accent colors/utilities).",
+      "reason": "Not requested by the diagnostics-focused BuildRequest and falls under unrelated UI/styling changes.",
       "evidence": [
-        "backend/main.mo (truncated): var isBootstrapped : Bool = false; traps if isBootstrapped"
+        "frontend-file-summaries.txt (truncated)"
       ]
     },
     {
-      "description": "Added frontend URL/session parameter utilities emphasizing token persistence in sessionStorage.",
-      "reason": "Not requested in REQ-4/REQ-5; introduces additional behavior around storing parameters (including mention of 'admin tokens') not part of the stated requirements.",
+      "description": "Modification/addition of project tracking metadata (project_state.json) marking items pending and describing publish workflow issues.",
+      "reason": "Not requested as part of implementing REQ-1..REQ-4 diagnostics features.",
       "evidence": [
-        "frontend/src/utils/urlParams.ts (truncated)"
-      ]
-    },
-    {
-      "description": "Added/updated production configuration documentation describing security properties (e.g., 'secure credential verification (not plaintext storage)').",
-      "reason": "Documentation changes were not requested as part of the build; also conflicts with the shown backend implementation that uses plaintext credentials in code.",
-      "evidence": [
-        "frontend/PRODUCTION_CONFIGURATION.md"
+        "project_state.json"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/src/App.tsx",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/src/hooks/useBackendHealthCheck.ts",
+    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
     "project_state.json"
   ]
 }

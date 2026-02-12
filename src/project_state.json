@@ -1,29 +1,36 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build backend storage for contact form submissions and a protected admin-only interface to view them.",
+  "summary": "Website project with a critical issue: publishing/deploying the current draft to production creates new drafts instead of updating the live site.",
   "architectural_notes": [
-    "Contact form submissions must be stored persistently (not ephemeral) and retrievable for admin viewing.",
-    "Admin dashboard route should be protected with authentication/authorization; unauthenticated users cannot access messages."
+    "When user requests publish/go-live, the system must compare current draft vs live, identify deployment blockers, and deploy the exact current draft to production without creating/regenerating new drafts."
   ],
   "known_issues": [
-    "Contact form submissions are not appearing in the admin page; may indicate missing/incorrect form-to-backend persistence or admin view wiring."
+    "Publishing/deploying to live currently creates new draft versions or regenerates draft code; production/live site never updates."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-private-admin-only-page-for-viewing-contact-form-submissions-at-either-admin-contact-or-dashboard-messages-choose-one-and-implement-it-the-page-must-be-protected-so-only-an-authenticated-internet-identity-user-with-admin-permissions-can-view-submissions-otherwise-show-the-existing-access-denied-flow-with-credential-bootstrap",
-      "title": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
+      "id": "feature-enhance-the-frontend-backend-health-check-diagnostics-to-retrieve-and-display-the-backend-deployment-identity-information-canister-id-server-timestamp-and-to-log-a-single-clearly-labeled-diagnostic-line-that-helps-detect-draft-live-mismatch-e-g-frontend-host-vs-backend-canister-id",
+      "title": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
       "reqIds": [
-        "REQ-4"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-keep-existing-admin-route-compatibility-by-redirecting-or-aliasing-the-current-admin-submissions-route-to-the-new-admin-messages-route-so-previously-shared-links-continue-to-work",
-      "title": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
+      "id": "feature-add-an-in-app-draft-vs-live-verification-diagnostics-view-that-makes-it-obvious-which-environment-a-user-is-currently-viewing-and-whether-the-frontend-is-connected-to-the-expected-backend-show-hostname-build-version-timestamp-backend-canister-id-and-backend-health-status",
+      "title": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
       "reqIds": [
-        "REQ-5"
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-backend-connectivity-diagnostics-ui-to-include-backend-canister-identity-info-when-available-and-provide-more-actionable-troubleshooting-guidance-specifically-for-draft-live-mismatch-and-missing-backend-deployment-scenarios",
+      "title": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -31,48 +38,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Persist contact form submissions permanently in secure backend storage (name, email, phone, message at minimum).",
+      "summary": "Fix publish/deploy workflow so the exact current draft is pushed to live/production (no new drafts), including draft-vs-live comparison, blocker identification, and successful zero-downtime deployment when possible.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Create a private admin-only page at /admin/contact or /dashboard/messages to view contact form submissions (protected access).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Add admin authentication for the submissions dashboard using the provided username/password credentials.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
+      "summary": "Add a backend query method that returns unambiguous deployment/runtime identity information so the frontend can confirm it is talking to the intended live backend canister (e.g., include the backend canister principal ID and current canister time).",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
     }
   ],
-  "projectName": "Persist contact form submissions and add protected admin messages page",
+  "projectName": "Add draft-vs-live deployment verification diagnostics and canister identity reporting",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,5 +1,5 @@
 import ContactForm from './ContactForm';
-import { Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Mail, MessageCircle } from 'lucide-react';
 
 export default function ContactSection() {
   return (
@@ -20,19 +20,6 @@ export default function ContactSection() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-8">
-              <div className="group bg-white/30 backdrop-blur-sm p-6 rounded-3xl border-2 border-navy/30 hover:border-teal transition-all shadow-lg hover:shadow-xl transform hover:scale-105 focus-within:ring-4 focus-within:ring-teal/50">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 bg-navy rounded-2xl flex items-center justify-center group-hover:animate-wiggle">
-                    <MapPin className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-black font-medium text-shadow-subtle">
-                      Start your adventure in Edinburgh, Glasgow, Inverness or where ever you want ! Tours across Scotland — from the Highlands to the Islands, and everywhere in between!
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <div id="get-in-touch" className="group bg-white/30 backdrop-blur-sm p-6 rounded-3xl border-2 border-navy/30 hover:border-teal transition-all shadow-lg hover:shadow-xl transform hover:scale-105 focus-within:ring-4 focus-within:ring-teal/50 scroll-mt-20">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-14 h-14 bg-navy rounded-2xl flex items-center justify-center group-hover:animate-wiggle">

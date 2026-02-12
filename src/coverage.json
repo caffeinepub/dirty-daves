@@ -1,59 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T13:41:17.873Z",
+  "generatedAt": "2026-02-12T10:43:03.177Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
+        "summary": "Add a backend query method that returns unambiguous deployment/runtime identity information so the frontend can confirm it is talking to the intended live backend canister (e.g., include the backend canister principal ID and current canister time).",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
+        "summary": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
-          "frontend/PRODUCTION_CONFIGURATION.md"
+          "frontend/src/hooks/useBackendHealthCheck.ts",
+          "frontend/src/backend.d.ts"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/PRODUCTION_CONFIGURATION.md"
+          "frontend/src/hooks/useBackendHealthCheck.ts",
+          "frontend/src/backend.d.ts"
         ]
       },
       {
-        "id": "REQ-5",
-        "summary": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
+        "id": "REQ-3",
+        "summary": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
           "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx"
         ]
       }
     ]
@@ -64,13 +62,14 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/src/hooks/useBackendHealthCheck.ts",
+    "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx",
+    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

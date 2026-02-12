@@ -14,7 +14,6 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const ContactSubmission = IDL.Record({
-  'id' : IDL.Text,
   'name' : IDL.Text,
   'email' : IDL.Text,
   'phoneCountryCallingCode' : IDL.Text,
@@ -27,25 +26,24 @@ export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'bootstrapAdminWithCredentials' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'getAllContactSubmissions' : IDL.Func(
-      [],
-      [IDL.Vec(ContactSubmission)],
-      ['query'],
-    ),
-  'getAllContactSubmissionsJunk' : IDL.Func(
       [],
       [IDL.Vec(ContactSubmission)],
       ['query'],
     ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getDeploymentInfo' : IDL.Func(
+      [],
+      [IDL.Record({ 'canisterTime' : IDL.Int })],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'incrementSystemUserCounter' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
+  'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitContactForm' : IDL.Func(
@@ -65,7 +63,6 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const ContactSubmission = IDL.Record({
-    'id' : IDL.Text,
     'name' : IDL.Text,
     'email' : IDL.Text,
     'phoneCountryCallingCode' : IDL.Text,
@@ -78,29 +75,24 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'bootstrapAdminWithCredentials' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'getAllContactSubmissions' : IDL.Func(
-        [],
-        [IDL.Vec(ContactSubmission)],
-        ['query'],
-      ),
-    'getAllContactSubmissionsJunk' : IDL.Func(
         [],
         [IDL.Vec(ContactSubmission)],
         ['query'],
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getDeploymentInfo' : IDL.Func(
+        [],
+        [IDL.Record({ 'canisterTime' : IDL.Int })],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'incrementSystemUserCounter' : IDL.Func(
-        [IDL.Text, IDL.Text],
-        [IDL.Nat],
-        [],
-      ),
+    'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitContactForm' : IDL.Func(

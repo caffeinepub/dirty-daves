@@ -1,108 +1,93 @@
 {
   "kind": "build_request",
-  "title": "Persist contact form submissions and add protected admin messages page",
-  "priority": "normal",
+  "title": "Add draft-vs-live deployment verification diagnostics and canister identity reporting",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Persist contact form submissions in the Motoko canister using stable storage so submissions survive canister upgrades. Store at minimum: name, email, phone number (including country calling code), message, and a timestamp, and ensure every successful submission is saved to stable storage.",
+      "text": "Add a backend query method that returns unambiguous deployment/runtime identity information so the frontend can confirm it is talking to the intended live backend canister (e.g., include the backend canister principal ID and current canister time).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Save every submission permanently to a secure database. Store at minimum: name, email, phone number and message"
+          "Immediately compare the current draft with the live version (if any exists) and identify why deployment is blocked or failing (e.g. sync issue, deployment error, greyed-out publish button, SSL/canister problem, or draft/live mismatch)."
         ]
       },
       "acceptanceCriteria": [
-        "After submitting the contact form, the submission is returned by an admin-only query even after a canister upgrade (no data loss).",
-        "Stored submission data includes: name, email, phoneCountryCallingCode, phoneNumber, message, timestamp (and an id if used).",
-        "submitContactForm continues to accept the existing parameters used by the frontend (including honeypot and elapsedTime) and saves non-junk submissions to the main storage."
+        "Backend exposes a public query method (e.g., deployment info) callable by anonymous users without trapping.",
+        "Returned payload includes the backend canister Principal (as text) and a server-side timestamp.",
+        "No state migration is required; upgrade does not break existing contact form/admin features."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement backend admin bootstrapping via username/password by adding a canister method that the frontend can call (`bootstrapAdminWithCredentials(username, password)`) to grant admin permissions to the authenticated caller after successful credential verification. Configure the credentials to match: username `dirtydave69`, password `Tomlikesboys69`. Store/compare the password securely (do not store plaintext passwords in canister state).",
-      "target": "backend",
+      "text": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "make sure it's protected — only I can access it. username dirtydave69\npassword Tomlikesboys69"
+          "Instead: Immediately compare the current draft with the live version (if any exists) and identify why deployment is blocked or failing (e.g. sync issue, deployment error, greyed-out publish button, SSL/canister problem, or draft/live mismatch)."
         ]
       },
       "acceptanceCriteria": [
-        "Calling `bootstrapAdminWithCredentials` with incorrect credentials traps with an authorization/invalid-credentials error.",
-        "Calling `bootstrapAdminWithCredentials` with the correct credentials grants the caller admin permission so subsequent calls to `getAllContactSubmissions` and `getAllContactSubmissionsJunk` succeed for that caller.",
-        "The password is not stored in plaintext in canister stable state (e.g., store a hash and compare hashes)."
+        "`useBackendHealthCheck` continues to perform the existing `testConnection` check and additionally attempts to fetch backend deployment identity info.",
+        "On success, console output includes one labeled line that contains: current hostname + backend canister ID + build version info (if available).",
+        "On failure, console output includes one labeled line with hostname and the exact error message (no repeated loops/spam).",
+        "Hook return value includes the fetched backend canister ID (when available) for use in UI components."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure admin-only retrieval endpoints for contact submissions return all saved submissions (normal and junk) and are protected by admin permission checks.",
-      "target": "backend",
+      "text": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Create a private admin-only page ... (make sure it's protected — only I can access it.)"
+          "Add a brand new draft version (or just keep regenerating the draft code) and the live site never updates. The website is still not published to production."
         ]
       },
       "acceptanceCriteria": [
-        "`getAllContactSubmissions` is admin-only and returns all non-junk submissions sorted by timestamp.",
-        "`getAllContactSubmissionsJunk` is admin-only and returns all junk submissions sorted by timestamp.",
-        "Non-admin callers receive an authorization error that the frontend maps to access denied."
+        "Diagnostics view can be accessed without admin privileges (e.g., via a dedicated route or a query-param gated panel) and does not expose sensitive data.",
+        "View displays: current hostname, build mode/prod flag, build version, build timestamp, backend health status, backend canister ID, and backend server timestamp.",
+        "View includes clear English copy explaining how to interpret mismatches (e.g., “If hostname is a live domain but backend canister ID differs from expected, publish/binding may be misconfigured”).",
+        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
+      "text": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Create a private admin-only page at /admin/contact or /dashboard/messages (make sure it's protected — only I can access it.)"
+          "Resolve whatever is preventing the push: correct any inconsistencies, retry the deployment process, or apply the necessary backend fix so that publish actually works this time."
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to the chosen route renders the submissions admin UI.",
-        "If the visitor is not authenticated with Internet Identity, the page shows the access denied screen prompting Internet Identity login.",
-        "If authenticated but not an admin yet, the page shows the credential bootstrap UI and, after successful bootstrap, loads submissions.",
-        "Once admin access is granted, the page lists saved submissions and allows viewing details (using the existing admin submissions UI behavior)."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Create a private admin-only page at /admin/contact or /dashboard/messages"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Visiting `/admin/submissions` still reaches the admin submissions UI (either via redirect or rendering the same page component).",
-        "The new chosen route and `/admin/submissions` both enforce the same access control behavior."
+        "Admin page diagnostics shows backend canister ID and backend server timestamp when health check data is available.",
+        "If backend is unhealthy, UI shows the captured error message and a short checklist that distinguishes: (1) frontend published but backend not, (2) canister binding mismatch, (3) network/agent errors.",
+        "UI changes do not break existing admin access flow and do not require new auth mechanisms."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if needed for stable-state upgrades.",
-    "Do not edit files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT.",
-    "Do not store admin passwords in plaintext in canister state or in frontend code."
+    "Do not create or require additional backend canisters/services; keep Motoko logic in the existing single actor (backend/main.mo).",
+    "Do not edit files under frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Do not introduce third-party auth or external deployment services; keep Internet Identity as-is.",
+    "Do not regenerate or restructure unrelated app features (landing page, offers pages, contact form) while implementing diagnostics."
   ],
   "nonGoals": [
-    "Integrating an external database (PostgreSQL/MySQL/MongoDB/Redis) or any non-IC storage service.",
-    "Adding third-party authentication providers beyond Internet Identity.",
-    "Implementing real-time updates (WebSockets/push notifications) for new submissions."
+    "Actually performing or automating the Caffeine platform publish/deploy action within application code.",
+    "Adding new product features unrelated to deployment verification (e.g., new landing sections, new forms, payments, chat).",
+    "Introducing external monitoring/logging services."
   ],
   "imageRequirements": {
     "required": [],

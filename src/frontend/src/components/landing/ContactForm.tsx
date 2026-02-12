@@ -16,6 +16,7 @@ export default function ContactForm() {
     phoneNumber?: string;
     message?: string;
   }>({});
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Track form start time for bot detection
   const formStartTimeRef = useRef<number>(Date.now());
@@ -25,7 +26,7 @@ export default function ContactForm() {
     formStartTimeRef.current = Date.now();
   }, []);
 
-  const { mutate: submitForm, isPending, isSuccess, isError, error } = useSubmitContactForm();
+  const { mutate: submitForm, isPending, isError, error, reset } = useSubmitContactForm();
 
   const validateForm = () => {
     const newErrors: { 
@@ -75,6 +76,9 @@ export default function ContactForm() {
       },
       {
         onSuccess: () => {
+          // Show success state
+          setShowSuccess(true);
+          // Clear form
           setName('');
           setEmail('');
           setPhoneCountryCallingCode('+1');
@@ -89,13 +93,19 @@ export default function ContactForm() {
     );
   };
 
-  if (isSuccess) {
+  const handleSendAnother = () => {
+    setShowSuccess(false);
+    reset();
+    formStartTimeRef.current = Date.now();
+  };
+
+  if (showSuccess) {
     return (
       <div className="bg-white/30 backdrop-blur-sm p-8 rounded-3xl border-2 border-teal text-center shadow-2xl shadow-teal/30 animate-pop">
         <CheckCircle2 className="w-20 h-20 text-teal mx-auto mb-4 animate-wiggle" />
         <h3 className="text-3xl font-black mb-2 text-black text-shadow-subtle">Thanks! Your message has been sent to Dirty Dave. 🎉</h3>
         <button
-          onClick={() => window.location.reload()}
+          onClick={handleSendAnother}
           className="mt-6 px-8 py-4 bg-navy text-white rounded-2xl font-black hover:bg-navy/90 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal/50"
         >
           Send Another Message

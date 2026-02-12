@@ -1,59 +1,184 @@
 import { useState } from 'react';
-import { useGetAllContactSubmissions, useGetAllContactSubmissionsJunk } from '../../hooks/useAdminContactSubmissions';
+import { useGetAllContactSubmissions } from '../../hooks/useAdminContactSubmissions';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
+import { useBackendHealthCheck } from '../../hooks/useBackendHealthCheck';
+import { useQueryClient } from '@tanstack/react-query';
 import AccessDeniedScreen from '../../components/admin/AccessDeniedScreen';
 import { formatTimestamp } from '../../utils/formatTimestamp';
-import { Loader2, RefreshCw, Mail, Phone, User, Calendar, MessageSquare, X } from 'lucide-react';
+import { Loader2, RefreshCw, Mail, Phone, User, Calendar, MessageSquare, X, LogOut, CheckCircle2, XCircle, Clock, AlertTriangle, Server } from 'lucide-react';
 import type { ContactSubmission } from '../../backend';
 
 export default function ContactSubmissionsAdminPage() {
-  const { identity } = useInternetIdentity();
-  const isAuthenticated = !!identity;
+  const { clear, identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const {
+    healthStatus,
+    error: healthError,
+    isHealthy,
+    isChecking,
+    backendCanisterId,
+    backendServerTimestamp,
+    deploymentInfoError,
+  } = useBackendHealthCheck();
 
-  const [activeTab, setActiveTab] = useState<'normal' | 'junk'>('normal');
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
 
   const {
-    data: normalSubmissions = [],
-    isLoading: normalLoading,
-    error: normalError,
-    refetch: refetchNormal,
-    isFetching: normalFetching,
+    data: submissions = [],
+    isLoading,
+    error,
+    refetch,
+    isFetching,
   } = useGetAllContactSubmissions();
 
-  const {
-    data: junkSubmissions = [],
-    isLoading: junkLoading,
-    error: junkError,
-    refetch: refetchJunk,
-    isFetching: junkFetching,
-  } = useGetAllContactSubmissionsJunk();
-
   // Check for access denied errors
-  const isAccessDenied =
-    normalError?.message === 'ACCESS_DENIED' || junkError?.message === 'ACCESS_DENIED';
+  const isAccessDenied = error?.message === 'ACCESS_DENIED';
 
-  // Show access denied screen if not authenticated OR if access is denied
-  if (!isAuthenticated || isAccessDenied) {
+  // Show access denied screen if access is denied
+  if (isAccessDenied) {
     return <AccessDeniedScreen />;
   }
 
-  const submissions = activeTab === 'normal' ? normalSubmissions : junkSubmissions;
-  const isLoading = activeTab === 'normal' ? normalLoading : junkLoading;
-  const isFetching = activeTab === 'normal' ? normalFetching : junkFetching;
-  const error = activeTab === 'normal' ? normalError : junkError;
-
   const handleRefresh = () => {
-    if (activeTab === 'normal') {
-      refetchNormal();
-    } else {
-      refetchJunk();
-    }
+    refetch();
+  };
+
+  const handleLogout = async () => {
+    await clear();
+    queryClient.clear();
   };
 
   const truncateMessage = (message: string, maxLength: number = 100) => {
     if (message.length <= maxLength) return message;
     return message.substring(0, maxLength) + '...';
+  };
+
+  const formattedServerTimestamp = backendServerTimestamp
+    ? new Date(Number(backendServerTimestamp / 1_000_000n)).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+      })
+    : 'Not available';
+
+  // Backend connectivity status component with enhanced diagnostics
+  const BackendConnectivityStatus = () => {
+    let statusIcon;
+    let statusText;
+    let statusColor;
+
+    if (isChecking) {
+      statusIcon = <Clock className="w-5 h-5 text-yellow-500 animate-pulse" />;
+      statusText = 'Checking...';
+      statusColor = 'text-yellow-500';
+    } else if (isHealthy) {
+      statusIcon = <CheckCircle2 className="w-5 h-5 text-green-500" />;
+      statusText = 'Healthy';
+      statusColor = 'text-green-500';
+    } else {
+      statusIcon = <XCircle className="w-5 h-5 text-red-500" />;
+      statusText = 'Unhealthy';
+      statusColor = 'text-red-500';
+    }
+
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : 'unknown';
+
+    return (
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <Server className="w-5 h-5" />
+          Backend Connectivity Diagnostics
+        </h3>
+        
+        {/* Status */}
+        <div className="mb-4">
+          <label className="text-xs font-bold text-white/70 uppercase tracking-wider">Connection Status</label>
+          <div className="flex items-center gap-2 mt-1">
+            {statusIcon}
+            <span className={`font-semibold ${statusColor}`}>{statusText}</span>
+          </div>
+        </div>
+
+        {/* Backend Identity Info */}
+        {(backendCanisterId || backendServerTimestamp) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-bold text-white/70 uppercase tracking-wider">Backend Canister ID</label>
+              <p className="text-white text-sm font-mono mt-1 break-all">
+                {backendCanisterId || 'Not available'}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-white/70 uppercase tracking-wider">Backend Server Time</label>
+              <p className="text-white text-sm font-mono mt-1">{formattedServerTimestamp}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {healthError && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+            <p className="text-red-200 text-sm font-mono">{healthError}</p>
+          </div>
+        )}
+
+        {/* Deployment Info Error */}
+        {deploymentInfoError && (
+          <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+            <p className="text-yellow-200 text-sm">
+              <strong>Note:</strong> {deploymentInfoError}
+            </p>
+          </div>
+        )}
+
+        {/* Troubleshooting Guidance */}
+        {!isHealthy && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <div className="flex items-start gap-2 mb-3">
+              <AlertTriangle className="w-5 h-5 text-red-300 flex-shrink-0 mt-0.5" />
+              <h4 className="text-sm font-bold text-white">Troubleshooting Checklist</h4>
+            </div>
+            <ul className="text-xs text-white/80 space-y-2 ml-7">
+              <li>
+                <strong>1. Frontend published but backend not deployed:</strong>
+                <br />
+                <span className="text-white/60">
+                  The frontend may be live but the backend canister is not running or unreachable.
+                  Verify the backend canister is deployed and accessible.
+                </span>
+              </li>
+              <li>
+                <strong>2. Canister binding / hostname mismatch:</strong>
+                <br />
+                <span className="text-white/60">
+                  You're on <code className="bg-white/10 px-1 rounded">{hostname}</code> but the backend canister may be bound to a different environment.
+                  Check that the live hostname is correctly mapped to the production backend canister.
+                </span>
+              </li>
+              <li>
+                <strong>3. Network / agent / browser issues:</strong>
+                <br />
+                <span className="text-white/60">
+                  Check your internet connection, browser console for errors, and try a hard refresh (Ctrl+Shift+R / Cmd+Shift+R).
+                  If using a VPN or firewall, ensure Internet Computer endpoints are accessible.
+                </span>
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {/* Healthy State Info */}
+        {isHealthy && (
+          <p className="text-xs text-white/60">
+            Backend canister is reachable and responding correctly. All systems operational.
+          </p>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -64,51 +189,36 @@ export default function ContactSubmissionsAdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-black text-white">Contact Submissions</h1>
-              <p className="text-white/80 mt-1 font-medium">Admin Panel</p>
+              <p className="text-white/80 mt-1 font-medium">
+                Manage and review contact form submissions
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={handleRefresh}
                 disabled={isFetching}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-white/30"
               >
                 <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
-              <a
-                href="/"
-                className="px-4 py-2 bg-teal hover:bg-teal/90 text-white rounded-xl font-bold transition-all focus:outline-none focus:ring-2 focus:ring-white/50"
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-red-500/30"
               >
-                Go to Home
-              </a>
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('normal')}
-            className={`px-6 py-3 rounded-xl font-black transition-all ${
-              activeTab === 'normal'
-                ? 'bg-white text-navy shadow-lg'
-                : 'bg-white/20 text-white hover:bg-white/30'
-            }`}
-          >
-            Normal Submissions ({normalSubmissions.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('junk')}
-            className={`px-6 py-3 rounded-xl font-black transition-all ${
-              activeTab === 'junk'
-                ? 'bg-white text-navy shadow-lg'
-                : 'bg-white/20 text-white hover:bg-white/30'
-            }`}
-          >
-            Junk Submissions ({junkSubmissions.length})
-          </button>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Backend Connectivity Diagnostics */}
+        <div className="mb-6">
+          <BackendConnectivityStatus />
         </div>
 
         {/* Loading State */}
@@ -122,131 +232,199 @@ export default function ContactSubmissionsAdminPage() {
         )}
 
         {/* Error State */}
-        {error && error.message !== 'ACCESS_DENIED' && (
-          <div className="bg-red-100/90 backdrop-blur-sm border-2 border-red-500 text-red-800 px-6 py-4 rounded-xl font-medium">
-            Failed to load submissions: {error.message}
+        {error && !isAccessDenied && (
+          <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 backdrop-blur-sm">
+            <h2 className="text-xl font-black text-white mb-2">Error Loading Submissions</h2>
+            <p className="text-white/90">{error.message}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && submissions.length === 0 && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl p-12 text-center">
-            <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-black text-navy mb-2">No Submissions Yet</h3>
-            <p className="text-gray-600 font-medium">
-              {activeTab === 'normal'
-                ? 'No contact form submissions have been received yet.'
-                : 'No junk submissions have been detected yet.'}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-12 text-center border border-white/20">
+            <Mail className="w-16 h-16 text-white/50 mx-auto mb-4" />
+            <h2 className="text-2xl font-black text-white mb-2">No Submissions Yet</h2>
+            <p className="text-white/80">
+              Contact form submissions will appear here once users start reaching out.
             </p>
           </div>
         )}
 
-        {/* Submissions List */}
+        {/* Submissions Table */}
         {!isLoading && !error && submissions.length > 0 && (
-          <div className="grid gap-4">
-            {submissions.map((submission) => (
-              <div
-                key={submission.id}
-                onClick={() => setSelectedSubmission(submission)}
-                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-3">
-                      <User className="w-5 h-5 text-navy flex-shrink-0" />
-                      <h3 className="text-xl font-black text-navy truncate">{submission.name}</h3>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-2 mb-3">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Mail className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium truncate">{submission.email}</span>
-                      </div>
-                      {submission.phoneNumber && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <Phone className="w-4 h-4 flex-shrink-0" />
-                          <span className="text-sm font-medium">
-                            {submission.phoneCountryCallingCode} {submission.phoneNumber}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/20">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/10 border-b border-white/20">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Message
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-black text-white uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {submissions.map((submission, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-white/60" />
+                          <span className="text-white font-semibold">{submission.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-white/60" />
+                          <a
+                            href={`mailto:${submission.email}`}
+                            className="text-teal hover:text-teal/80 font-medium underline"
+                          >
+                            {submission.email}
+                          </a>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {submission.phoneCountryCallingCode && submission.phoneNumber ? (
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-white/60" />
+                            <span className="text-white font-medium">
+                              {submission.phoneCountryCallingCode} {submission.phoneNumber}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-white/40 italic">Not provided</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-start gap-2">
+                          <MessageSquare className="w-4 h-4 text-white/60 mt-1 flex-shrink-0" />
+                          <span className="text-white/90 line-clamp-2">
+                            {truncateMessage(submission.message)}
                           </span>
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Calendar className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">
-                          {formatTimestamp(submission.timestamp)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-gray-700 font-medium line-clamp-2">
-                      {truncateMessage(submission.message)}
-                    </p>
-                  </div>
-                  <button className="px-4 py-2 bg-navy text-white rounded-xl font-bold hover:bg-navy/90 transition-all flex-shrink-0">
-                    View
-                  </button>
-                </div>
-              </div>
-            ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-white/60" />
+                          <span className="text-white/80 text-sm">
+                            {formatTimestamp(submission.timestamp)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => setSelectedSubmission(submission)}
+                          className="px-4 py-2 bg-teal hover:bg-teal/90 text-white rounded-lg font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-teal/30"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Submission Detail Modal */}
+      {/* Detail Modal */}
       {selectedSubmission && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          onClick={() => setSelectedSubmission(null)}
-        >
-          <div
-            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
-              <h2 className="text-2xl font-black text-navy">Submission Details</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gradient-to-br from-navy to-teal rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-white/20 shadow-2xl">
+            <div className="sticky top-0 bg-white/10 backdrop-blur-sm border-b border-white/20 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-black text-white">Submission Details</h2>
               <button
                 onClick={() => setSelectedSubmission(null)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-white/30"
+                aria-label="Close"
               >
-                <X className="w-6 h-6 text-gray-600" />
+                <X className="w-6 h-6 text-white" />
               </button>
             </div>
+
             <div className="p-6 space-y-6">
               <div>
-                <label className="block text-sm font-black text-gray-600 mb-2">Name</label>
-                <p className="text-lg font-bold text-navy">{selectedSubmission.name}</p>
+                <label className="flex items-center gap-2 text-sm font-black text-white/80 uppercase tracking-wider mb-2">
+                  <User className="w-4 h-4" />
+                  Name
+                </label>
+                <p className="text-white text-lg font-semibold">{selectedSubmission.name}</p>
               </div>
+
               <div>
-                <label className="block text-sm font-black text-gray-600 mb-2">Email</label>
+                <label className="flex items-center gap-2 text-sm font-black text-white/80 uppercase tracking-wider mb-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </label>
                 <a
                   href={`mailto:${selectedSubmission.email}`}
-                  className="text-lg font-bold text-teal hover:underline"
+                  className="text-teal hover:text-teal/80 text-lg font-semibold underline"
                 >
                   {selectedSubmission.email}
                 </a>
               </div>
-              {selectedSubmission.phoneNumber && (
-                <div>
-                  <label className="block text-sm font-black text-gray-600 mb-2">Phone</label>
-                  <a
-                    href={`tel:${selectedSubmission.phoneCountryCallingCode}${selectedSubmission.phoneNumber}`}
-                    className="text-lg font-bold text-teal hover:underline"
-                  >
-                    {selectedSubmission.phoneCountryCallingCode} {selectedSubmission.phoneNumber}
-                  </a>
-                </div>
-              )}
+
               <div>
-                <label className="block text-sm font-black text-gray-600 mb-2">Submitted</label>
-                <p className="text-lg font-bold text-navy">
+                <label className="flex items-center gap-2 text-sm font-black text-white/80 uppercase tracking-wider mb-2">
+                  <Phone className="w-4 h-4" />
+                  Phone Number
+                </label>
+                {selectedSubmission.phoneCountryCallingCode && selectedSubmission.phoneNumber ? (
+                  <p className="text-white text-lg font-semibold">
+                    {selectedSubmission.phoneCountryCallingCode} {selectedSubmission.phoneNumber}
+                  </p>
+                ) : (
+                  <p className="text-white/40 italic">Not provided</p>
+                )}
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-sm font-black text-white/80 uppercase tracking-wider mb-2">
+                  <Calendar className="w-4 h-4" />
+                  Submitted On
+                </label>
+                <p className="text-white text-lg font-semibold">
                   {formatTimestamp(selectedSubmission.timestamp)}
                 </p>
               </div>
+
               <div>
-                <label className="block text-sm font-black text-gray-600 mb-2">Message</label>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <p className="text-gray-800 font-medium whitespace-pre-wrap">
+                <label className="flex items-center gap-2 text-sm font-black text-white/80 uppercase tracking-wider mb-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Message
+                </label>
+                <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+                  <p className="text-white whitespace-pre-wrap leading-relaxed">
                     {selectedSubmission.message}
                   </p>
                 </div>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={() => setSelectedSubmission(null)}
+                  className="w-full px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl font-black transition-colors focus:outline-none focus:ring-4 focus:ring-white/30"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

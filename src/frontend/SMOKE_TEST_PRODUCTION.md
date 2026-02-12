@@ -8,19 +8,26 @@ Run these tests immediately after deploying to production to verify core functio
 1. Navigate to `/` (root URL)
 2. Open browser DevTools Console (F12)
 3. Verify page loads completely
+4. Check for backend health check log: `[Backend Health Check] ✅ Backend canister connection successful`
+5. Check for build environment log: `[Build Environment] Host: <hostname>, Mode: production, Build: <version>`
 
 ### Expected Results
-- [ ] Page renders without console errors (warnings are acceptable)
+- [ ] Page renders without critical console errors (warnings are acceptable)
+- [ ] Backend health check passes and logs success message with hostname
+- [ ] Build environment indicator logs current host, mode, and build version
 - [ ] Hero section displays with background image
 - [ ] "DIRTY DAVES" title is visible
 - [ ] Subtitle "Private Tours of Scotland by the S.H.I.T Tour company" is visible
 - [ ] 6 offer cards are visible in the features section
 - [ ] Reviews section displays with review cards
 - [ ] Contact form section is visible
-- [ ] Footer displays with social links and attribution
+- [ ] Footer displays with social links, attribution, and Build & Environment indicator
+- [ ] Build & Environment indicator shows: hostname, production mode, and build timestamp/version
 
 ### Common Issues
-- Missing background image: Check asset path in `public/assets/generated/`
+- Missing background image: Check asset path in `dist/assets/generated/`
+- Backend health check fails: Verify backend canister is deployed and accessible; check console for single labeled diagnostic message with hostname
+- Build indicator missing: Check footer component and BuildEnvironmentIndicator import
 - Console errors: Check for missing dependencies or build issues
 
 ---
@@ -31,7 +38,7 @@ Run these tests immediately after deploying to production to verify core functio
 For each offer route, perform the following:
 
 1. Click on an offer card from the landing page
-2. Observe the loading state (should show navy-to-teal gradient spinner)
+2. Observe the loading state (should show navy-to-teal gradient spinner with "Loading..." text)
 3. Verify the offer page loads completely
 4. Check browser DevTools Console for errors
 5. Click "Back to Home" or "Get in Touch" CTA
@@ -46,9 +53,9 @@ For each offer route, perform the following:
 - [ ] `/offers/choose-your-own-adventure`
 
 ### Expected Results
-- [ ] PageLoader fallback (spinning loader) appears briefly during initial load
+- [ ] PageLoader fallback (spinning loader with "Loading..." text) appears briefly during initial load
 - [ ] Offer page renders with correct title, content, and SEO metadata
-- [ ] No console errors during navigation
+- [ ] No critical console errors during navigation
 - [ ] Back navigation returns to landing page
 - [ ] "Get in Touch" CTA navigates to `/#contact` and scrolls to contact form
 
@@ -67,13 +74,14 @@ For each offer route, perform the following:
 1. Scroll to contact form section
 2. Fill in all required fields (name, email, message)
 3. Optionally fill in phone number
-4. Click "Send Message 🚀"
+4. Wait at least 2 seconds before submitting (to avoid spam detection)
+5. Click "Send Message 🚀"
 
 **Expected Results:**
 - [ ] Form submits successfully (shows success message with checkmark)
 - [ ] Success message: "Thanks! Your message has been sent to Dirty Dave. 🎉"
 - [ ] "Send Another Message" button is visible
-- [ ] No console errors
+- [ ] No critical console errors
 
 #### 3B. Phone Field Behavior
 1. Locate the Phone Number field in the contact form
@@ -102,10 +110,12 @@ For each offer route, perform the following:
 
 #### 3D. Spam Protection
 1. Fill out form and submit immediately (within 1 second)
-2. Check if submission is flagged
+2. Check console for spam detection log: `[Contact Form] Spam protection triggered`
+3. Fill out form normally (wait 2+ seconds) and submit
 
 **Expected Results:**
-- [ ] Very fast submissions (< 1 second) may be rejected or flagged as junk
+- [ ] Very fast submissions (< 2 seconds) show user-friendly error: "Please take a moment to fill out the form before submitting."
+- [ ] Spam detection logs to console but does NOT show as critical error
 - [ ] Normal submissions (> 2 seconds) are accepted
 - [ ] Honeypot field (hidden) catches bot submissions
 
@@ -113,6 +123,7 @@ For each offer route, perform the following:
 - Form submits but no success message: Check backend canister is deployed and accessible
 - Phone dropdown not showing correct format: Verify countryCallingCodes.ts exports correct label format
 - All submissions flagged as spam: Check timing logic in backend
+- Network errors: Check browser console for `[Contact Form] Network error` logs
 
 ---
 
@@ -120,42 +131,60 @@ For each offer route, perform the following:
 
 ### Test Steps
 
-#### 4A. Unauthenticated Access (Anonymous Principal)
-1. Open browser DevTools Console
-2. Do NOT log in with Internet Identity
-3. Attempt to call admin-only backend methods directly (if you have access to the actor):
+#### 4A. Admin Routes - Unauthenticated Access
+1. Navigate to `/admin` (or `/admin/contact` or `/admin/submissions`)
+2. Verify you are NOT logged in with Internet Identity
+
+**Expected Results:**
+- [ ] AccessDeniedScreen displays with "Admin Access Required" heading
+- [ ] "Login with Internet Identity" button is visible
+- [ ] "Go to Home" button is visible
+- [ ] No critical console errors
+
+#### 4B. Admin Routes - Authenticated Non-Admin User
+1. Log in with Internet Identity (use a principal that is NOT an admin)
+2. Navigate to `/admin`
+3. Wait for admin check to complete
+
+**Expected Results:**
+- [ ] Loading screen appears briefly with spinner and "Loading..." text
+- [ ] AccessDeniedScreen displays with "Access Denied" heading
+- [ ] Message: "You are logged in, but you don't have admin permissions to access this area."
+- [ ] "Logout" button is visible
+- [ ] "Go to Home" button is visible
+- [ ] No critical console errors
+
+#### 4C. Admin Routes - Admin User
+1. Log in with Internet Identity as an admin principal
+2. Navigate to `/admin` (or `/admin/contact` or `/admin/submissions`)
+3. Wait for admin check to complete
+
+**Expected Results:**
+- [ ] Loading screen appears briefly
+- [ ] ContactSubmissionsAdminPage loads successfully
+- [ ] Admin can view all contact submissions
+- [ ] Retrieved submissions include phone-related fields (phoneCountryCallingCode, phoneNumber)
+- [ ] Backend connectivity diagnostics section shows "Backend: Healthy" with green checkmark
+- [ ] Diagnostics section includes explanatory text about draft/live/misconfiguration scenarios
+- [ ] No critical console errors
+
+#### 4D. Backend Authorization (Advanced)
+If you have direct access to the backend actor in console:
+
+1. As anonymous user, attempt to call admin-only methods:
    ```javascript
-   // This should fail with "Unauthorized" error
    await actor.getAllContactSubmissions();
-   await actor.getAllContactSubmissionsJunk();
    ```
 
 **Expected Results:**
-- [ ] Backend returns error: "Unauthorized: Only admins can view all submissions"
-- [ ] Backend returns error: "Unauthorized: Only admins can view all junk submissions"
+- [ ] Backend returns error: "Unauthorized: Only admins can perform this action"
 - [ ] Anonymous users CANNOT access admin-only data
 
-#### 4B. Authenticated Non-Admin User
-1. Log in with Internet Identity (if auth is enabled)
-2. Verify you are NOT assigned admin role
-3. Attempt to call admin-only backend methods
-
-**Expected Results:**
-- [ ] Backend returns error: "Unauthorized: Only admins can view all submissions"
-- [ ] Non-admin users CANNOT access admin-only data
-
-#### 4C. Admin User (if applicable)
-1. Log in with Internet Identity as admin principal
-2. Call admin-only backend methods
-
-**Expected Results:**
-- [ ] Admin can successfully call `getAllContactSubmissions()`
-- [ ] Admin can successfully call `getAllContactSubmissionsJunk()`
-- [ ] Retrieved submissions include phone-related fields (phoneCountryCallingCode, phoneNumber)
-
 ### Common Issues
-- Access control not working: Verify backend authorization mixin is properly initialized
+- Access control not working: Verify backend authorization is properly initialized
 - Admin cannot access: Check admin principal is correctly assigned in backend
+- Loading state never completes: Check useIsAdmin hook and backend isAdmin() method
+- Backend diagnostics not showing: Check BuildEnvironmentIndicator component is imported in admin page
 
 ---
 
@@ -163,7 +192,7 @@ For each offer route, perform the following:
 
 ### Test Steps
 1. Open browser DevTools Network tab
-2. Reload landing page
+2. Reload landing page (hard refresh: Ctrl+Shift+R or Cmd+Shift+R)
 3. Navigate to an offer page
 4. Check network waterfall
 
@@ -172,29 +201,66 @@ For each offer route, perform the following:
 - [ ] Initial bundle size is reasonable (offer pages are code-split)
 - [ ] Lazy-loaded offer pages fetch separate chunks
 - [ ] No unnecessary third-party scripts loading
+- [ ] Backend health check completes within 2 seconds
+
+---
+
+## 6. Build & Environment Diagnostics
+
+### Test Steps
+1. Scroll to footer on landing page
+2. Locate the Build & Environment indicator (small text line)
+3. Navigate to admin page (if you have access)
+4. Check backend connectivity diagnostics section
+
+### Expected Results
+- [ ] Footer shows Build & Environment indicator with: hostname, production mode, build version/timestamp
+- [ ] Indicator is subtle and non-intrusive (small text, low visual weight)
+- [ ] Admin page shows backend connectivity status (Healthy/Unhealthy/Checking)
+- [ ] Backend connectivity section includes explanatory label for troubleshooting
+- [ ] When backend is healthy, shows green checkmark and "Healthy" status
+- [ ] When backend is unhealthy, shows red X and "Unhealthy" status with error message
+
+### Common Issues
+- Indicator not showing: Check BuildEnvironmentIndicator component is imported in Footer
+- Build version shows "dev" or "unknown": Build-time env vars not set (optional, defaults are OK)
+- Backend status always "Checking": Health check hook may be stuck; check console for errors
 
 ---
 
 ## Summary Checklist
 
-- [ ] Landing page renders without errors
-- [ ] All 6 offer routes load with proper lazy-loading fallback
-- [ ] Contact form submits successfully without CAPTCHA
+- [ ] Landing page renders without critical errors
+- [ ] Backend health check passes and logs success with hostname
+- [ ] Build & Environment indicator displays in footer with correct info
+- [ ] All 6 offer routes load with proper lazy-loading fallback (PageLoader with spinner)
+- [ ] Contact form submits successfully
 - [ ] Phone field displays with country code dropdown in "+<code> <abbrev>" format
 - [ ] Phone field allows user to select country code and enter phone number
 - [ ] Form submission includes phone data
-- [ ] Spam protection (honeypot + timing) works as expected
-- [ ] Access control prevents unauthorized access to admin methods
+- [ ] Spam protection (honeypot + timing) works as expected and logs appropriately
+- [ ] Access control prevents unauthorized access to admin routes
+- [ ] Admin routes show proper loading states and access denied screens
+- [ ] Admin page displays backend connectivity diagnostics
 - [ ] Navigation and routing work as expected
-- [ ] No critical console errors
+- [ ] No critical console errors (warnings and info logs are acceptable)
 
 ---
 
 ## Post-Deployment Actions
 
 If any tests fail:
-1. Check browser console for specific error messages
-2. Verify environment variables are set correctly (if any)
+1. Check browser console for specific error messages, health check logs, and build environment logs
+2. Verify backend canister is deployed and accessible
 3. Confirm all assets exist in `dist/assets/generated/`
-4. Review backend canister deployment status
-5. Check network tab for failed requests
+4. Check network tab for failed requests
+5. Review backend canister deployment status with `dfx canister status backend --network ic`
+6. Check frontend canister status with `dfx canister status frontend --network ic`
+7. Verify the Build & Environment indicator shows the correct hostname (should match canister URL)
+8. Check admin diagnostics page for backend connectivity status
+9. Test with different browsers (Chrome, Firefox, Safari)
+10. Test on mobile devices for responsive behavior
+
+For reference, see:
+- **Deployment Guide**: `PRODUCTION_DEPLOYMENT_NOTES.md`
+- **Configuration Details**: `PRODUCTION_CONFIGURATION.md`

@@ -90,7 +90,6 @@ export class ExternalBlob {
     }
 }
 export interface ContactSubmission {
-    id: string;
     name: string;
     email: string;
     phoneCountryCallingCode: string;
@@ -109,16 +108,17 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    bootstrapAdminWithCredentials(userName: string, password: string): Promise<void>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
-    getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getDeploymentInfo(): Promise<{
+        canisterTime: bigint;
+    }>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    incrementSystemUserCounter(userName: string, password: string): Promise<bigint>;
+    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, honeypot: string, elapsedTime: number): Promise<string>;
+    submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, _honeypot: string, _elapsedTime: number): Promise<string>;
     testConnection(): Promise<string>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
@@ -152,20 +152,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async bootstrapAdminWithCredentials(arg0: string, arg1: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.bootstrapAdminWithCredentials(arg0, arg1);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.bootstrapAdminWithCredentials(arg0, arg1);
-            return result;
-        }
-    }
     async getAllContactSubmissions(): Promise<Array<ContactSubmission>> {
         if (this.processError) {
             try {
@@ -177,20 +163,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllContactSubmissions();
-            return result;
-        }
-    }
-    async getAllContactSubmissionsJunk(): Promise<Array<ContactSubmission>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getAllContactSubmissionsJunk();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getAllContactSubmissionsJunk();
             return result;
         }
     }
@@ -222,6 +194,22 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getDeploymentInfo(): Promise<{
+        canisterTime: bigint;
+    }> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDeploymentInfo();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDeploymentInfo();
+            return result;
+        }
+    }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -236,17 +224,17 @@ export class Backend implements backendInterface {
             return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
         }
     }
-    async incrementSystemUserCounter(arg0: string, arg1: string): Promise<bigint> {
+    async isAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
-                const result = await this.actor.incrementSystemUserCounter(arg0, arg1);
+                const result = await this.actor.isAdmin();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.incrementSystemUserCounter(arg0, arg1);
+            const result = await this.actor.isAdmin();
             return result;
         }
     }

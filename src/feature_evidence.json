@@ -2,11 +2,51 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-private-admin-only-page-for-viewing-contact-form-submissions-at-either-admin-contact-or-dashboard-messages-choose-one-and-implement-it-the-page-must-be-protected-so-only-an-authenticated-internet-identity-user-with-admin-permissions-can-view-submissions-otherwise-show-the-existing-access-denied-flow-with-credential-bootstrap",
-      "featureTitle": "Create a private admin-only page for viewing contact form submissions at either `/admin/contact` or `/dashboard/messages` (choose one and implement it). The page must be protected so only an authenticated Internet Identity user with admin permissions can view submissions; otherwise show the existing access-denied flow with credential bootstrap.",
+      "featureId": "feature-enhance-the-frontend-backend-health-check-diagnostics-to-retrieve-and-display-the-backend-deployment-identity-information-canister-id-server-timestamp-and-to-log-a-single-clearly-labeled-diagnostic-line-that-helps-detect-draft-live-mismatch-e-g-frontend-host-vs-backend-canister-id",
+      "featureTitle": "Enhance the frontend backend-health-check diagnostics to retrieve and display the backend deployment identity information (canister ID + server timestamp) and to log a single clearly labeled diagnostic line that helps detect draft/live mismatch (e.g., frontend host vs backend canister ID).",
       "files": [
-        "frontend/PRODUCTION_CONFIGURATION.md",
-        "frontend/src/App.tsx"
+        "frontend/src/hooks/useBackendHealthCheck.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-in-app-draft-vs-live-verification-diagnostics-view-that-makes-it-obvious-which-environment-a-user-is-currently-viewing-and-whether-the-frontend-is-connected-to-the-expected-backend-show-hostname-build-version-timestamp-backend-canister-id-and-backend-health-status",
+      "featureTitle": "Add an in-app \"Draft vs Live Verification\" diagnostics view that makes it obvious which environment a user is currently viewing and whether the frontend is connected to the expected backend (show hostname, build version/timestamp, backend canister ID, and backend health status).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-admin-backend-connectivity-diagnostics-ui-to-include-backend-canister-identity-info-when-available-and-provide-more-actionable-troubleshooting-guidance-specifically-for-draft-live-mismatch-and-missing-backend-deployment-scenarios",
+      "featureTitle": "Update the admin \"Backend Connectivity\" diagnostics UI to include backend canister identity info when available and provide more actionable troubleshooting guidance specifically for draft/live mismatch and missing backend deployment scenarios.",
+      "files": [
+        "frontend/src/pages/admin/ContactSubmissionsAdminPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,26 +59,6 @@
       ],
       "testIds": [
         "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-keep-existing-admin-route-compatibility-by-redirecting-or-aliasing-the-current-admin-submissions-route-to-the-new-admin-messages-route-so-previously-shared-links-continue-to-work",
-      "featureTitle": "Keep existing admin route compatibility by redirecting or aliasing the current `/admin/submissions` route to the new admin messages route, so previously shared links continue to work.",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
       ],
       "confidence": "high"
     }

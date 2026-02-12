@@ -1,6 +1,7 @@
 import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import LandingPage from './components/landing/LandingPage';
+import { useBackendHealthCheck } from './hooks/useBackendHealthCheck';
 
 // Lazy load offer pages for code splitting
 const OffTheBeatenPathPage = lazy(() => import('./pages/offers/OffTheBeatenPathPage'));
@@ -9,7 +10,8 @@ const FlexibleAsHellPage = lazy(() => import('./pages/offers/FlexibleAsHellPage'
 const StoriesAndBanterPage = lazy(() => import('./pages/offers/StoriesAndBanterPage'));
 const StayYourWayPage = lazy(() => import('./pages/offers/StayYourWayPage'));
 const ChooseYourOwnAdventurePage = lazy(() => import('./pages/offers/ChooseYourOwnAdventurePage'));
-const ContactSubmissionsAdminPage = lazy(() => import('./pages/admin/ContactSubmissionsAdminPage'));
+const AdminEntryPage = lazy(() => import('./pages/admin/AdminEntryPage'));
+const DraftVsLiveDiagnosticsPage = lazy(() => import('./pages/diagnostics/DraftVsLiveDiagnosticsPage'));
 
 // Loading fallback component
 function PageLoader() {
@@ -25,13 +27,13 @@ function PageLoader() {
 
 // Root layout component
 function RootLayout() {
-  return (
-    <div className="min-h-screen">
-      <Outlet />
-    </div>
-  );
+  // Run backend health check once on app load (non-blocking)
+  useBackendHealthCheck();
+
+  return <Outlet />;
 }
 
+// Define routes
 const rootRoute = createRootRoute({
   component: RootLayout,
 });
@@ -102,28 +104,49 @@ const chooseYourOwnAdventureRoute = createRoute({
   ),
 });
 
-// Primary admin contact/messages route
-const adminContactRoute = createRoute({
+// Admin routes with three aliases
+const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/contact',
+  path: '/admin',
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <ContactSubmissionsAdminPage />
+      <AdminEntryPage />
     </Suspense>
   ),
 });
 
-// Legacy admin submissions route (alias to /admin/contact)
-const adminSubmissionsRoute = createRoute({
+const adminAliasRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/admin/submissions',
+  path: '/admin-access',
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <ContactSubmissionsAdminPage />
+      <AdminEntryPage />
     </Suspense>
   ),
 });
 
+const adminSecretRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/secret-admin-panel',
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <AdminEntryPage />
+    </Suspense>
+  ),
+});
+
+// Diagnostics route
+const diagnosticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/diagnostics/draft-vs-live',
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <DraftVsLiveDiagnosticsPage />
+    </Suspense>
+  ),
+});
+
+// Create route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
   offTheBeatenPathRoute,
@@ -132,12 +155,16 @@ const routeTree = rootRoute.addChildren([
   storiesAndBanterRoute,
   stayYourWayRoute,
   chooseYourOwnAdventureRoute,
-  adminContactRoute,
-  adminSubmissionsRoute,
+  adminRoute,
+  adminAliasRoute,
+  adminSecretRoute,
+  diagnosticsRoute,
 ]);
 
+// Create router
 const router = createRouter({ routeTree });
 
+// Export App component
 export default function App() {
   return <RouterProvider router={router} />;
 }
