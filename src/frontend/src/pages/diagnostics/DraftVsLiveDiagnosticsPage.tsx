@@ -1,6 +1,7 @@
 import { useBackendHealthCheck } from '../../hooks/useBackendHealthCheck';
-import { CheckCircle2, XCircle, Clock, Server, Globe, Code, Calendar, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Server, Globe, Code, Calendar, AlertTriangle, Copy } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
 
 /**
  * Public diagnostics page for verifying draft vs live deployment status.
@@ -17,6 +18,8 @@ export default function DraftVsLiveDiagnosticsPage() {
     backendServerTimestamp,
     deploymentInfoError,
   } = useBackendHealthCheck();
+
+  const [copied, setCopied] = useState(false);
 
   const hostname = typeof window !== 'undefined' ? window.location.hostname : 'unknown';
   const mode = import.meta.env.MODE || 'development';
@@ -49,6 +52,14 @@ export default function DraftVsLiveDiagnosticsPage() {
 
   // Determine if this looks like a live domain
   const isLiveDomain = hostname.includes('.caffeine.') || (!hostname.includes('localhost') && !hostname.includes('127.0.0.1'));
+
+  const handleCopyCanisterId = async () => {
+    if (backendCanisterId) {
+      await navigator.clipboard.writeText(backendCanisterId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy to-teal">
@@ -143,9 +154,24 @@ export default function DraftVsLiveDiagnosticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-bold text-white/70 uppercase tracking-wider">Backend Canister ID</label>
-              <p className="text-white text-lg font-mono mt-1 break-all">
-                {backendCanisterId || 'Not available'}
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-white text-lg font-mono break-all">
+                  {backendCanisterId || 'Not available'}
+                </p>
+                {backendCanisterId && (
+                  <button
+                    onClick={handleCopyCanisterId}
+                    className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+                    title="Copy Canister ID"
+                  >
+                    {copied ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-white/70" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <label className="text-sm font-bold text-white/70 uppercase tracking-wider">Backend Server Time</label>
@@ -250,41 +276,25 @@ export default function DraftVsLiveDiagnosticsPage() {
               </p>
             </li>
             <li className="font-semibold">
-              Confirm canister binding matches your environment
+              Confirm canister binding matches your expectations
               <p className="text-sm text-white/70 ml-6 mt-1">
-                The backend canister ID should match what you expect for this environment (draft vs live).
+                The backend canister ID shown above should match the canister you deployed. Use the copy button to easily compare.
               </p>
             </li>
             <li className="font-semibold">
-              Try a hard refresh to clear cached assets
+              Clear browser cache and hard refresh
               <p className="text-sm text-white/70 ml-6 mt-1">
-                Press Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac) to force reload.
+                Press Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac) to force reload without cache.
               </p>
             </li>
             <li className="font-semibold">
-              Check browser console for detailed error messages
+              Check browser console for errors
               <p className="text-sm text-white/70 ml-6 mt-1">
-                Open DevTools (F12) and look for red errors in the Console tab.
+                Open DevTools (F12) and look for red error messages that might indicate initialization or network issues.
               </p>
             </li>
           </ol>
         </section>
-
-        {/* Environment Detection */}
-        {isLiveDomain && !isProd && (
-          <section className="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-yellow-300 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="text-lg font-black text-white mb-2">⚠️ Potential Mismatch Detected</h3>
-                <p className="text-white/90">
-                  Your hostname appears to be a live domain (<strong>{hostname}</strong>), but the build mode is <strong>{mode}</strong> instead of production.
-                  This suggests the draft version may not have been properly published to the live environment.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

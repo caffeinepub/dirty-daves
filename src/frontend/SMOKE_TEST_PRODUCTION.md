@@ -150,11 +150,31 @@ For each offer route, perform the following:
 - [ ] Loading screen appears briefly with spinner and "Loading..." text
 - [ ] AccessDeniedScreen displays with "Access Denied" heading
 - [ ] Message: "You are logged in, but you don't have admin permissions to access this area."
+- [ ] Yellow security warning box is visible explaining resetBootstrap is temporary
+- [ ] "Reset Bootstrap" button is visible (yellow)
+- [ ] "Set Me as Admin" button is visible (green)
 - [ ] "Logout" button is visible
 - [ ] "Go to Home" button is visible
 - [ ] No critical console errors
 
-#### 4C. Admin Routes - Admin User
+#### 4C. Admin Bootstrap Recovery Flow
+1. As an authenticated non-admin user on `/admin`
+2. Click the **"Reset Bootstrap"** button
+3. Wait for success message
+4. Click the **"Set Me as Admin"** button
+5. Wait for page to refresh
+
+**Expected Results:**
+- [ ] "Reset Bootstrap" button shows loading spinner while processing
+- [ ] Success message appears: "Bootstrap flag reset successfully!"
+- [ ] "Set Me as Admin" button remains enabled after reset
+- [ ] "Set Me as Admin" button shows loading spinner while processing
+- [ ] Success message appears: "Admin access granted! Refreshing..."
+- [ ] Page automatically refreshes and loads ContactSubmissionsAdminPage
+- [ ] User can now view contact submissions
+- [ ] No critical console errors
+
+#### 4D. Admin Routes - Admin User
 1. Log in with Internet Identity as an admin principal
 2. Navigate to `/admin` (or `/admin/contact` or `/admin/submissions`)
 3. Wait for admin check to complete
@@ -168,7 +188,7 @@ For each offer route, perform the following:
 - [ ] Diagnostics section includes explanatory text about draft/live/misconfiguration scenarios
 - [ ] No critical console errors
 
-#### 4D. Backend Authorization (Advanced)
+#### 4E. Backend Authorization (Advanced)
 If you have direct access to the backend actor in console:
 
 1. As anonymous user, attempt to call admin-only methods:
@@ -185,6 +205,8 @@ If you have direct access to the backend actor in console:
 - Admin cannot access: Check admin principal is correctly assigned in backend
 - Loading state never completes: Check useIsAdmin hook and backend isAdmin() method
 - Backend diagnostics not showing: Check BuildEnvironmentIndicator component is imported in admin page
+- Reset Bootstrap button fails: Verify resetBootstrap() method exists in backend
+- Set Me as Admin fails after reset: Check that firstAdminBootstrapped flag was properly reset
 
 ---
 
@@ -231,11 +253,13 @@ If you have direct access to the backend actor in console:
 ## 7. Custom Domain Verification
 
 ### Test Steps
-1. Navigate to `https://<your-canister-url>/.well-known/ic-domains` (e.g., `https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/.well-known/ic-domains`)
-2. Navigate to `https://<your-canister-url>/.well-known/ii-alternative-origins`
+1. Navigate to `https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/.well-known/ic-domains`
+2. Navigate to `https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/.well-known/ii-alternative-origins`
 3. Verify the responses
 
 ### Expected Results
+
+#### 7A. ic-domains File
 - [ ] `/.well-known/ic-domains` returns HTTP 200 status code
 - [ ] Response body contains exactly two lines:
   ```
@@ -244,54 +268,25 @@ If you have direct access to the backend actor in console:
   ```
 - [ ] Content-Type header is `text/plain`
 - [ ] No trailing newlines or extra content
+
+#### 7B. ii-alternative-origins File (Internet Identity Fix)
 - [ ] `/.well-known/ii-alternative-origins` returns HTTP 200 status code
-- [ ] Response body contains exactly: `{"alternativeOrigins":["https://dirtydaves.co.uk","https://www.dirtydaves.co.uk"]}`
+- [ ] Response body contains exactly:
+  ```json
+  {
+    "alternativeOrigins": [
+      "https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io",
+      "https://fd6rd-maaaa-aaaah-atocq-cai.raw.icp0.io"
+    ]
+  }
+  ```
 - [ ] Content-Type header is `application/json`
+- [ ] Response includes BOTH canister origins (`.icp0.io` and `.raw.icp0.io`)
+- [ ] JSON is valid and properly formatted
 
-### Common Issues
-- 404 Not Found: Files not deployed; check `frontend/public/.well-known/` directory exists and was included in build
-- Wrong content: Verify files contain exact content with no extra lines or spaces
-- CORS errors: Should not occur for simple GET requests to same origin
-- Wrong number of domains: Verify both apex and www domains are listed
+#### 7C. Record Exact Response Body
+After verifying the ii-alternative-origins endpoint, record the exact response:
 
----
+**URL tested**: `https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/.well-known/ii-alternative-origins`
 
-## Summary Checklist
-
-- [ ] Landing page renders without critical errors
-- [ ] Backend health check passes and logs success with hostname
-- [ ] Build & Environment indicator displays in footer with correct info
-- [ ] All 6 offer routes load with proper lazy-loading fallback (PageLoader with spinner)
-- [ ] Contact form submits successfully
-- [ ] Phone field displays with country code dropdown in "+<code> <abbrev>" format
-- [ ] Phone field allows user to select country code and enter phone number
-- [ ] Form submission includes phone data
-- [ ] Spam protection (honeypot + timing) works as expected and logs appropriately
-- [ ] Access control prevents unauthorized access to admin routes
-- [ ] Admin routes show proper loading states and access denied screens
-- [ ] Admin page displays backend connectivity diagnostics
-- [ ] Navigation and routing work as expected
-- [ ] Custom domain verification files are accessible at `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins`
-- [ ] Both verification files return correct content (two domains for ic-domains, JSON for ii-alternative-origins)
-- [ ] No critical console errors (warnings and info logs are acceptable)
-
----
-
-## Post-Deployment Actions
-
-If any tests fail:
-1. Check browser console for specific error messages, health check logs, and build environment logs
-2. Verify backend canister is deployed and accessible
-3. Confirm all assets exist in `dist/assets/generated/`
-4. Check network tab for failed requests
-5. Review backend canister deployment status with `dfx canister status backend --network ic`
-6. Check frontend canister status with `dfx canister status frontend --network ic`
-7. Verify the Build & Environment indicator shows the correct hostname (should match canister URL)
-8. Check admin diagnostics page for backend connectivity status
-9. Test with different browsers (Chrome, Firefox, Safari)
-10. Test on mobile devices for responsive behavior
-11. Verify custom domain verification files at `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins` return HTTP 200 with correct content
-
-For reference, see:
-- **Deployment Guide**: `PRODUCTION_DEPLOYMENT_NOTES.md`
-- **Configuration Details**: `PRODUCTION_CONFIGURATION.md`
+**Response body**:

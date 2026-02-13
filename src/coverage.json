@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T14:38:39.107Z",
+  "generatedAt": "2026-02-13T10:30:34.883Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,68 +12,81 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Ensure the deployed frontend serves a `/.well-known/ic-domains` text file that contains exactly two lines (one domain per line) with no extra spaces, quotes, or trailing blank lines:\n1) `dirtydaves.co.uk`\n2) `www.dirtydaves.co.uk`\nThe file must be located at `frontend/public/.well-known/ic-domains` so it is included in the static asset deployment.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/.well-known/ic-domains"
-        ],
-        "matchedFiles": [
-          "frontend/public/.well-known/ic-domains"
-        ]
+        "summary": "Backend: Add a temporary public shared method resetBootstrap() in backend/main.mo that sets firstAdminBootstrapped := false, placed immediately after `var firstAdminBootstrapped : Bool = false;` and before `setMeAsAdmin()`.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Create a static file `frontend/public/.well-known/ii-alternative-origins` (no file extension) containing exactly this one-line JSON:\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}\nEnsure it is deployed as a public static asset at `/.well-known/ii-alternative-origins`.",
+        "summary": "Frontend: When an authenticated user is shown the /admin AccessDeniedScreen (logged in but not admin), add a temporary \"Reset Bootstrap\" button that calls the backend `resetBootstrap()` method, shows success/failure UI, and then allows the user to click the existing \"Set Me as Admin\" button to call `setMeAsAdmin()` immediately after.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/.well-known/ii-alternative-origins"
+          "frontend/src/hooks/useAdminResetBootstrap.ts",
+          "frontend/src/components/admin/AccessDeniedScreen.tsx",
+          "frontend/src/hooks/useAdminBootstrapAccess.ts"
         ],
         "matchedFiles": [
-          "frontend/public/.well-known/ii-alternative-origins"
+          "frontend/src/hooks/useAdminResetBootstrap.ts",
+          "frontend/src/components/admin/AccessDeniedScreen.tsx",
+          "frontend/src/hooks/useAdminBootstrapAccess.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add an asset configuration file `frontend/public/.ic-assets.json` that configures content types and disables caching (max_age: 0) for the two `/.well-known` files, using exactly this JSON structure and paths:\n{\n  \"assets\": [\n    {\n      \"path\": \"/.well-known/ic-domains\",\n      \"content_type\": \"text/plain\",\n      \"cache\": { \"max_age\": 0 }\n    },\n    {\n      \"path\": \"/.well-known/ii-alternative-origins\",\n      \"content_type\": \"application/json\",\n      \"cache\": { \"max_age\": 0 }\n    }\n  ]\n}\n",
+        "summary": "Frontend: Add a small, explicit security warning in the authenticated AccessDeniedScreen UI that `resetBootstrap()` is temporary and must be removed/disabled after an admin is successfully bootstrapped.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/.ic-assets.json"
+          "frontend/src/components/admin/AccessDeniedScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/public/.ic-assets.json"
+          "frontend/src/components/admin/AccessDeniedScreen.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Update the production smoke test documentation to reflect the new expected `/.well-known/ic-domains` content (two lines including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
+        "summary": "Docs: Update frontend/PRODUCTION_CONFIGURATION.md to include explicit steps and exact URL pattern for opening the Candid UI for the backend canister to call `resetBootstrap()` and then `setMeAsAdmin()` (including the recommended a4gq6... Candid UI URL with `?id=<BACKEND_CANISTER_ID>` and guidance to obtain the canister id from the Diagnostics page).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/SMOKE_TEST_PRODUCTION.md"
+          "frontend/PRODUCTION_CONFIGURATION.md",
+          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/SMOKE_TEST_PRODUCTION.md"
+          "frontend/PRODUCTION_CONFIGURATION.md",
+          "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Add a short post-deploy checklist note (in an existing deployment/production doc) listing the remaining manual steps outside Caffeine for domain setup for canister `fd6rd-maaaa-aaaah-atocq-cai`, including the exact DNS records and the optional boundary-node registration/status URLs the user provided.",
-        "status": "missing",
+        "summary": "Deployment: Redeploy backend + frontend changes and ensure the live environment reflects the update.",
+        "status": "implemented",
         "plannedFiles": [
+          "frontend/SMOKE_TEST_PRODUCTION.md",
           "frontend/PRODUCTION_DEPLOYMENT_NOTES.md"
         ],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/SMOKE_TEST_PRODUCTION.md"
+        ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/SMOKE_TEST_PRODUCTION.md",
-    "frontend/public/.ic-assets.json",
-    "frontend/public/.well-known/ic-domains",
-    "frontend/public/.well-known/ii-alternative-origins",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/admin/AccessDeniedScreen.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useAdminBootstrapAccess.ts",
+    "frontend/src/hooks/useAdminResetBootstrap.ts",
+    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

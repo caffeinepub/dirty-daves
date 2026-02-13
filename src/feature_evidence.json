@@ -2,30 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-deployed-frontend-serves-a-well-known-ic-domains-text-file-that-contains-exactly-two-lines-one-domain-per-line-with-no-extra-spaces-quotes-or-trailing-blank-lines-1-dirtydaves-co-uk-2-www-dirtydaves-co-uk-the-file-must-be-located-at-frontend-public-well-known-ic-domains-so-it-is-included-in-the-static-asset-deployment",
-      "featureTitle": "Ensure the deployed frontend serves a `/.well-known/ic-domains` text file that contains exactly two lines (one domain per line) with no extra spaces, quotes, or trailing blank lines:\n1) `dirtydaves.co.uk`\n2) `www.dirtydaves.co.uk`\nThe file must be located at `frontend/public/.well-known/ic-domains` so it is included in the static asset deployment.",
+      "featureId": "feature-frontend-when-an-authenticated-user-is-shown-the-admin-accessdeniedscreen-logged-in-but-not-admin-add-a-temporary-reset-bootstrap-button-that-calls-the-backend-resetbootstrap-method-shows-success-failure-ui-and-then-allows-the-user-to-click-the-existing-set-me-as-admin-button-to-call-setmeasadmin-immediately-after",
+      "featureTitle": "Frontend: When an authenticated user is shown the /admin AccessDeniedScreen (logged in but not admin), add a temporary \"Reset Bootstrap\" button that calls the backend `resetBootstrap()` method, shows success/failure UI, and then allows the user to click the existing \"Set Me as Admin\" button to call `setMeAsAdmin()` immediately after.",
       "files": [
-        "frontend/public/.well-known/ic-domains"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-create-a-static-file-frontend-public-well-known-ii-alternative-origins-no-file-extension-containing-exactly-this-one-line-json-alternativeorigins-https-dirtydaves-co-uk-https-www-dirtydaves-co-uk-ensure-it-is-deployed-as-a-public-static-asset-at-well-known-ii-alternative-origins",
-      "featureTitle": "Create a static file `frontend/public/.well-known/ii-alternative-origins` (no file extension) containing exactly this one-line JSON:\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}\nEnsure it is deployed as a public static asset at `/.well-known/ii-alternative-origins`.",
-      "files": [
-        "frontend/public/.well-known/ii-alternative-origins"
+        "frontend/src/components/admin/AccessDeniedScreen.tsx",
+        "frontend/src/hooks/useAdminBootstrapAccess.ts",
+        "frontend/src/hooks/useAdminResetBootstrap.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,10 +24,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-an-asset-configuration-file-frontend-public-ic-assets-json-that-configures-content-types-and-disables-caching-max-age-0-for-the-two-well-known-files-using-exactly-this-json-structure-and-paths-assets-path-well-known-ic-domains-content-type-text-plain-cache-max-age-0-path-well-known-ii-alternative-origins-content-type-application-json-cache-max-age-0",
-      "featureTitle": "Add an asset configuration file `frontend/public/.ic-assets.json` that configures content types and disables caching (max_age: 0) for the two `/.well-known` files, using exactly this JSON structure and paths:\n{\n  \"assets\": [\n    {\n      \"path\": \"/.well-known/ic-domains\",\n      \"content_type\": \"text/plain\",\n      \"cache\": { \"max_age\": 0 }\n    },\n    {\n      \"path\": \"/.well-known/ii-alternative-origins\",\n      \"content_type\": \"application/json\",\n      \"cache\": { \"max_age\": 0 }\n    }\n  ]\n}",
+      "featureId": "feature-frontend-add-a-small-explicit-security-warning-in-the-authenticated-accessdeniedscreen-ui-that-resetbootstrap-is-temporary-and-must-be-removed-disabled-after-an-admin-is-successfully-bootstrapped",
+      "featureTitle": "Frontend: Add a small, explicit security warning in the authenticated AccessDeniedScreen UI that `resetBootstrap()` is temporary and must be removed/disabled after an admin is successfully bootstrapped.",
       "files": [
-        "frontend/public/.ic-assets.json"
+        "frontend/src/components/admin/AccessDeniedScreen.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -62,8 +44,29 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-production-smoke-test-documentation-to-reflect-the-new-expected-well-known-ic-domains-content-two-lines-including-www-and-add-a-verification-check-for-well-known-ii-alternative-origins-returning-the-exact-json-payload",
-      "featureTitle": "Update the production smoke test documentation to reflect the new expected `/.well-known/ic-domains` content (two lines including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
+      "featureId": "feature-docs-update-frontend-production-configuration-md-to-include-explicit-steps-and-exact-url-pattern-for-opening-the-candid-ui-for-the-backend-canister-to-call-resetbootstrap-and-then-setmeasadmin-including-the-recommended-a4gq6-candid-ui-url-with-id-backend-canister-id-and-guidance-to-obtain-the-canister-id-from-the-diagnostics-page",
+      "featureTitle": "Docs: Update frontend/PRODUCTION_CONFIGURATION.md to include explicit steps and exact URL pattern for opening the Candid UI for the backend canister to call `resetBootstrap()` and then `setMeAsAdmin()` (including the recommended a4gq6... Candid UI URL with `?id=<BACKEND_CANISTER_ID>` and guidance to obtain the canister id from the Diagnostics page).",
+      "files": [
+        "frontend/PRODUCTION_CONFIGURATION.md",
+        "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-deployment-redeploy-backend-frontend-changes-and-ensure-the-live-environment-reflects-the-update",
+      "featureTitle": "Deployment: Redeploy backend + frontend changes and ensure the live environment reflects the update.",
       "files": [
         "frontend/SMOKE_TEST_PRODUCTION.md"
       ],
@@ -77,7 +80,7 @@
         "http-outcalls@3.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-5"
       ],
       "confidence": "high"
     }

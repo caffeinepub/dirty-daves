@@ -1,82 +1,88 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Configure ICP custom domain verification static assets and update production docs",
+  "title": "Temporary admin bootstrap recovery UI + production docs updates",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Serve /.well-known/ic-domains with exactly two domain lines (apex + www) from frontend/public for ICP custom domain verification.",
-      "acceptanceCriteria": [
-        "Repository contains `frontend/public/.well-known/ic-domains`.",
-        "`frontend/public/.well-known/ic-domains` content matches exactly:\n`dirtydaves.co.uk\\nwww.dirtydaves.co.uk` (newline-separated, no additional newline at end preferred).",
-        "When deployed, `GET /.well-known/ic-domains` returns HTTP 200 and the response body is exactly those two lines."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/.well-known/ic-domains",
-          "operation": "modify",
-          "description": "Update file contents to be exactly two lines with no extra spaces/quotes and no trailing blank line: first line `dirtydaves.co.uk`, second line `www.dirtydaves.co.uk`."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Serve /.well-known/ii-alternative-origins as a static one-line JSON file for Internet Identity alternative origins.",
+      "summary": "Add a temporary Reset Bootstrap button on the authenticated /admin access-denied screen that calls backend resetBootstrap(), shows success/failure UI, and keeps Set Me as Admin available to run immediately after.",
       "acceptanceCriteria": [
-        "Repository contains `frontend/public/.well-known/ii-alternative-origins`.",
-        "File content matches exactly the provided JSON on a single line.",
-        "When deployed, `GET /.well-known/ii-alternative-origins` returns HTTP 200."
+        "On /admin, for authenticated non-admin users, a \"Reset Bootstrap\" button is visible alongside the existing \"Set Me as Admin\" button",
+        "Clicking \"Reset Bootstrap\" calls `actor.resetBootstrap()` and displays a clear success message when it succeeds",
+        "If reset fails, the error is displayed in the existing error area or a new error area without breaking the page",
+        "After reset succeeds, clicking \"Set Me as Admin\" successfully grants admin and the user can access the submissions page (assuming no other RBAC issues)"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/.well-known/ii-alternative-origins",
+          "path": "frontend/src/hooks/useAdminResetBootstrap.ts",
           "operation": "create",
-          "description": "Create a no-extension static asset containing exactly this single line (no trailing newline): {\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}."
+          "description": "Create a React Query mutation hook that calls the backend capability `resetBootstrap()` via the authenticated actor, with clear error propagation and admin-query invalidation as needed. Use the authorization component patterns for authenticated actor usage and error handling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/admin/AccessDeniedScreen.tsx",
+          "operation": "modify",
+          "description": "Update the authenticated (non-admin) AccessDeniedScreen UI to add a temporary \"Reset Bootstrap\" button next to the existing \"Set Me as Admin\" action. Wire it to the new `useAdminResetBootstrap` hook, add success feedback for reset, and display reset errors without breaking the existing setMeAsAdmin success/error UI. Use authorization component conventions for authenticated-only actions and graceful handling of backend traps. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useAdminBootstrapAccess.ts",
+          "operation": "modify",
+          "description": "Ensure the existing admin bootstrap mutation keeps working when invoked immediately after a successful reset, and that relevant admin-related queries are invalidated/refetched so /admin can transition to the submissions page. Use authorization component conventions for actor/identity checks and cache invalidation. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add .ic-assets.json to set explicit content types and disable caching (max_age 0) for the two /.well-known assets.",
+      "summary": "Add an explicit security warning on the authenticated access-denied UI stating resetBootstrap() is temporary and must be removed/disabled after bootstrapping an admin.",
       "acceptanceCriteria": [
-        "Repository contains `frontend/public/.ic-assets.json` with the exact JSON provided in the request (paths, content_type values, and cache.max_age).",
-        "On deployment, responses for `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins` are served with appropriate `Content-Type` and are not aggressively cached (max-age 0)."
+        "The access-denied (authenticated) UI includes a warning message stating that resetBootstrap is temporary and should be removed/disabled after bootstrapping admin",
+        "The warning text is in English and visible without needing to open devtools"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/.ic-assets.json",
-          "operation": "create",
-          "description": "Create the asset configuration file with exactly the JSON structure and paths specified in the request to set content_type and cache.max_age: 0 for `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins`."
+          "path": "frontend/src/components/admin/AccessDeniedScreen.tsx",
+          "operation": "modify",
+          "description": "Add a clearly visible, English security warning in the authenticated access-denied view explaining that the Reset Bootstrap action is temporary and must be removed/disabled after successfully bootstrapping an admin. Keep styling consistent with existing AccessDeniedScreen alert patterns. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Update production smoke test doc to expect the new ic-domains two-line content and to verify ii-alternative-origins payload.",
+      "summary": "Update production docs with copy/paste-ready Candid UI URL pattern and steps to call resetBootstrap() then setMeAsAdmin(), including guidance to find backend canister id from the Diagnostics page.",
       "acceptanceCriteria": [
-        "`frontend/SMOKE_TEST_PRODUCTION.md` section \"Custom Domain Verification\" expects `dirtydaves.co.uk` and `www.dirtydaves.co.uk` (and no extra lines).",
-        "Smoke test includes a step to fetch and verify `/.well-known/ii-alternative-origins` content."
+        "frontend/PRODUCTION_CONFIGURATION.md contains a copy/paste-ready URL pattern for Candid UI that includes `?id=<BACKEND_CANISTER_ID>`",
+        "The docs explicitly say to call `resetBootstrap()` first, then `setMeAsAdmin()` immediately after, and that both can be done from the same Candid UI",
+        "The docs mention where to find the backend canister id in the app (Diagnostics page)"
       ],
       "file_operations": [
         {
-          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
+          "path": "frontend/PRODUCTION_CONFIGURATION.md",
           "operation": "modify",
-          "description": "Revise the \"Custom Domain Verification\" section to expect exactly two lines for `/.well-known/ic-domains` (including `www`) and add a new check to fetch `/.well-known/ii-alternative-origins` and verify it matches exactly {\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}."
+          "description": "Extend the Admin/First-Time Admin Setup section to include explicit manual recovery steps via the Candid UI, including the recommended a4gq6… Candid UI URL pattern with `?id=<BACKEND_CANISTER_ID>`, and a strict ordering: call `resetBootstrap()` first, then `setMeAsAdmin()` immediately after (both from the same Candid UI session). Include guidance to obtain `<BACKEND_CANISTER_ID>` from the in-app Diagnostics page (Draft vs Live Diagnostics)."
+        },
+        {
+          "path": "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the Diagnostics page clearly displays the backend canister id in a copy-friendly way (already shown, but refine labeling/formatting if needed) so the docs' instructions to find the canister id here are accurate and easy to follow."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add post-deploy checklist note documenting remaining manual custom-domain setup steps (DNS + optional registration/status URLs) for canister fd6rd-maaaa-aaaah-atocq-cai.",
+      "summary": "Document and validate deployment/smoke-test steps so the live environment can be verified to include the updated /admin recovery UI.",
       "acceptanceCriteria": [
-        "A production/deployment documentation file includes the user-provided DNS records verbatim:\n- CNAME @/apex → dirtydaves.co.uk.icp1.io\n- CNAME www → www.dirtydaves.co.uk.icp1.io\n- TXT _canister-id.dirtydaves.co.uk → fd6rd-maaaa-aaaah-atocq-cai\n- CNAME _acme-challenge.dirtydaves.co.uk → _acme-challenge.dirtydaves.co.uk.icp2.io\n(and note about www if needed).",
-        "Documentation includes verbatim optional commands/URLs:\n- `curl -sL -X POST https://icp0.io/custom-domains/v1/dirtydaves.co.uk`\n- `https://icp0.io/custom-domains/v1/dirtydaves.co.uk` for status."
+        "A new live deployment is produced that includes the backend `resetBootstrap()` method and the updated /admin UI",
+        "Smoke test: user can log in, click Reset Bootstrap, then click Set Me as Admin, and then load the contact submissions admin page without unauthorized errors (for that principal)"
       ],
       "file_operations": [
         {
+          "path": "frontend/SMOKE_TEST_PRODUCTION.md",
+          "operation": "modify",
+          "description": "Add a smoke-test subsection under Access Control Verification for the temporary bootstrap recovery path: authenticated non-admin user can click \"Reset Bootstrap\", see success/failure messaging, then click \"Set Me as Admin\" and subsequently load the submissions admin page without unauthorized errors."
+        },
+        {
           "path": "frontend/PRODUCTION_DEPLOYMENT_NOTES.md",
           "operation": "modify",
-          "description": "Add a short post-deploy checklist note for canister `fd6rd-maaaa-aaaah-atocq-cai` listing the remaining manual steps outside Caffeine, including the DNS records verbatim (CNAME @/apex → dirtydaves.co.uk.icp1.io; CNAME www → www.dirtydaves.co.uk.icp1.io; TXT _canister-id.dirtydaves.co.uk → fd6rd-maaaa-aaaah-atocq-cai; CNAME _acme-challenge.dirtydaves.co.uk → _acme-challenge.dirtydaves.co.uk.icp2.io; plus the note about www if needed) and the optional registration/status command and URL verbatim (`curl -sL -X POST https://icp0.io/custom-domains/v1/dirtydaves.co.uk` and `https://icp0.io/custom-domains/v1/dirtydaves.co.uk`)."
+          "description": "Add a short deployment note reminding that after shipping the temporary recovery UI, operators should redeploy and then verify on the live site using the updated smoke test steps, including the /admin recovery flow and /diagnostics/draft-vs-live canister id verification."
         }
       ]
     }

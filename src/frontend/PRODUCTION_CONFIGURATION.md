@@ -25,25 +25,22 @@ The application uses **role-based access control (RBAC)** provided by the author
 4. If authenticated and admin: ContactSubmissionsAdminPage loads successfully
 
 ### First-Time Admin Setup
-For the first deployment, admin access is initialized automatically:
-- The first principal to authenticate is granted admin access
-- Subsequent admins must be added by existing admins
-- Admin credentials are managed securely by the backend canister
 
-### Security Notes
-- Admin permissions are verified on every backend call
-- The backend uses the authorization mixin for consistent access control
-- Only authenticated principals with admin role can view submissions
-- Anonymous principals are treated as guests with no admin access
-- Logging out clears all cached data including user profile
+**Important**: The first admin must manually claim admin access using one of the methods below.
 
-## Contact Form
+#### Method 1: Using the "Set Me as Admin" Button (Recommended)
 
-### Spam Protection
-The contact form includes built-in spam protection without requiring external services:
+1. Navigate to `/admin` in your browser
+2. Click "Login with Internet Identity" and complete authentication
+3. After login, you'll see "Access Denied" with a green **"Set Me as Admin"** button
+4. Click the button to grant yourself admin access
+5. The page will refresh automatically and show the admin dashboard
 
-1. **Honeypot Field**: Hidden field that bots typically fill out
-2. **Timing Check**: Submissions faster than 2 seconds are flagged as suspicious
-3. **User-Friendly Error Handling**: Spam detection shows helpful messages, not critical errors
+**If the button fails with "Unauthorized: Only admins can assign user roles":**
 
-Spam protection is logged to console for debugging:
+This means the bootstrap flag is already set to `true` but no admin was successfully assigned. Use the **Reset Bootstrap** button (see Method 4 below) or follow Method 2 or 3.
+
+#### Method 2: Using dfx Command Line
+
+If you prefer to use the command line or the button doesn't work:
+

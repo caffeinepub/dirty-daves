@@ -30,9 +30,20 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getDeploymentInfo' : ActorMethod<[], { 'canisterTime' : bigint }>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'resetBootstrap' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  /**
+   * / Allows first admin to bootstrap system via self-assign when
+   * / no admin has been set yet (firstAdminBootstrapped == false).
+   * /
+   * / After first admin has been assigned, all further
+   * / assignments require the caller to be an existing admin.
+   * /
+   * / Bootstrap check: Uses a persistent flag 'firstAdminBootstrapped'
+   * / to determine if the system has been initialized with an admin.
+   */
+  'setMeAsAdmin' : ActorMethod<[], undefined>,
   'submitContactForm' : ActorMethod<
     [string, string, string, string, string, string, number],
     string

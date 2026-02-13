@@ -3,11 +3,11 @@ import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
 
 /**
- * Hook to bootstrap admin access by calling setMeAsAdmin().
- * This allows an authenticated user to claim admin privileges.
- * Should only be used during initial setup or after resetBootstrap().
+ * Hook to reset the admin bootstrap flag by calling resetBootstrap().
+ * This is a TEMPORARY recovery mechanism that should be removed after
+ * successfully bootstrapping the first admin.
  */
-export function useAdminBootstrapAccess() {
+export function useAdminResetBootstrap() {
   const { actor } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
@@ -18,16 +18,15 @@ export function useAdminBootstrapAccess() {
         throw new Error('Actor not available');
       }
       if (!identity) {
-        throw new Error('Must be authenticated to claim admin access');
+        throw new Error('Must be authenticated to reset bootstrap flag');
       }
-      await actor.setMeAsAdmin();
+      await actor.resetBootstrap();
     },
     onSuccess: () => {
-      // Invalidate admin-related queries to refresh access status
+      // Invalidate admin-related queries to ensure fresh state after reset
       const principal = identity?.getPrincipal().toString();
       queryClient.invalidateQueries({ queryKey: ['isAdmin', principal] });
       queryClient.invalidateQueries({ queryKey: ['contactSubmissions'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
   });
 }

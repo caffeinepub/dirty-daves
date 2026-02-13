@@ -14,7 +14,7 @@ export function useIsAdmin() {
     queryKey: ['isAdmin', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.isAdmin();
+      return actor.isCallerAdmin();
     },
     enabled: !!actor && !actorFetching && !isInitializing && !!identity,
     retry: false,

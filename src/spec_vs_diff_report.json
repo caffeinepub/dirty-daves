@@ -1,58 +1,76 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T14:38:39.104Z",
-  "summary": "REQ-2 and REQ-3 appear implemented via new static assets under frontend/public. REQ-1 is present but the shown file content includes an extra trailing blank line. REQ-4 and REQ-5 are not evidenced in the provided SMOKE_TEST_PRODUCTION.md truncation / other docs. The diff summary also indicates multiple unrequested frontend code/UI changes (and updates to project metadata) that violate the stated constraint to limit changes to static assets and documentation.",
+  "generatedAt": "2026-02-13T10:30:34.880Z",
+  "summary": "REQ-1 is implemented in backend/main.mo with a public shared resetBootstrap() that sets firstAdminBootstrapped := false and is placed right after the flag and before setMeAsAdmin(). A frontend hook for calling actor.resetBootstrap() was added, and AccessDeniedScreen was modified to use it, but the diff is truncated so button visibility, warning text, and success/error UI cannot be fully confirmed. Docs update for Candid UI steps and the deployment requirement are not evidenced. Several unrelated/extra features appear to have been added (migration module, diagnostics route/page, various landing/admin unrelated changes per file summaries).",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Ensure `frontend/public/.well-known/ic-domains` contains exactly two lines: `dirtydaves.co.uk` and `www.dirtydaves.co.uk` with no extra spaces/quotes/trailing blank lines.",
-      "reason": "The diff shows an extra blank line at the end of the file content, implying a trailing newline/blank line beyond the two required lines, so the content does not match the exact two-line requirement.",
+      "id": "REQ-2",
+      "requirement": "On /admin for authenticated non-admin users, show a temporary \"Reset Bootstrap\" button alongside \"Set Me as Admin\"; clicking it calls actor.resetBootstrap() and displays clear success/failure UI without breaking the page; after success, user can click \"Set Me as Admin\" to gain admin.",
+      "reason": "AccessDeniedScreen.tsx is truncated before the authenticated UI section where the buttons/messages would be rendered, so the diff summary does not provide evidence that the Reset Bootstrap button is actually visible alongside Set Me as Admin, nor that success/failure UI is displayed to the user (only console.error is shown in handlers).",
       "evidence": [
-        "frontend/public/.well-known/ic-domains"
+        "frontend/src/components/admin/AccessDeniedScreen.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Add an explicit security warning in the authenticated AccessDeniedScreen UI that resetBootstrap() is temporary and must be removed/disabled after admin bootstrapping.",
+      "reason": "The authenticated UI portion is truncated right where a comment beginning with \"Security War...\" appears; the actual warning text is not visible in the provided diff summary, so it cannot be verified.",
+      "evidence": [
+        "frontend/src/components/admin/AccessDeniedScreen.tsx (truncated)"
       ]
     },
     {
       "id": "REQ-4",
-      "requirement": "Update `frontend/SMOKE_TEST_PRODUCTION.md` to reflect the new expected `/.well-known/ic-domains` two-line content (including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
-      "reason": "The shown (truncated) modifications to `frontend/SMOKE_TEST_PRODUCTION.md` do not include any visible 'Custom Domain Verification' updates nor steps to fetch/verify `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins`.",
+      "requirement": "Update frontend/PRODUCTION_CONFIGURATION.md with explicit Candid UI steps and a copy/paste-ready a4gq6... Candid UI URL pattern including ?id=<BACKEND_CANISTER_ID>, and guidance to obtain the backend canister id from the Diagnostics page; instruct to call resetBootstrap() first then setMeAsAdmin().",
+      "reason": "The displayed portion of frontend/PRODUCTION_CONFIGURATION.md does not include the required Candid UI URL pattern (a4gq6... + ?id=<BACKEND_CANISTER_ID>) nor the required explicit steps referencing the Diagnostics page for canister id. The file content in the diff summary is cut off mid-document.",
       "evidence": [
-        "frontend/SMOKE_TEST_PRODUCTION.md (truncated)"
+        "frontend/PRODUCTION_CONFIGURATION.md (shown only through early sections; no Candid UI URL pattern visible)"
       ]
     },
     {
       "id": "REQ-5",
-      "requirement": "Add a post-deploy checklist note in an existing deployment/production doc including the provided DNS records verbatim and the optional boundary-node registration/status URLs/command.",
-      "reason": "No documentation file changes in the diff summary show the required DNS record block or the provided curl/URL status entries.",
-      "evidence": [
-        "frontend/SMOKE_TEST_PRODUCTION.md (truncated)",
-        "file-diff summary (no other production/deployment doc shown as modified)"
-      ]
+      "requirement": "Redeploy backend + frontend changes and ensure live environment reflects the update; smoke test resetBootstrap then setMeAsAdmin then load submissions page.",
+      "reason": "No evidence of deployment or live-environment smoke test results is present in the diff summary (only code/docs changes).",
+      "evidence": []
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Multiple frontend application code/UI changes (new routes, landing page/hero/CTA/style changes, contact form behavior changes, Tailwind config changes, etc.).",
-      "reason": "BuildRequest constraints require keeping changes limited to static asset files and documentation and explicitly say not to modify immutable frontend paths; the diff summary indicates extensive frontend source changes unrelated to `.well-known` assets and docs.",
+      "description": "Added backend state migration module that forces firstAdminBootstrapped to false via Migration.run wiring.",
+      "reason": "BuildRequest only asked for a temporary public resetBootstrap() method in backend/main.mo; it did not request adding a migration module/file.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "backend/migration.mo",
+        "backend/main.mo (import Migration \"migration\"; (with migration = Migration.run))"
       ]
     },
     {
-      "description": "Modification of `project_state.json` to add/update internal tracking entries for AR-1..AR-6.",
-      "reason": "Not requested in the BuildRequest; requirement scope is limited to static assets and documentation for custom domain verification and deployment checklist notes.",
+      "description": "Added a new public diagnostics route/page for draft-vs-live deployment status and canister identity info.",
+      "reason": "BuildRequest only mentions using the Diagnostics page as a reference in docs (REQ-4) but does not request creating or expanding a diagnostics route/page feature.",
       "evidence": [
-        "project_state.json"
+        "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx (modified)",
+        "frontend-file-summaries.txt (mentions new public diagnostics route at /diagnostics/draft-vs-live and App.tsx router changes)"
+      ]
+    },
+    {
+      "description": "Multiple landing page/content/UI styling and copy changes unrelated to the admin bootstrap recovery request (offers, reviews, footer, contact section, global styles, etc.).",
+      "reason": "These are not requested by the BuildRequest, which is narrowly scoped to resetBootstrap + /admin UI + docs.",
+      "evidence": [
+        "frontend-file-summaries.txt (numerous unrelated component changes listed)"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/PRODUCTION_CONFIGURATION.md",
     "frontend/SMOKE_TEST_PRODUCTION.md",
-    "frontend/public/.ic-assets.json",
-    "frontend/public/.well-known/ic-domains",
-    "frontend/public/.well-known/ii-alternative-origins",
+    "frontend/src/components/admin/AccessDeniedScreen.tsx",
+    "frontend/src/hooks/useAdminBootstrapAccess.ts",
+    "frontend/src/hooks/useAdminResetBootstrap.ts",
+    "frontend/src/pages/diagnostics/DraftVsLiveDiagnosticsPage.tsx",
     "project_state.json"
   ]
 }

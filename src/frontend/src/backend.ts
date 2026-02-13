@@ -115,9 +115,20 @@ export interface backendInterface {
         canisterTime: bigint;
     }>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
+    resetBootstrap(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    /**
+     * / Allows first admin to bootstrap system via self-assign when
+     * / no admin has been set yet (firstAdminBootstrapped == false).
+     * /
+     * / After first admin has been assigned, all further
+     * / assignments require the caller to be an existing admin.
+     * /
+     * / Bootstrap check: Uses a persistent flag 'firstAdminBootstrapped'
+     * / to determine if the system has been initialized with an admin.
+     */
+    setMeAsAdmin(): Promise<void>;
     submitContactForm(name: string, email: string, phoneCountry: string, phoneNumber: string, message: string, _honeypot: string, _elapsedTime: number): Promise<string>;
     testConnection(): Promise<string>;
 }
@@ -224,20 +235,6 @@ export class Backend implements backendInterface {
             return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
         }
     }
-    async isAdmin(): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.isAdmin();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.isAdmin();
-            return result;
-        }
-    }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -252,6 +249,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async resetBootstrap(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetBootstrap();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetBootstrap();
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -263,6 +274,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveCallerUserProfile(arg0);
+            return result;
+        }
+    }
+    async setMeAsAdmin(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setMeAsAdmin();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setMeAsAdmin();
             return result;
         }
     }

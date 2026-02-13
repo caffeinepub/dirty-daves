@@ -1,104 +1,108 @@
 {
   "kind": "build_request",
-  "title": "Configure ICP custom domain verification assets for dirtydaves.co.uk (+ www) and prepare for redeploy",
-  "priority": "normal",
+  "title": "Add temporary resetBootstrap admin recovery path (Candid + /admin buttons)",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the deployed frontend serves a `/.well-known/ic-domains` text file that contains exactly two lines (one domain per line) with no extra spaces, quotes, or trailing blank lines:\n1) `dirtydaves.co.uk`\n2) `www.dirtydaves.co.uk`\nThe file must be located at `frontend/public/.well-known/ic-domains` so it is included in the static asset deployment.",
-      "target": "frontend",
+      "text": "Backend: Add a temporary public shared method resetBootstrap() in backend/main.mo that sets firstAdminBootstrapped := false, placed immediately after `var firstAdminBootstrapped : Bool = false;` and before `setMeAsAdmin()`.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-user-latest"
         ],
         "quotes": [
-          "Put the following exact content in the ic-domains file (one domain per line, no extra spaces or quotes):\ndirtydaves.co.uk\nwww.dirtydaves.co.uk"
+          "Please add a temporary public method to reset the flag, like this:\n\npublic shared func resetBootstrap() : async () {\n  firstAdminBootstrapped := false;\n};"
         ]
       },
       "acceptanceCriteria": [
-        "Repository contains `frontend/public/.well-known/ic-domains`.",
-        "`frontend/public/.well-known/ic-domains` content matches exactly:\n`dirtydaves.co.uk\\nwww.dirtydaves.co.uk` (newline-separated, no additional newline at end preferred).",
-        "When deployed, `GET /.well-known/ic-domains` returns HTTP 200 and the response body is exactly those two lines."
+        "backend/main.mo contains a `public shared func resetBootstrap() : async ()` that sets `firstAdminBootstrapped := false`",
+        "The canister Candid interface exposes `resetBootstrap` with no arguments",
+        "Calling `resetBootstrap()` followed by `setMeAsAdmin()` from the same principal successfully assigns #admin even if the flag had been stuck true"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Create a static file `frontend/public/.well-known/ii-alternative-origins` (no file extension) containing exactly this one-line JSON:\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}\nEnsure it is deployed as a public static asset at `/.well-known/ii-alternative-origins`.",
+      "text": "Frontend: When an authenticated user is shown the /admin AccessDeniedScreen (logged in but not admin), add a temporary \"Reset Bootstrap\" button that calls the backend `resetBootstrap()` method, shows success/failure UI, and then allows the user to click the existing \"Set Me as Admin\" button to call `setMeAsAdmin()` immediately after.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-user-latest"
         ],
         "quotes": [
-          "Also in the .well-known folder, create another plain text file named \"ii-alternative-origins\" with this exact content (JSON format, one line):\n{\"alternativeOrigins\":[\"https://dirtydaves.co.uk\",\"https://www.dirtydaves.co.uk\"]}"
+          "If easier, add temporary buttons on /admin (when access denied):\n- \"Reset Bootstrap\" button that calls resetBootstrap()\n- \"Set Me as Admin\" button that calls setMeAsAdmin()"
         ]
       },
       "acceptanceCriteria": [
-        "Repository contains `frontend/public/.well-known/ii-alternative-origins`.",
-        "File content matches exactly the provided JSON on a single line.",
-        "When deployed, `GET /.well-known/ii-alternative-origins` returns HTTP 200."
+        "On /admin, for authenticated non-admin users, a \"Reset Bootstrap\" button is visible alongside the existing \"Set Me as Admin\" button",
+        "Clicking \"Reset Bootstrap\" calls `actor.resetBootstrap()` and displays a clear success message when it succeeds",
+        "If reset fails, the error is displayed in the existing error area or a new error area without breaking the page",
+        "After reset succeeds, clicking \"Set Me as Admin\" successfully grants admin and the user can access the submissions page (assuming no other RBAC issues)"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add an asset configuration file `frontend/public/.ic-assets.json` that configures content types and disables caching (max_age: 0) for the two `/.well-known` files, using exactly this JSON structure and paths:\n{\n  \"assets\": [\n    {\n      \"path\": \"/.well-known/ic-domains\",\n      \"content_type\": \"text/plain\",\n      \"cache\": { \"max_age\": 0 }\n    },\n    {\n      \"path\": \"/.well-known/ii-alternative-origins\",\n      \"content_type\": \"application/json\",\n      \"cache\": { \"max_age\": 0 }\n    }\n  ]\n}\n",
+      "text": "Frontend: Add a small, explicit security warning in the authenticated AccessDeniedScreen UI that `resetBootstrap()` is temporary and must be removed/disabled after an admin is successfully bootstrapped.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-user-latest"
         ],
         "quotes": [
-          "(If your setup supports/requires it) Create a file named \".ic-assets.json\" in the root of the assets/public folder (or next to index.html) with this content to help with caching and headers for the .well-known files:"
+          "After I become admin and can see form submissions:\n- Remind me to remove/comment out resetBootstrap() for security."
         ]
       },
       "acceptanceCriteria": [
-        "Repository contains `frontend/public/.ic-assets.json` with the exact JSON provided in the request (paths, content_type values, and cache.max_age).",
-        "On deployment, responses for `/.well-known/ic-domains` and `/.well-known/ii-alternative-origins` are served with appropriate `Content-Type` and are not aggressively cached (max-age 0)."
+        "The access-denied (authenticated) UI includes a warning message stating that resetBootstrap is temporary and should be removed/disabled after bootstrapping admin",
+        "The warning text is in English and visible without needing to open devtools"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Update the production smoke test documentation to reflect the new expected `/.well-known/ic-domains` content (two lines including `www`) and add a verification check for `/.well-known/ii-alternative-origins` returning the exact JSON payload.",
+      "text": "Docs: Update frontend/PRODUCTION_CONFIGURATION.md to include explicit steps and exact URL pattern for opening the Candid UI for the backend canister to call `resetBootstrap()` and then `setMeAsAdmin()` (including the recommended a4gq6... Candid UI URL with `?id=<BACKEND_CANISTER_ID>` and guidance to obtain the canister id from the Diagnostics page).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-user-latest"
         ],
         "quotes": [
-          "After redeploy, please check and confirm to me that the file is publicly accessible by telling me what shows up at this URL: https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/.well-known/ic-domains"
+          "How do I open the Candid UI to call resetBootstrap() manually? (exact URL or steps, e.g. https://fd6rd-maaaa-aaaah-atocq-cai.icp0.io/ + ?canisterId or dashboard link)\n- After calling resetBootstrap(), how do I call setMeAsAdmin() right after?"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/SMOKE_TEST_PRODUCTION.md` section \"Custom Domain Verification\" expects `dirtydaves.co.uk` and `www.dirtydaves.co.uk` (and no extra lines).",
-        "Smoke test includes a step to fetch and verify `/.well-known/ii-alternative-origins` content."
+        "frontend/PRODUCTION_CONFIGURATION.md contains a copy/paste-ready URL pattern for Candid UI that includes `?id=<BACKEND_CANISTER_ID>`",
+        "The docs explicitly say to call `resetBootstrap()` first, then `setMeAsAdmin()` immediately after, and that both can be done from the same Candid UI",
+        "The docs mention where to find the backend canister id in the app (Diagnostics page)"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Add a short post-deploy checklist note (in an existing deployment/production doc) listing the remaining manual steps outside Caffeine for domain setup for canister `fd6rd-maaaa-aaaah-atocq-cai`, including the exact DNS records and the optional boundary-node registration/status URLs the user provided.",
-      "target": "frontend",
+      "text": "Deployment: Redeploy backend + frontend changes and ensure the live environment reflects the update.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-user-latest"
         ],
         "quotes": [
-          "Once that's done and confirmed live, remind me of the remaining manual steps I need to do outside Caffeine:\n- Add these DNS records..."
+          "Deployed the changes (or please redeploy if needed).",
+          "Deploy any updates and tell me when it's live."
         ]
       },
       "acceptanceCriteria": [
-        "A production/deployment documentation file includes the user-provided DNS records verbatim:\n- CNAME @/apex → dirtydaves.co.uk.icp1.io\n- CNAME www → www.dirtydaves.co.uk.icp1.io\n- TXT _canister-id.dirtydaves.co.uk → fd6rd-maaaa-aaaah-atocq-cai\n- CNAME _acme-challenge.dirtydaves.co.uk → _acme-challenge.dirtydaves.co.uk.icp2.io\n(and note about www if needed).",
-        "Documentation includes verbatim optional commands/URLs:\n- `curl -sL -X POST https://icp0.io/custom-domains/v1/dirtydaves.co.uk`\n- `https://icp0.io/custom-domains/v1/dirtydaves.co.uk` for status."
+        "A new live deployment is produced that includes the backend `resetBootstrap()` method and the updated /admin UI",
+        "Smoke test: user can log in, click Reset Bootstrap, then click Set Me as Admin, and then load the contact submissions admin page without unauthorized errors (for that principal)"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under the immutable frontend paths listed in SYSTEM_CONTEXT (e.g., `frontend/src/main.tsx`, `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/components/ui`).",
-    "Keep all changes limited to static asset files and documentation; no backend changes are required for serving `frontend/public` assets."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional canisters/services).",
+    "Do not edit files under frontend/src/components/ui or other frontend immutablePaths listed in SYSTEM_CONTEXT; compose existing components instead.",
+    "User-facing text must be in English."
   ],
   "nonGoals": [
-    "Do not attempt to configure DNS on the user’s registrar from within the project.",
-    "Do not claim to have executed a redeploy, published a new live version, or performed live HTTP checks from within this build request; provide steps/checklist only.",
-    "Do not change the canister ID (must remain `fd6rd-maaaa-aaaah-atocq-cai`)."
+    "Do not add new authentication providers beyond Internet Identity.",
+    "Do not redesign the RBAC system beyond the temporary bootstrap recovery mechanism.",
+    "Do not build real-time features or external database integrations."
   ],
   "imageRequirements": {
     "required": [],
